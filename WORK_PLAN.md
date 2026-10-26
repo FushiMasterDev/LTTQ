@@ -104,7 +104,7 @@ Mục tiêu: đăng nhập được bằng tài khoản mẫu của 3 vai trò, 
 
 **MAC**
 
-- [ ] **M1.1** ⛳ (làm ngay, chỉ đụng `database/`) `001_schema.sql` (mọi bảng mục 6.3 trừ module H), `002_indexes.sql`, `003_views.sql`, `004_security.sql`, `build_install.sh` → `install_demo.sql`. Xong khi: chạy sạch trên database trống, chạy lại không lỗi.
+- [x] **M1.1** ⛳ (làm ngay, chỉ đụng `database/`) `001_schema.sql` (mọi bảng mục 6.3 trừ module H), `002_indexes.sql`, `003_views.sql`, `004_security.sql`, `build_install.sh` → `install_demo.sql`. Xong khi: chạy sạch trên database trống, chạy lại không lỗi.
 - [ ] **M1.2** ⛳ `010_seed_reference.sql`, `020_seed_demo.sql` theo **mục 4** (dữ liệu đủ cho mọi màn, kể cả màn làm ở đợt sau).
 - [ ] **M1.3** ⛳ (sau W1.1) DTO chung `PagedResult<T>`, `PageRequest`, `Lookup` (push riêng trước để WIN làm W1.3); hạ tầng DAL `ConnectionFactory`, `UnitOfWork`, `DbClock`, `SqlErrorTranslator`, hàm đọc dòng dùng chung; BLL các exception, `ICurrentSession`, enum `Permission` đủ mục 5.2, `Authorizer`, `DataScope`, `AuditWriter`, `SettingsProvider`; `PasswordHasher` + test.
 - [ ] **M1.4** ⛳ Hợp đồng + cài đặt: `AuthService`, `SessionService` (đăng nhập, khóa tạm 5 lần sai, đổi mật khẩu bắt buộc, một phiên mỗi tài khoản, kiểm phiên trước thao tác ghi), `StaffService` (tạo nhân viên, khóa/mở, đặt lại mật khẩu), `CatalogService` (khu vực, tiện nghi, danh mục phòng, ngày lễ, chính sách hủy chung, tham số).
