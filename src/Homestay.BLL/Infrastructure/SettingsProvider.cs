@@ -38,6 +38,12 @@ public sealed class SettingsProvider(ConnectionFactory factory)
     }.ToFrozenDictionary(StringComparer.Ordinal);
     public static IReadOnlyCollection<string> Keys { get; } = Array.AsReadOnly(Rules.Keys.Order(StringComparer.Ordinal).ToArray());
 
+    public static (string ValueType, decimal? Minimum, decimal? Maximum, string? Format) GetDefinition(string key)
+    {
+        if (!Rules.TryGetValue(key, out var rule)) throw new BusinessException("Tham số không được hỗ trợ. Vui lòng tải lại danh sách tham số.");
+        return (rule.Type, rule.Min, rule.Max, rule.Type == "TimeOnly" ? "HH:mm" : null);
+    }
+
     public static void Validate(string key, string? value)
     {
         if (!Rules.TryGetValue(key, out var rule)) throw new BusinessException("Tham số không được hỗ trợ. Vui lòng tải lại danh sách tham số.");

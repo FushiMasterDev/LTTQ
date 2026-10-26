@@ -11,29 +11,19 @@ public interface IWriteSessionValidator
 
 public sealed class WriteOperationRunner(ConnectionFactory factory, ICurrentSession currentSession, IWriteSessionValidator sessionValidator)
 {
-    public Task<T> ExecuteAsync<T>(Func<UnitOfWork, CancellationToken, Task<T>> operation, CancellationToken cancellationToken) =>
-        BusinessErrorTranslator.ExecuteAsync(async ct =>
+    public Task<T> ExecuteAsync<T>(Func<UnitOfWork, CancellationToken, Task<T>> operation, CancellationToken cancellationToken)
+    {
+        var session = currentSession.RequireSession();
+        return TransactionOperationRunner.ExecuteAsync(factory, async (uow, ct) =>
         {
-            var session = currentSession.RequireSession();
-            for (var retries = 0; ; retries++)
-            {
-                ct.ThrowIfCancellationRequested();
-                try
-                {
-                    var uow = await UnitOfWork.BeginAsync(factory, ct).ConfigureAwait(false);
-                    await using var transactionScope = uow.ConfigureAwait(false);
-                    await sessionValidator.ValidateAsync(session, uow, ct).ConfigureAwait(false);
-                    var result = await operation(uow, ct).ConfigureAwait(false);
-                    await uow.CommitAsync(ct).ConfigureAwait(false);
-                    return result;
-                }
-                catch (DbDeadlockException) when (retries < 3)
-                {
-                    // Chỉ deadlock mới được gửi lại: 1 lần đầu + tối đa 3 lần thử lại.
-                    await Task.Delay(Random.Shared.Next(100, 301), ct).ConfigureAwait(false);
-                }
-            }
+            await sessionValidator.ValidateAsync(session, uow, ct).ConfigureAwait(false);
+            return await operation(uow, ct).ConfigureAwait(false);
         }, cancellationToken);
+    }
+
+    // Heartbeat tự kiểm phiên và trả false; logout cần kết thúc được cả phiên không còn hợp lệ.
+    internal Task<T> ExecuteMaintenanceAsync<T>(Func<UnitOfWork, CancellationToken, Task<T>> operation, CancellationToken cancellationToken) =>
+        TransactionOperationRunner.ExecuteAsync(factory, operation, cancellationToken);
 
     public async Task ExecuteAsync(Func<UnitOfWork, CancellationToken, Task> operation, CancellationToken cancellationToken)
     {
