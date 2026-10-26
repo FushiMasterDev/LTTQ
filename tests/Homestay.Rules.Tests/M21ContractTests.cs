@@ -15,10 +15,9 @@ public sealed class M21ContractTests
     private static BookingService Bookings() => new(null!, null!, null!, null!, null!, null!, null!, null!, null!);
 
     [Fact]
-    public async Task AllFiveDeferredWritesFailExplicitlyBeforeDoingWork()
+    public async Task FourM24DeferredWritesFailExplicitlyBeforeDoingWork()
     {
         var b = Bookings();
-        await Assert.ThrowsAsync<NotImplementedException>(() => b.CreateAsync(new()));
         await Assert.ThrowsAsync<NotImplementedException>(() => b.ClaimAsync(new(1, new byte[8])));
         await Assert.ThrowsAsync<NotImplementedException>(() => b.ReassignAsync(new(1, 2, new byte[8])));
         await Assert.ThrowsAsync<NotImplementedException>(() => b.CancelUnpaidAsync(new(1, "Test", new byte[8])));

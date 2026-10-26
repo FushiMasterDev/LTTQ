@@ -28,7 +28,7 @@ internal sealed class M21TestClient
         var writes = new WriteOperationRunner(Factory, Current, new WriteSessionValidator(new AuthRepository()));
         Availability = new(auth, Current, Factory, new AvailabilityRepository(), clock, settings);
         Customers = new(auth, Current, Factory, writes, customers, clock, new AuditWriter(), Login.Machine);
-        Bookings = new(auth, Current, new DataScope(Current), Factory, new BookingRepository(), customers, clock, settings, Availability);
+        Bookings = new(auth, Current, new DataScope(Current), Factory, new BookingRepository(), customers, clock, settings, Availability, writes, new AuditWriter(), Login.Machine);
         Notifications = new(Current, Factory, writes, new NotificationRepository(), clock);
         Files = new(auth, Factory, new EvidenceRepository());
     }

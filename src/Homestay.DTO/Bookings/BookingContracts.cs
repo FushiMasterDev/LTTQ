@@ -56,7 +56,10 @@ public sealed record BookingListItem
 }
 public sealed record BookingPaymentItem(int Id, string VoucherNo, PaymentType Type, decimal Amount, PaymentMethod Method,
     PaymentStatus Status, int RecordedByUserId, string RecordedByName, DateTime RecordedAtUtc, int? VerifiedByUserId,
-    string? VerifiedByName, DateTime? VerifiedAtUtc, Guid? EvidenceFileId, bool HasEvidence, string? TransferContent);
+    string? VerifiedByName, DateTime? VerifiedAtUtc, Guid? EvidenceFileId, bool HasEvidence, string? TransferContent)
+{
+    public DateTime? TransferredAtUtc { get; init; }
+}
 public sealed record BookingHistoryItem(long Id, BookingStatus? FromStatus, BookingStatus ToStatus, ActorType ActorType,
     string? ActorName, bool OnBehalfOfOwner, string? Note, DateTime ChangedAtUtc);
 public sealed record BookingAuditItem(long Id, string ActionCode, string? ActorName, string? OldValues, string? NewValues, string? Note, DateTime CreatedAtUtc);
@@ -64,6 +67,7 @@ public sealed record BookingChangeItem(int Id, ChangeRequestType RequestType, Ch
     DateTime RequestedAtUtc, DateTime? PaymentDeadlineAtUtc);
 public sealed record BookingDetail
 {
+    public BookingTransferInstructions? TransferInstructions { get; init; }
     public BookingListItem Booking { get; init; } = null!;
     public CustomerItem Customer { get; init; } = null!;
     public int Guests { get; init; }

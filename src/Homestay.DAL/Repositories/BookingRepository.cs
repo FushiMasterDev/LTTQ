@@ -173,7 +173,7 @@ public sealed partial class BookingRepository
             Active: r.GetBoolean("IsActive"), Days: r.GetNullableInt32("MinDaysBefore"), Percent: r.GetNullableInt32("RefundPercent")), ct).ConfigureAwait(false);
         var p = policyRows.First();
         using var payments = db.CreateCommand("""
-            SELECT p.Id,p.VoucherNo,p.Type,p.Amount,p.Method,p.Status,p.RecordedByUserId,COALESCE(re.FullName,ru.Username) AS RecordedByName,p.RecordedAt,
+            SELECT p.Id,p.VoucherNo,p.Type,p.Amount,p.TransferredAt,p.Method,p.Status,p.RecordedByUserId,COALESCE(re.FullName,ru.Username) AS RecordedByName,p.RecordedAt,
                 p.VerifiedByUserId,COALESCE(ve.FullName,vu.Username) AS VerifiedByName,p.VerifiedAt,p.EvidenceFileId,p.TransferContent
             FROM dbo.Payments p JOIN dbo.Users ru ON ru.Id=p.RecordedByUserId LEFT JOIN dbo.Employees re ON re.UserId=ru.Id
             LEFT JOIN dbo.Users vu ON vu.Id=p.VerifiedByUserId LEFT JOIN dbo.Employees ve ON ve.UserId=vu.Id
@@ -183,7 +183,7 @@ public sealed partial class BookingRepository
         var paymentRows = await db.QueryAsync(payments, r => new BookingPaymentItem(r.GetInt32("Id"), r.GetString("VoucherNo"), r.GetEnum<PaymentType>("Type"), r.GetDecimal("Amount"),
             r.GetEnum<PaymentMethod>("Method"), r.GetEnum<PaymentStatus>("Status"), r.GetInt32("RecordedByUserId"), r.GetString("RecordedByName"), r.GetUtcDateTime("RecordedAt"),
             r.GetNullableInt32("VerifiedByUserId"), r.GetNullableString("VerifiedByName"), r.GetNullableUtcDateTime("VerifiedAt"),
-            r.IsDBNull(r.GetOrdinal("EvidenceFileId")) ? null : r.GetGuid("EvidenceFileId"), !r.IsDBNull(r.GetOrdinal("EvidenceFileId")), r.GetNullableString("TransferContent")), ct).ConfigureAwait(false);
+            r.IsDBNull(r.GetOrdinal("EvidenceFileId")) ? null : r.GetGuid("EvidenceFileId"), !r.IsDBNull(r.GetOrdinal("EvidenceFileId")), r.GetNullableString("TransferContent")) { TransferredAtUtc = r.GetNullableUtcDateTime("TransferredAt") }, ct).ConfigureAwait(false);
         using var history = db.CreateCommand("""
             SELECT sh.*,COALESCE(e.FullName,u.Username) AS ActorName FROM dbo.BookingStatusHistories sh
             LEFT JOIN dbo.Users u ON u.Id=sh.ActorUserId LEFT JOIN dbo.Employees e ON e.UserId=u.Id WHERE sh.BookingId=@id ORDER BY sh.ChangedAt,sh.Id;

@@ -1,4 +1,4 @@
-using System.Net.Mail;
+using static Homestay.BLL.Rules.CustomerInputRules;
 using Homestay.BLL.Infrastructure;
 using Homestay.BLL.Rules;
 using Homestay.DAL.Infrastructure;
@@ -42,14 +42,7 @@ public sealed class CustomerService(Authorizer authorizer, ICurrentSession curre
     {
         RequireWrite();
         ArgumentNullException.ThrowIfNull(request);
-        var normalized = request with
-        {
-            FullName = Name(request.FullName),
-            Phone = PhoneNumber.Normalize(request.Phone),
-            Email = Email(request.Email),
-            IdNumber = Identity(request.IdNumber),
-            Note = Note(request.Note)
-        };
+        var normalized = Normalize(request);
         return writes.ExecuteAsync(async (db, ct) =>
         {
             // Cùng khóa cho tạo nhanh/tạo khách/đổi SĐT. Hai máy tạo cùng SĐT nhận cùng bản ghi, không ghi đè hồ sơ cũ.
@@ -111,25 +104,4 @@ public sealed class CustomerService(Authorizer authorizer, ICurrentSession curre
         static object? Safe(CustomerItem? c) => c is null ? null : new { c.FullName, c.Phone, c.Email, IdNumber = StaffInputRules.MaskIdentity(c.IdNumber), c.Note };
         return audit.WriteAsync(db, new(currentSession.RequireSession().UserId, action, "Customers", id.ToString(System.Globalization.CultureInfo.InvariantCulture), Safe(old), Safe(next), null, machineName), ct);
     }
-    private static string Name(string? value)
-    {
-        var name = value?.Trim() ?? "";
-        if (name.Length is < 1 or > 100) throw new BusinessException("Họ tên phải có từ 1 đến 100 ký tự. Vui lòng nhập lại.");
-        return name;
-    }
-    private static string? Email(string? value)
-    {
-        var email = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-        if (email is not null && (email.Length > 256 || !MailAddress.TryCreate(email, out var parsed) || parsed.Address != email))
-            throw new BusinessException("Email không hợp lệ. Vui lòng nhập lại hoặc để trống.");
-        return email;
-    }
-    private static string? Identity(string? value)
-    {
-        var identity = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-        if (identity is not null && (identity.Length > 20 || identity.Any(c => !char.IsAsciiLetterOrDigit(c))))
-            throw new BusinessException("CCCD/hộ chiếu tối đa 20 chữ hoặc số. Không nhập lại giá trị đã che.");
-        return identity;
-    }
-    private static string? Note(string? value) { StaffInputRules.Text(value, 1000); return string.IsNullOrWhiteSpace(value) ? null : value.Trim(); }
 }
