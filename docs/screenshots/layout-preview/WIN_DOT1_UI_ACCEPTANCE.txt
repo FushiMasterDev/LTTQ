@@ -1,0 +1,22 @@
+WIN UI acceptance — 2026-10-27 — Manager, real SQL connection
+
+Observed through Windows Computer Use after the user signed in.
+PASS Main title: Fuji Homestay · Quản lý; status shows connected, Manager, all areas.
+PASS Production navigation contains F02, F18, F24; later screens remain hidden.
+PASS F18 displays 7 employees with Vietnamese text, roles, account state and area scope.
+PASS F18 search NV0002 + Reload returns exactly 1 row; clearing search + Reload restores 7.
+PASS Reopening F18/F24 from navigation reuses their existing tabs (one tab each).
+PASS F24 Areas: 3 rows.
+PASS F24 Amenities: 8 rows.
+PASS F24 Room categories: 5 rows.
+PASS F24 Holidays for 2026: 13 rows, dd/MM/yyyy dates.
+PASS F24 Cancellation policies: 2 rows, regular/holiday scope and refund rules displayed.
+PASS F24 Settings: 26 rows; Session.IdleMinutes=30. Add/deactivate disabled for settings.
+PASS Logout confirmation accepted; main window closed and F01 login returned.
+
+No employee/catalog/settings/password changes were submitted on the main database.
+Login, heartbeat and logout update session/audit records through the application as expected.
+No new defect observed in the read-only checks above.
+Not yet accepted: manual F04 Check/Save, Staff/Accountant UI sessions, lockout/session-replacement/concurrency through UI, full DPI/Designer verification.
+SQL write-service checks on a separate temporary database passed independently; see WIN_DOT1_SQL_ACCEPTANCE.txt.
+Main DB lacks Payments.TransferredAt required by the updated W2 contract; no schema edit or reseed performed.
