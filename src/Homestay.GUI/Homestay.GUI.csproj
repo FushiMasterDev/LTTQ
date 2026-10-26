@@ -13,4 +13,7 @@
     <ProjectReference Include="..\Homestay.BLL\Homestay.BLL.csproj" />
     <ProjectReference Include="..\Homestay.DTO\Homestay.DTO.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
