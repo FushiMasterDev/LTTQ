@@ -95,7 +95,7 @@ Mục tiêu: đăng nhập được bằng tài khoản mẫu của 3 vai trò, 
   - Giữ `Form1` tạm để chạy thử. Giữ nguyên `.gitignore`, `.gitattributes` có sẵn.
   - Xong khi: VS build xanh, ứng dụng mở được `Form1`; push lên `dev`; MAC chạy `dotnet build` xanh trên Mac.
 - [ ] **W1.2** (sau W1.1) `Program.cs`: `AppServices`, đọc `appsettings.json`, bắt lỗi toàn cục (gồm `NotImplementedException` → "Chức năng đang làm"), `FileLogger`, kiểm `SchemaVersions` lúc khởi động. **F04** Cấu hình kết nối (DPAPI).
-- [ ] **W1.3** (sau M1.3) Control dùng chung trong `Common/`: lưới có phân trang 10/20/50/100 + **Hiện cột** + **Xuất CSV** UTF-8 BOM; ô chọn có tìm kiếm không dấu; định dạng tiền `1.234.000 ₫`, ngày `dd/MM/yyyy`; hộp thoại lỗi; nút "?"; `AsyncLoader` (bỏ kết quả tải cũ).
+- [x] **W1.3** (sau M1.3) Control dùng chung trong `Common/`: lưới có phân trang 10/20/50/100 + **Hiện cột** + **Xuất CSV** UTF-8 BOM; ô chọn có tìm kiếm không dấu; định dạng tiền `1.234.000 ₫`, ngày `dd/MM/yyyy`; hộp thoại lỗi; nút "?"; `AsyncLoader` (bỏ kết quả tải cũ).
 - [ ] **W1.4** (vẽ form sau W1.1; nối dữ liệu sau M1.1, M1.4) **F01** Đăng nhập, **F02** Đổi mật khẩu, **F03** Cửa sổ chính: menu 3 vai trò theo `Authorizer.Can`, tab (mở lại tab đang có), thanh trạng thái; mục menu của đợt sau tạm ẩn qua **một danh sách duy nhất**. Xóa `Form1`.
 - [ ] **W1.5** (vẽ form sau W1.1; nối dữ liệu sau M1.4) **F18** tab Nhân viên, **F24** Danh mục & cấu hình.
 

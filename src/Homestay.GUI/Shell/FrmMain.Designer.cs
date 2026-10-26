@@ -1,0 +1,124 @@
+#nullable enable
+namespace Homestay.GUI.Shell;
+
+partial class FrmMain
+{
+    private System.ComponentModel.IContainer? components;
+    private TableLayoutPanel root = null!;
+    private FlowLayoutPanel top = null!;
+    private Label brand = null!;
+    private ComboBox roleBox = null!;
+    private TextBox quickSearch = null!;
+    private Button notificationsButton = null!;
+    private Button closeTabButton = null!;
+    private Button exitButton = null!;
+    private Label banner = null!;
+    private SplitContainer outerSplit = null!;
+    private ListBox navigation = null!;
+    private SplitContainer notificationSplit = null!;
+    private TabControl workspaceTabs = null!;
+    private ListBox notificationList = null!;
+    private StatusStrip status = null!;
+    private ToolStripStatusLabel sessionStatus = null!;
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing) components?.Dispose();
+        base.Dispose(disposing);
+    }
+    private void InitializeComponent()
+    {
+        components = new System.ComponentModel.Container();
+        SuspendLayout();
+        root = new TableLayoutPanel();
+        top = new FlowLayoutPanel();
+        brand = new Label();
+        roleBox = new ComboBox();
+        quickSearch = new TextBox();
+        notificationsButton = new Button();
+        closeTabButton = new Button();
+        exitButton = new Button();
+        banner = new Label();
+        outerSplit = new SplitContainer();
+        navigation = new ListBox();
+        notificationSplit = new SplitContainer();
+        workspaceTabs = new TabControl();
+        notificationList = new ListBox();
+        status = new StatusStrip();
+        sessionStatus = new ToolStripStatusLabel();
+        root.Dock = DockStyle.Fill;
+        root.RowCount = 4;
+        root.ColumnCount = 1;
+        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        root.RowStyles.Add(new RowStyle(SizeType.Percent,100));
+        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        top.Dock = DockStyle.Fill;
+        top.AutoSize = true;
+        top.Padding = new Padding(12,8,12,8);
+        top.BackColor = Common.UiTheme.Accent;
+        brand.Text = "FUJI HOMESTAY";
+        brand.ForeColor = Color.White;
+        brand.Font = new Font("Segoe UI",16F,FontStyle.Bold);
+        brand.AutoSize = true;
+        brand.Margin = new Padding(0,4,18,0);
+        top.Controls.Add(brand);
+        roleBox.DropDownStyle = ComboBoxStyle.DropDownList;
+        roleBox.Width = 160;
+        roleBox.Items.AddRange(new object[] {"Nhân viên","Quản lý","Kế toán"});
+        top.Controls.Add(roleBox);
+        quickSearch.PlaceholderText = "Mã đơn / SĐT / tên · Ctrl+K";
+        quickSearch.Width = 280;
+        top.Controls.Add(quickSearch);
+        notificationsButton.Text = "Thông báo";
+        notificationsButton.AutoSize = true;
+        top.Controls.Add(notificationsButton);
+        closeTabButton.Text = "Đóng tab";
+        closeTabButton.AutoSize = true;
+        top.Controls.Add(closeTabButton);
+        exitButton.Text = "Thoát";
+        exitButton.AutoSize = true;
+        top.Controls.Add(exitButton);
+        banner.Text = "XEM BỐ CỤC · Chưa đăng nhập · Không kết nối và không ghi dữ liệu · Chọn vai trò để rà soát thiết kế";
+        banner.AutoSize = true;
+        banner.Dock = DockStyle.Fill;
+        banner.Padding = new Padding(12,8,12,8);
+        banner.BackColor = Common.UiTheme.Warning;
+        outerSplit.Dock = DockStyle.Fill;
+        outerSplit.Size = new Size(1280,590);
+        outerSplit.SplitterDistance = 235;
+        outerSplit.FixedPanel = FixedPanel.Panel1;
+        navigation.Dock = DockStyle.Fill;
+        navigation.IntegralHeight = false;
+        navigation.Font = new Font("Segoe UI",10F);
+        navigation.ItemHeight = 30;
+        outerSplit.Panel1.Controls.Add(navigation);
+        notificationSplit.Dock = DockStyle.Fill;
+        notificationSplit.Size = new Size(1035,590);
+        notificationSplit.SplitterDistance = 735;
+        notificationSplit.FixedPanel = FixedPanel.Panel2;
+        notificationSplit.Panel2Collapsed = true;
+        workspaceTabs.Dock = DockStyle.Fill;
+        notificationSplit.Panel1.Controls.Add(workspaceTabs);
+        notificationList.Dock = DockStyle.Fill;
+        notificationList.Items.Add("Chưa tải thông báo");
+        notificationSplit.Panel2.Controls.Add(notificationList);
+        outerSplit.Panel2.Controls.Add(notificationSplit);
+        status.Items.Add(sessionStatus);
+        sessionStatus.Text = "Chưa đăng nhập · Vai trò: xem bố cục · Khu vực: — · Giờ đăng nhập: — · Chưa kết nối · 0.1";
+        root.Controls.Add(top,0,0);
+        root.Controls.Add(banner,0,1);
+        root.Controls.Add(outerSplit,0,2);
+        root.Controls.Add(status,0,3);
+        Controls.Add(root);
+        Text = "Fuji Homestay · Xem bố cục Windows";
+        BackColor = Common.UiTheme.Canvas;
+        AutoScaleDimensions = new SizeF(96F, 96F);
+        AutoScaleMode = AutoScaleMode.Dpi;
+        ClientSize = new Size(1320, 720);
+        MinimumSize = new Size(620, 480);
+        Font = new Font("Segoe UI", 10F);
+        StartPosition = FormStartPosition.CenterScreen;
+        ResumeLayout(false);
+        PerformLayout();
+    }
+}
