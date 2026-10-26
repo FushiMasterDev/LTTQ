@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\Homestay.DTO\Homestay.DTO.csproj" />
@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.7" />
+    <!-- Ghim bản vá: SqlClient 6.1.7 kéo Pkcs 9.0.11 có lỗ hổng GHSA-846f-f764-76mx; bỏ khi SqlClient tự dùng bản đã vá -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
   </ItemGroup>
 
   <PropertyGroup>
