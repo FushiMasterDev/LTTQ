@@ -1,0 +1,16 @@
+StartupService versions=1,2,3,4,10,20
+PASS GUI checks supported schema on real SQL
+PASS F04 backend check then encrypted save/load with real SQL profile
+PASS Runtime initialized without login; idle minutes=30
+PASS MAC StartupServiceTests executed on real SQL (read only)
+PASS Missing database reports translated error: Mất kết nối máy chủ dữ liệu, vui lòng thử lại.
+
+VSTest version 18.7.0 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 488 ms - Homestay.BLL.Tests.dll (net10.0)
+
+
+NOTE: Login/F18/F24 writes not run; temporary DB tests await authorization.

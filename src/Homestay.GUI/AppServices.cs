@@ -30,15 +30,15 @@ public sealed class AppServices : IAccountGateway
     public StaffService Staff => Ready.Staff;
     public CatalogService Catalog => Ready.Catalog;
 
-    // Contract requested from MAC: an unauthenticated BLL bootstrap read API.
-    // Keep startup fail-closed until that contract is supplied; never infer versions from a local file.
+    // Both F04 and startup use the same unauthenticated, read-only BLL contract.
     public Func<ConnectionProfile, CancellationToken, Task<int[]>> ReadSchemaVersionsAsync { get; init; }
-        = (_, _) => throw new NotImplementedException();
     private static readonly int[] SupportedVersions = [1, 2, 3, 4, 10, 20];
 
     public AppServices(AppSettings settings, string connectionPath)
     {
         Settings = settings;
+        ReadSchemaVersionsAsync = async (profile, token) =>
+            (await new StartupService(CreateFactory(profile)).GetSchemaVersionsAsync(token)).ToArray();
         Connections = new ConnectionStore(connectionPath);
         Logger = new FileLogger(settings.Logging.Folder, settings.Logging.RetainDays);
     }
@@ -64,7 +64,7 @@ public sealed class AppServices : IAccountGateway
     }
     // A new login gets a new BLL session container, even after an unreachable server prevented logout.
     internal void ResetForSignIn() => runtime = null;
-    private Runtime CreateRuntime(ConnectionProfile profile)
+    private ConnectionFactory CreateFactory(ConnectionProfile profile)
     {
         var builder = new SqlConnectionStringBuilder
         {
@@ -72,7 +72,11 @@ public sealed class AppServices : IAccountGateway
             UserID = profile.Username, Password = profile.Password, Encrypt = profile.Encrypt,
             TrustServerCertificate = profile.TrustServerCertificate, Pooling = true
         };
-        var factory = new ConnectionFactory(builder.ConnectionString, Settings.Database.CommandTimeoutSeconds);
+        return new ConnectionFactory(builder.ConnectionString, Settings.Database.CommandTimeoutSeconds);
+    }
+    private Runtime CreateRuntime(ConnectionProfile profile)
+    {
+        var factory = CreateFactory(profile);
         var current = new CurrentSession();
         var authorizer = new Authorizer(current);
         var accounts = new AuthRepository();
