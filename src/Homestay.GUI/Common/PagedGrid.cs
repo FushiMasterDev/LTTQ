@@ -62,10 +62,19 @@ public sealed class PagedGrid : UserControl
         grid.ColumnHeaderMouseClick += (_, e) =>
         {
             if (e.ColumnIndex < 0) return;
-            var key = grid.Columns[e.ColumnIndex].DataPropertyName;
+            var column = grid.Columns[e.ColumnIndex];
+            if (column.Tag is false) return;
+            var key = column.Tag as string ?? column.DataPropertyName;
             descending = sort == key && !descending; sort = key; Request(1);
         };
         export.Click += async (_, _) => await ErrorHandler.RunAsync(export, ExportAsync);
+    }
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public PageRequest Query => new() { PageNumber = page, PageSize = (int)size.SelectedItem!, SortColumn = sort, SortDescending = descending };
+    public void SetSortKeys(params string?[] keys)
+    {
+        if (keys.Length != grid.Columns.Count) throw new ArgumentException("Số khóa sắp xếp không khớp.");
+        for (var i=0;i<keys.Length;i++) grid.Columns[i].Tag = keys[i] is string key ? (object)key : false;
     }
     public void SetColumns(params string[] headers)
     {

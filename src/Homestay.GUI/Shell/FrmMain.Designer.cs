@@ -12,6 +12,10 @@ partial class FrmMain
     private Button notificationsButton = null!;
     private Button closeTabButton = null!;
     private Button exitButton = null!;
+    private Button logoutButton = null!;
+    private Button lockButton = null!;
+    private Button generalHelpButton = null!;
+    private Label userLabel = null!;
     private Label banner = null!;
     private SplitContainer outerSplit = null!;
     private ListBox navigation = null!;
@@ -22,7 +26,7 @@ partial class FrmMain
     private ToolStripStatusLabel sessionStatus = null!;
     protected override void Dispose(bool disposing)
     {
-        if (disposing) components?.Dispose();
+        if (disposing) { DisposeRuntime(); components?.Dispose(); }
         base.Dispose(disposing);
     }
     private void InitializeComponent()
@@ -37,6 +41,10 @@ partial class FrmMain
         notificationsButton = new Button();
         closeTabButton = new Button();
         exitButton = new Button();
+        logoutButton = new Button();
+        lockButton = new Button();
+        generalHelpButton = new Button();
+        userLabel = new Label();
         banner = new Label();
         outerSplit = new SplitContainer();
         navigation = new ListBox();
@@ -78,6 +86,22 @@ partial class FrmMain
         exitButton.Text = "Thoát";
         exitButton.AutoSize = true;
         top.Controls.Add(exitButton);
+        logoutButton.Text = "Đăng xuất";
+        logoutButton.AutoSize = true;
+        logoutButton.Visible = false;
+        top.Controls.Add(logoutButton);
+        lockButton.Text = "Khóa màn hình";
+        lockButton.AutoSize = true;
+        lockButton.Visible = false;
+        top.Controls.Add(lockButton);
+        generalHelpButton.Text = "Trợ giúp";
+        generalHelpButton.AutoSize = true;
+        top.Controls.Add(generalHelpButton);
+        userLabel.AutoSize = true;
+        userLabel.ForeColor = Color.White;
+        userLabel.Padding = new Padding(8);
+        userLabel.Visible = false;
+        top.Controls.Add(userLabel);
         banner.Text = "XEM BỐ CỤC · Chưa đăng nhập · Không kết nối và không ghi dữ liệu · Chọn vai trò để rà soát thiết kế";
         banner.AutoSize = true;
         banner.Dock = DockStyle.Fill;

@@ -89,7 +89,7 @@ partial class FrmLogin
         root.Controls.Add(showPasswordLabel,0,3);
         root.Controls.Add(showPassword,1,3);
         root.RowStyles.Add(new RowStyle(SizeType.Percent,100));
-        noticeLabel.Text = "Fuji Homestay · Phiên bản 0.1\nChưa xác thực kết nối. Đăng nhập chỉ được thực hiện qua BLL.";
+        noticeLabel.Text = "Fuji Homestay · Phiên bản 0.2\nChưa xác thực kết nối. Đăng nhập chỉ được thực hiện qua BLL.";
 
         noticeLabel.Dock = DockStyle.Fill;
         noticeLabel.ForeColor = Common.UiTheme.Ink;

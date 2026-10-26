@@ -1,6 +1,7 @@
 using Homestay.GUI.Configuration;
 using Homestay.GUI.Infrastructure;
 using Homestay.GUI.Shell;
+using Homestay.GUI.Workflow;
 
 namespace Homestay.GUI;
 
@@ -21,7 +22,11 @@ internal static class Program
         try
         {
             var settings = AppSettings.Load(Path.Combine(AppContext.BaseDirectory, "appsettings.json"));
-            var services = new AppServices(settings, Path.Combine(AppContext.BaseDirectory, "connection.dat"));
+            var profileIndex = Array.FindIndex(args, x => x.Equals("--connection-file", StringComparison.OrdinalIgnoreCase));
+            if (profileIndex >= 0 && profileIndex + 1 >= args.Length)
+                throw new InvalidDataException("Thiếu đường dẫn sau --connection-file.");
+            var profilePath = profileIndex >= 0 ? Path.GetFullPath(args[profileIndex + 1]) : Path.Combine(AppContext.BaseDirectory, "connection.dat");
+            var services = new AppServices(settings, profilePath);
             ErrorHandler.Logger = services.Logger;
             if (args.Contains("--preview", StringComparer.OrdinalIgnoreCase))
             { Application.Run(new FrmMain()); return; }
@@ -35,7 +40,7 @@ internal static class Program
                 if (configure) return;
             }
             // The schema check is awaited on a visible startup form, never skipped.
-            Application.Run(new FrmLogin(services));
+            Application.Run(new DesktopContext(services));
         }
         catch (Exception exception) { ErrorHandler.Show(exception); }
     }

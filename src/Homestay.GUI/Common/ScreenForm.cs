@@ -28,6 +28,15 @@ public class ScreenForm : Form
             Wire(control.Controls);
         }
     }
+    protected Task RunMutationAsync(Button trigger, Func<Task> action, Func<Task>? reload = null) =>
+        ErrorHandler.RunAsync(trigger, async () =>
+        {
+            var body = Controls.Count == 0 ? this : Controls[0];
+            body.Enabled = false;
+            try { await action(); }
+            finally { if (!body.IsDisposed) body.Enabled = true; }
+        }, reload);
+
     protected override bool ProcessDialogKey(Keys keyData)
     {
         if (keyData == Keys.Enter && AcceptButton is null && ActiveControl is TextBox { Multiline: false })

@@ -1,3 +1,6 @@
+using Homestay.BLL.Infrastructure;
+using Homestay.GUI.Workflow;
+
 namespace Homestay.GUI.Shell;
 
 internal sealed record ScreenEntry(string Id, string Title, string Audience, Func<Form> Create)
@@ -5,10 +8,10 @@ internal sealed record ScreenEntry(string Id, string Title, string Audience, Fun
     public override string ToString() => Id + "  " + Title;
 }
 
-// Single inventory. Entries are layout previews only until the real Authorizer/DTO contracts exist.
+// Layout inventory stays separate from the integrated allowlist; production always checks BLL authorization.
 internal static class ScreenRegistry
 {
-    public static readonly IReadOnlySet<string> EnabledProductionForms = new HashSet<string>();
+    public static readonly IReadOnlySet<string> EnabledProductionForms = new HashSet<string> { "F02", "F18", "F24" };
     public static readonly ScreenEntry[] Layouts =
     [
         new("F01", "Đăng nhập", "All", () => new Shell.FrmLogin()),
@@ -40,6 +43,19 @@ internal static class ScreenRegistry
         new("F31", "Chi tiết đối soát", "Finance", () => new Accountant.FrmSettlementDetail()),
         new("F32", "Sổ thu chi & công nợ", "Finance", () => new Accountant.FrmCashBook()),
     ];
+    public static ScreenEntry[] Production(IAccountGateway gateway, AppServices? services)
+    {
+        var entries = new List<ScreenEntry>();
+        if (EnabledProductionForms.Contains("F02") && gateway.Can(Permission.AccountSelfManage))
+            entries.Add(new("F02","Đổi mật khẩu","All",()=>new FrmChangePassword(gateway)));
+        if (EnabledProductionForms.Contains("F18") && gateway.Can(Permission.EmployeeManage))
+            entries.Add(new("F18","Nhân viên & tài khoản","Manager",()=>services is null
+                ? throw new NotImplementedException() : new Manager.FrmStaff(services)));
+        if (EnabledProductionForms.Contains("F24") && gateway.Can(Permission.AccountManage) && gateway.Can(Permission.CatalogManage))
+            entries.Add(new("F24","Danh mục & cấu hình","Manager",()=>services is null
+                ? throw new NotImplementedException() : new Manager.FrmCatalog(services)));
+        return entries.ToArray();
+    }
     public static bool IsPreviewAudience(ScreenEntry screen, string role) => screen.Audience switch
     {
         "All" => true,

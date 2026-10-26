@@ -59,14 +59,16 @@ public partial class FrmConnection : ScreenForm
             tested = true;
             noticeLabel.Text = "Kết nối và phiên bản dữ liệu hợp lệ. Có thể lưu cấu hình mã hóa.";
         }
-        finally { root.Enabled = true; saveButton.Enabled = tested; }
+        finally { profile.Password = ""; if (!IsDisposed) { root.Enabled = true; saveButton.Enabled = tested; } }
     }
     private void Save()
     {
         try
         {
             if (!tested || services is null) return;
-            services.Connections.Save(ReadProfile());
+            var profile = ReadProfile();
+            try { services.Connections.Save(profile); }
+            finally { profile.Password = ""; }
             DialogResult = DialogResult.OK;
             Close();
         }
