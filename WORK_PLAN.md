@@ -17,7 +17,7 @@ Mac đã kiểm: .NET SDK 10.0.400, Docker, chip Intel (SQL Server 2022 chạy t
 
 | Đường dẫn | Chủ | Máy kia |
 |---|---|---|
-| `HomestayDesktop.sln` và 6 `.csproj` | WIN **tạo** ở W1.1; sau đó `.sln` và `.csproj` trừ GUI thuộc MAC | Sau W1.1 không sửa |
+| `HomestayDesktop.sln`, 5 `.csproj` không phải GUI | MAC (tạo ở M1.3) | WIN chỉ thêm project GUI vào `.sln` ở W1.1, ngoài ra không sửa |
 | `.gitattributes`, `.gitignore` | MAC (đã có sẵn) | Không ghi đè khi VS đề nghị tạo `.gitignore` |
 | `database/` | MAC | Chỉ chạy script, không sửa |
 | `src/Homestay.DTO/`, `src/Homestay.DAL/`, `src/Homestay.BLL/` | MAC | Không sửa; cần thêm trường/hàm → tạo GitHub Issue nhãn `contract` |
@@ -40,7 +40,7 @@ Mac đã kiểm: .NET SDK 10.0.400, Docker, chip Intel (SQL Server 2022 chạy t
 
 - Toàn bộ bảng có từ đợt 1 (spec mục 11). Chỉ MAC sửa script; mỗi lần sửa chạy lại `database/build_install.sh` để sinh `install_demo.sql`, commit bắt đầu bằng `db:`.
 - Thấy commit `db:` mới → WIN chạy lại `install_demo.sql` (tạo lại database, mất dữ liệu thử trên máy WIN — chấp nhận).
-- Mật khẩu SQL của ứng dụng và mật khẩu tài khoản mẫu **không có trong Git**: truyền bằng biến SQLCMD `AppSqlPassword`, `DemoPassword` khi chạy script.
+- Mật khẩu SQL của ứng dụng và mật khẩu tài khoản mẫu **không có trong Git**: truyền bằng biến SQLCMD `AppSqlPassword`, `FirstManagerPassword` (Quản lý đầu tiên, seed 010), `DemoPassword` (tài khoản mẫu, seed 020) khi chạy script. Seed băm bằng PBKDF2 1.000 vòng trong T-SQL; BLL băm lại 600.000 vòng ở lần đăng nhập đầu (spec 3.10).
 
 ### 1.4. Git
 
@@ -74,7 +74,7 @@ dotnet test
 
 1. Visual Studio 2026, workload ".NET desktop development".
 2. SQL Server 2022 Developer hoặc Express, collation `Vietnamese_CI_AS`, bật TCP/IP; SQL Server Management Studio.
-3. Mở `database/install_demo.sql` trong SSMS, bật **Query → SQLCMD Mode**, đặt `:setvar AppSqlPassword …` và `:setvar DemoPassword …`, chạy.
+3. Mở `database/install_demo.sql` trong SSMS, bật **Query → SQLCMD Mode**, đặt `:setvar DbName HomestayDesktop`, `:setvar AppSqlPassword …`, `:setvar FirstManagerPassword …`, `:setvar DemoPassword …`, chạy.
 4. Chạy ứng dụng lần đầu → màn F04 Cấu hình kết nối → lưu `connection.dat` (DPAPI). Môi trường phát triển được `TrustServerCertificate=true`.
 
 ---
@@ -88,14 +88,11 @@ Mục tiêu: đăng nhập được bằng tài khoản mẫu của 3 vai trò, 
 **WIN**
 
 - [ ] **W1.0** Cài môi trường (mục 2) — làm ngay, không phụ thuộc.
-- [ ] **W1.1** ⛳ **Tạo solution trong Visual Studio 2026** — việc đầu tiên, trước mọi dòng code của cả hai máy (trừ `database/`):
-  - `HomestayDesktop.sln` ở **gốc repo** (cạnh `HOMESTAY_DESKTOP_SPEC.md`).
-  - `src/Homestay.DTO`, `src/Homestay.DAL`, `src/Homestay.BLL`: mẫu **Class Library**, `net10.0`.
-  - `src/Homestay.GUI`: mẫu **Windows Forms App**, `net10.0-windows`; thêm `<EnableWindowsTargeting>true</EnableWindowsTargeting>` vào `Homestay.GUI.csproj` để MAC build được.
-  - `tests/Homestay.Rules.Tests`, `tests/Homestay.BLL.Tests`: mẫu **xUnit Test Project**, `net10.0`.
-  - Tham chiếu project đúng bảng spec 3.2: DAL → DTO; BLL → DAL, DTO; GUI → BLL, DTO (**không** tham chiếu DAL); `Rules.Tests` → BLL; `BLL.Tests` → BLL, DAL, DTO.
-  - NuGet `Microsoft.Data.SqlClient` 6.x vào **DAL**. Không thêm gói nào khác.
-  - Xóa `Class1.cs`, `UnitTest1.cs` mẫu; giữ `Form1` tạm để chạy thử. Giữ nguyên `.gitignore`, `.gitattributes` có sẵn.
+- [ ] **W1.1** ⛳ (sau M1.3 bước tạo solution) **Thêm project GUI trong Visual Studio 2026** vào `HomestayDesktop.sln` có sẵn (MAC đã tạo DTO, DAL, BLL và 2 project test):
+  - Mở `HomestayDesktop.sln` → Add → New Project → mẫu **Windows Forms App**, tên `Homestay.GUI`, đặt tại `src/Homestay.GUI`, `net10.0-windows`.
+  - Thêm `<EnableWindowsTargeting>true</EnableWindowsTargeting>` vào `Homestay.GUI.csproj` để MAC build được.
+  - Tham chiếu GUI → BLL, DTO (**không** tham chiếu DAL). Không thêm gói NuGet.
+  - Giữ `Form1` tạm để chạy thử. Giữ nguyên `.gitignore`, `.gitattributes` có sẵn.
   - Xong khi: VS build xanh, ứng dụng mở được `Form1`; push lên `dev`; MAC chạy `dotnet build` xanh trên Mac.
 - [ ] **W1.2** (sau W1.1) `Program.cs`: `AppServices`, đọc `appsettings.json`, bắt lỗi toàn cục (gồm `NotImplementedException` → "Chức năng đang làm"), `FileLogger`, kiểm `SchemaVersions` lúc khởi động. **F04** Cấu hình kết nối (DPAPI).
 - [ ] **W1.3** (sau M1.3) Control dùng chung trong `Common/`: lưới có phân trang 10/20/50/100 + **Hiện cột** + **Xuất CSV** UTF-8 BOM; ô chọn có tìm kiếm không dấu; định dạng tiền `1.234.000 ₫`, ngày `dd/MM/yyyy`; hộp thoại lỗi; nút "?"; `AsyncLoader` (bỏ kết quả tải cũ).
@@ -106,7 +103,7 @@ Mục tiêu: đăng nhập được bằng tài khoản mẫu của 3 vai trò, 
 
 - [x] **M1.1** ⛳ (làm ngay, chỉ đụng `database/`) `001_schema.sql` (mọi bảng mục 6.3 trừ module H), `002_indexes.sql`, `003_views.sql`, `004_security.sql`, `build_install.sh` → `install_demo.sql`. Xong khi: chạy sạch trên database trống, chạy lại không lỗi.
 - [ ] **M1.2** ⛳ `010_seed_reference.sql`, `020_seed_demo.sql` theo **mục 4** (dữ liệu đủ cho mọi màn, kể cả màn làm ở đợt sau).
-- [ ] **M1.3** ⛳ (sau W1.1) DTO chung `PagedResult<T>`, `PageRequest`, `Lookup` (push riêng trước để WIN làm W1.3); hạ tầng DAL `ConnectionFactory`, `UnitOfWork`, `DbClock`, `SqlErrorTranslator`, hàm đọc dòng dùng chung; BLL các exception, `ICurrentSession`, enum `Permission` đủ mục 5.2, `Authorizer`, `DataScope`, `AuditWriter`, `SettingsProvider`; `PasswordHasher` + test.
+- [ ] **M1.3** ⛳ (không chờ WIN) Tạo `HomestayDesktop.sln` + `src/Homestay.DTO|DAL|BLL` (Class Library `net10.0`) + `tests/Homestay.Rules.Tests`, `tests/Homestay.BLL.Tests` (xUnit), tham chiếu đúng spec 3.2, gói `Microsoft.Data.SqlClient` 6.x vào DAL. Sau đó DTO chung `PagedResult<T>`, `PageRequest`, `Lookup` (push riêng trước để WIN làm W1.3); hạ tầng DAL `ConnectionFactory`, `UnitOfWork`, `DbClock`, `SqlErrorTranslator`, hàm đọc dòng dùng chung; BLL các exception, `ICurrentSession`, enum `Permission` đủ mục 5.2, `Authorizer`, `DataScope`, `AuditWriter`, `SettingsProvider`; `PasswordHasher` + test.
 - [ ] **M1.4** ⛳ Hợp đồng + cài đặt: `AuthService`, `SessionService` (đăng nhập, khóa tạm 5 lần sai, đổi mật khẩu bắt buộc, một phiên mỗi tài khoản, kiểm phiên trước thao tác ghi), `StaffService` (tạo nhân viên, khóa/mở, đặt lại mật khẩu), `CatalogService` (khu vực, tiện nghi, danh mục phòng, ngày lễ, chính sách hủy chung, tham số).
 
 Xong đợt khi: trên máy WIN đăng nhập được NV/QL/KT mẫu; sai 5 lần bị khóa; QL tạo nhân viên mới, nhân viên đổi mật khẩu tạm; QL sửa danh mục và tham số.
