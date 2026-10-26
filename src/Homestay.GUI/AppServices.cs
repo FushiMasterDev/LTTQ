@@ -8,6 +8,7 @@ using Homestay.GUI.Workflow;
 using Homestay.GUI.Configuration;
 using Homestay.GUI.Infrastructure;
 using Microsoft.Data.SqlClient;
+using Homestay.BLL.Jobs;
 
 namespace Homestay.GUI;
 
@@ -16,7 +17,9 @@ namespace Homestay.GUI;
 public sealed class AppServices : IAccountGateway
 {
     private sealed record Runtime(CurrentSession Current, Authorizer Authorizer, AuthService Auth,
-        SessionService Sessions, StaffService Staff, CatalogService Catalog, SettingsProvider Settings);
+        SessionService Sessions, StaffService Staff, CatalogService Catalog, SettingsProvider Settings,
+        AvailabilityService Availability, CustomerService Customers, BookingService Bookings,
+        PaymentService Payments, NotificationService Notifications, FileService Files, JobRunner Jobs, DbClock Clock);
     private Runtime? runtime;
     private Runtime Ready => runtime ?? throw new InvalidOperationException("Chưa khởi tạo kết nối ứng dụng.");
     public AppSettings Settings { get; }
@@ -29,6 +32,16 @@ public sealed class AppServices : IAccountGateway
     public SessionInfo? Session => runtime?.Current.Session;
     public StaffService Staff => Ready.Staff;
     public CatalogService Catalog => Ready.Catalog;
+    public AvailabilityService Availability => Ready.Availability;
+    public CustomerService Customers => Ready.Customers;
+    public BookingService Bookings => Ready.Bookings;
+    public PaymentService Payments => Ready.Payments;
+    public NotificationService Notifications => Ready.Notifications;
+    public FileService Files => Ready.Files;
+    public JobRunner Jobs => Ready.Jobs;
+    public Task<DateTime> ServerNowAsync(CancellationToken token=default)=>Ready.Clock.GetUtcNowAsync(token);
+    public event Action<string, object?>? NavigationRequested;
+    public void Navigate(string screen, object? argument = null) => NavigationRequested?.Invoke(screen, argument);
 
     // Both F04 and startup use the same unauthenticated, read-only BLL contract.
     public Func<ConnectionProfile, CancellationToken, Task<int[]>> ReadSchemaVersionsAsync { get; init; }
@@ -86,12 +99,25 @@ public sealed class AppServices : IAccountGateway
         var settings = new SettingsProvider(factory);
         var hasher = new PasswordHasher();
         var audit = new AuditWriter();
+        var scope = new DataScope(current);
+        var customers = new CustomerRepository();
+        var bookingRepository = new BookingRepository();
+        var notifications = new NotificationRepository();
+        var evidence = new EvidenceRepository();
+        var availability = new AvailabilityService(authorizer,current,factory,new AvailabilityRepository(),clock,settings);
+        var bookings = new BookingService(authorizer,current,scope,factory,bookingRepository,customers,clock,settings,availability,writes,audit,MachineName);
+        var expiryRepository = new HoldExpiryRepository();
         return new Runtime(current, authorizer,
             new AuthService(factory, accounts, clock, settings, hasher, audit, current),
             new SessionService(authorizer, current, writes, validator, accounts, clock, settings, hasher, audit, MachineName),
             new StaffService(authorizer, current, factory, writes, new StaffRepository(), accounts, clock, hasher, audit, MachineName),
             new CatalogService(authorizer, current, factory, writes, new CatalogRepository(), clock, settings, audit, MachineName),
-            settings);
+            settings, availability,
+            new CustomerService(authorizer,current,factory,writes,customers,clock,audit,MachineName), bookings,
+            new PaymentService(authorizer,current,scope,writes,bookingRepository,new PaymentRepository(),evidence,notifications,clock,bookings,audit,MachineName),
+            new NotificationService(current,factory,writes,notifications,clock),
+            new FileService(authorizer,factory,evidence),
+            new JobRunner(factory,clock,expiryRepository,new HoldExpiry(expiryRepository,audit,MachineName)),clock);
     }
     public bool Can(Permission permission) => Session is not null && Ready.Authorizer.Can(permission);
     public Task<SessionInfo> LoginAsync(LoginRequest request, CancellationToken token = default) => Ready.Auth.LoginAsync(request, token);

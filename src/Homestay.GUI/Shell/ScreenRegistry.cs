@@ -11,7 +11,7 @@ internal sealed record ScreenEntry(string Id, string Title, string Audience, Fun
 // Layout inventory stays separate from the integrated allowlist; production always checks BLL authorization.
 internal static class ScreenRegistry
 {
-    public static readonly IReadOnlySet<string> EnabledProductionForms = new HashSet<string> { "F02", "F18", "F24" };
+    public static readonly IReadOnlySet<string> EnabledProductionForms = new HashSet<string> { "F02", "F05", "F06", "F07", "F08", "F09", "F10", "F13", "F18", "F24" };
     public static readonly ScreenEntry[] Layouts =
     [
         new("F01", "Đăng nhập", "All", () => new Shell.FrmLogin()),
@@ -54,7 +54,18 @@ internal static class ScreenRegistry
         if (EnabledProductionForms.Contains("F24") && gateway.Can(Permission.AccountManage) && gateway.Can(Permission.CatalogManage))
             entries.Add(new("F24","Danh mục & cấu hình","Manager",()=>services is null
                 ? throw new NotImplementedException() : new Manager.FrmCatalog(services)));
-        return entries.ToArray();
+        if(services is not null) {
+            if(gateway.Can(Permission.BookingView)) {
+                entries.Add(new("F05","Tổng quan","All",()=>new Staff.FrmDashboard(services)));
+                entries.Add(new("F08","Danh sách đơn","All",()=>new Staff.FrmBookings(services)));
+                entries.Add(new("F09","Chi tiết đơn","All",()=>throw new InvalidOperationException("Chọn một đơn trong danh sách.")));
+            }
+            if(gateway.Can(Permission.AvailabilitySearch)) entries.Add(new("F06","Tra phòng & lịch","Operations",()=>new Staff.FrmAvailability(services)));
+            if(gateway.Can(Permission.BookingCreate))entries.Add(new("F07","Tạo đơn","Operations",()=>new Staff.FrmBookingCreate(services)));
+            if(gateway.Can(Permission.PaymentRecord))entries.Add(new("F10","Thu cọc","Operations",()=>throw new InvalidOperationException("Chọn một đơn để ghi nhận cọc.")));
+            if(gateway.Can(Permission.CustomerManage))entries.Add(new("F13","Khách hàng","All",()=>new Staff.FrmCustomers(services)));
+        }
+        return entries.Where(e=>EnabledProductionForms.Contains(e.Id)).OrderBy(e=>e.Id).ToArray();
     }
     public static bool IsPreviewAudience(ScreenEntry screen, string role) => screen.Audience switch
     {

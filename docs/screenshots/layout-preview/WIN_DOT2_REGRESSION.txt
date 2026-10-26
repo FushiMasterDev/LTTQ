@@ -1,0 +1,2 @@
+PASS F07 Close then repeated Dispose, and Dispose without Show
+PASS F03 Enter is handled by quick search before dialog navigation

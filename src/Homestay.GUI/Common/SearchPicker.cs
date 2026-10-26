@@ -27,6 +27,11 @@ public sealed class SearchPicker : UserControl
         all = items.ToList();
         Filter();
     }
+    public void SelectId(int? id)
+    {
+        search.Clear();
+        choices.SelectedIndex = all.FindIndex(x => x.Id == id);
+    }
     private void Filter()
     {
         var key = SelectedItem?.Id;

@@ -1,3 +1,8 @@
+using Homestay.DTO.Bookings;
+using Homestay.DTO.Common;
+using Homestay.DTO.Notifications;
+using Homestay.DTO.Enums;
+using Homestay.GUI.Staff;
 using Homestay.BLL.Infrastructure;
 using Homestay.GUI.Common;
 using Homestay.GUI.Infrastructure;
@@ -44,7 +49,7 @@ public partial class FrmMain : ScreenForm
             "Chức năng hiện theo vai trò. Không chia sẻ tài khoản đăng nhập.", "Hướng dẫn");
         quickSearch.KeyDown += (_, e) =>
         {
-            if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; ErrorHandler.Pending(this); }
+            if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; if(services is not null) _=SearchQuickAsync(); else ErrorHandler.Pending(this); }
         };
         heartbeatTimer.Tick += async (_, _) => await HeartbeatAsync();
         idleTimer.Tick += async (_, _) =>
@@ -58,7 +63,7 @@ public partial class FrmMain : ScreenForm
         this.gateway = gateway; this.services = services; this.idleMinutes = idleMinutes;
         var session = gateway.Session ?? throw new SessionExpiredException();
         if (session.MustChangePassword) throw new SessionExpiredException("Cần đổi mật khẩu trước khi tiếp tục.");
-        roleBox.Visible = false; quickSearch.Visible = false; notificationsButton.Visible = false;
+        roleBox.Visible = false; quickSearch.Visible = services is not null; notificationsButton.Visible = services is not null;
         logoutButton.Visible = true; lockButton.Visible = true; userLabel.Visible = true;
         userLabel.Text = session.FullName + " · " + UiNames.Position(session.Position);
         banner.Visible = false;
@@ -74,7 +79,7 @@ public partial class FrmMain : ScreenForm
         if (gateway is null) roleBox.SelectedIndex = 0;
         else
         {
-            SetMenu(ScreenRegistry.Production(gateway, services));
+            SetMenu(ScreenRegistry.Production(gateway, services).Where(e=>e.Id is not ("F09" or "F10")).ToArray());
             var welcome = new TabPage("Trang chủ");
             welcome.Controls.Add(new Label
             {
@@ -86,6 +91,13 @@ public partial class FrmMain : ScreenForm
             ErrorHandler.SessionExpired += HandleSessionExpired;
             System.Windows.Forms.Application.AddMessageFilter(activity);
             heartbeatTimer.Start(); idleTimer.Start();
+            if(services is not null) {
+                services.NavigationRequested+=OpenRequested;
+                SetupNotifications();
+                _=RefreshNotificationsAsync();
+                // Only start maintenance while this signed-in shell is alive.
+                _=RunJobsAsync();
+            }
         }
     }
     private void SetMenu(ScreenEntry[] entries)
@@ -134,7 +146,7 @@ public partial class FrmMain : ScreenForm
         try
         {
             if (!await gateway.HeartbeatAsync(lifetime.Token)) await EndSessionAsync(true, forced:true);
-            else if (!IsDisposed) { sessionStatus.ForeColor = Color.DarkGreen; sessionStatus.Text = connectedStatus; }
+            else if (!IsDisposed) { sessionStatus.ForeColor = Color.DarkGreen; sessionStatus.Text = connectedStatus; await RefreshNotificationsAsync(); await RunJobsAsync(); }
         }
         catch (OperationCanceledException) { }
         catch (Exception exception)
@@ -193,7 +205,11 @@ public partial class FrmMain : ScreenForm
     }
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
-        if (keyData == (Keys.Control | Keys.K) && gateway is null) { quickSearch.Focus(); return true; }
+        if (keyData == Keys.Enter && services is not null && quickSearch.Focused)
+        { _ = SearchQuickAsync(); return true; }
+        if (keyData == (Keys.Control | Keys.N) && services is not null && gateway?.Can(Permission.BookingCreate)==true)
+        { OpenRequested("F07",null); return true; }
+        if (keyData == (Keys.Control | Keys.K)) { quickSearch.Focus(); return true; }
         if (keyData == (Keys.Control | Keys.N) && gateway is null && roleBox.Text != "Kế toán")
         { var screen=ScreenRegistry.Layouts.First(s=>s.Id=="F07");OpenScreen(screen.Id,screen.Create);return true; }
         if (keyData == Keys.Escape) { CloseCurrentTab();return true; }
@@ -205,10 +221,80 @@ public partial class FrmMain : ScreenForm
         { e.Cancel=true; _=EndSessionAsync(false); }
         base.OnFormClosing(e);
     }
+    private bool jobsBusy;
+    private bool noticesBusy;
+    private int noticesPage=1;
+    private readonly Button previousNotice=new(){Text="Trước",AutoSize=true};
+    private readonly Button nextNotice=new(){Text="Sau",AutoSize=true};
+    private async Task RunJobsAsync() {
+        if(services is null||jobsBusy||ending)return;jobsBusy=true;
+        try { var n=await services.Jobs.RunOnceAsync(lifetime.Token); if(n>0)services.Logger.Maintenance(n); }
+        catch(OperationCanceledException){} catch(Exception e){services.Logger.Error(e);}
+        finally{jobsBusy=false;}
+    }
+    private void SetupNotifications() {
+        notificationList.DisplayMember=nameof(NotificationItem.Message);
+        var buttons=new FlowLayoutPanel{Dock=DockStyle.Bottom,AutoSize=true};
+        var readAll=new Button{Text="Đọc tất cả",AutoSize=true};
+        buttons.Controls.AddRange([previousNotice,nextNotice,readAll]);notificationSplit.Panel2.Controls.Add(buttons);
+        previousNotice.Click+=async(_,_)=>{if(noticesPage>1)noticesPage--;await RefreshNotificationsAsync();};
+        nextNotice.Click+=async(_,_)=>{noticesPage++;await RefreshNotificationsAsync();};
+        readAll.Click+=async(_,_)=>await ErrorHandler.RunAsync(readAll,async()=>{await services!.Notifications.MarkAllReadAsync(lifetime.Token);await RefreshNotificationsAsync();});
+        notificationsButton.Click+=async(_,_)=>await RefreshNotificationsAsync();
+        notificationList.DoubleClick+=async(_,_)=>{
+            if(notificationList.SelectedItem is not NotificationItem n)return;
+            try {await services!.Notifications.MarkReadAsync(n.Id,lifetime.Token);
+                if(n.RefType is "Booking" or "Bookings"&&int.TryParse(n.RefId,out var id))services.Navigate("F09",id);
+                await RefreshNotificationsAsync();
+            }catch(Exception e){ErrorHandler.Show(e,this);}
+        };
+    }
+    private async Task RefreshNotificationsAsync() {
+        if(services is null||noticesBusy||ending)return;noticesBusy=true;
+        try{
+            var unread=await services.Notifications.CountUnreadAsync(lifetime.Token);
+            var page=await services.Notifications.ListAsync(new(){PageNumber=noticesPage,PageSize=20},lifetime.Token);
+            if(IsDisposed)return;notificationsButton.Text="Thông báo ("+unread+")";
+            notificationList.DataSource=page.Items.ToArray();previousNotice.Enabled=noticesPage>1;nextNotice.Enabled=noticesPage*20<page.TotalCount;
+        }catch(OperationCanceledException){}catch(Exception e){services.Logger.Error(e);}finally{noticesBusy=false;}
+    }
+    private async Task SearchQuickAsync() {
+        if(services is null||string.IsNullOrWhiteSpace(quickSearch.Text))return;
+        try {
+            var r=await services.Bookings.QuickSearchAsync(quickSearch.Text,lifetime.Token);
+            var choices=r.Bookings.Select(b=>new Choice("B:"+b.Id,b.Code+" · "+b.CustomerName+" · "+b.HomestayName))
+                .Concat(r.Customers.Select(c=>new Choice("C:"+c.Id,c.FullName+" · "+c.Phone))).ToArray();
+            if(choices.Length==0){MessageBox.Show(this,"Không tìm thấy kết quả.");return;}
+            using var d=new FieldsDialog("Kết quả tìm nhanh",new FieldSpec("target","Đơn / khách",FieldKind.Choice,choices[0].Value,Choices:choices));
+            if(d.ShowDialog(this)!=DialogResult.OK)return;var key=(string)d.Values["target"]!;
+            if(key.StartsWith("B:"))OpenRequested("F09",int.Parse(key[2..]));
+            else {var c=r.Customers.Single(c=>c.Id==int.Parse(key[2..]));OpenRequested("F13",c);}
+        }catch(Exception e){if(!IsDisposed)ErrorHandler.Show(e,this);}
+    }
+    private async void OpenRequested(string id,object? argument) {
+        if(services is null||ending||IsDisposed)return;
+        try {
+            var key=id+(id is "F09" or "F10"?":"+argument:argument is BookingSearchRequest q?":"+q.Queue+":"+q.OnlyExpiringHolds+":"+q.OnlyOverdueConfirmation+":"+q.AssignedToMeOnly:"");
+            if(id=="F13"&&argument is Homestay.DTO.Customers.CustomerItem c)key+=":"+c.Id;
+            if(id=="F07"&&argument is Homestay.DTO.Availability.QuoteRequest r)key+=":"+r.RoomTypeId+":"+r.CheckIn+":"+r.CheckOut+":"+r.Guests;
+            if(id=="F07"&&argument is Homestay.DTO.Customers.CustomerItem customer)key+=":customer:"+customer.Id;
+            var alreadyOpen=tabs.ContainsKey(key);
+            OpenScreen(key,()=>id switch {
+                "F07"=>new FrmBookingCreate(services,argument),
+                "F08"=>new FrmBookings(services,argument as BookingSearchRequest),
+                "F09"=>new FrmBookingDetail(services,(int)argument!),
+                "F10"=>new FrmReceipt(services,(int)argument!),
+                "F13"=>new FrmCustomers(services,argument as Homestay.DTO.Customers.CustomerItem),
+                _=>throw new NotImplementedException()
+            });
+            if(id=="F09"&&alreadyOpen&&tabs.TryGetValue(key,out var page)&&page.Controls.OfType<FrmBookingDetail>().FirstOrDefault() is {} detail)await detail.RefreshFromServerAsync();
+        }catch(Exception e){ErrorHandler.Show(e,this);}
+    }
     private void DisposeRuntime()
     {
         if (runtimeDisposed) return;
         runtimeDisposed = true;
+        if(services is not null)services.NavigationRequested-=OpenRequested;
         ErrorHandler.SessionExpired -= HandleSessionExpired;
         System.Windows.Forms.Application.RemoveMessageFilter(activity);
         lifetime.Cancel(); lifetime.Dispose();

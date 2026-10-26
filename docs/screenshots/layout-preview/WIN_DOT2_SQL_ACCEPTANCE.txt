@@ -1,0 +1,41 @@
+Fixture database=HomestayWinCheck_7933595ded044626
+PASS F04 schema versions on separate SQL database
+PASS F04 connection check then encrypted save/load
+PASS Manager login with required password change
+PASS Manager heartbeat remains valid after password change
+PASS Staff login and permissions
+PASS Accountant login and permissions
+PASS F18 list through SQL service with server paging
+PASS F18 created employee signs in and changes temporary password
+PASS Unlock and heartbeat for created employee
+PASS F18 lock account
+PASS F18 unlock account
+PASS F18 reset password requires another change
+PASS F24 reads six catalog tabs
+PASS F24 creates, edits and deactivates catalog item
+PASS F24 updates setting with original value
+PASS W2 availability search uses real SQL
+PASS W2 calendar returns real room-night cells
+PASS W2 staff customer identity is masked
+PASS W2 customer phone lookup
+PASS W2 create booking commits real hold and pricing
+PASS W2 exact booking search
+PASS W2 shell quick search service
+PASS W2 F05 reads live queues, no placeholder banner
+PASS W2 F06 loads real availability in GUI
+PASS W2 F13 applies selected-customer phone filter
+PASS W2 F08 loads exact matching booking in GUI
+PASS W2 F09 exposes deposit only when BLL allows
+PASS W2 F07 shows actual nightly quote without creating another booking
+PASS W2 F07 Save button creates a real booking
+PASS W2 F10 loads actual amount due
+PASS W2 F10 Save button records real receipt and moves booking to verification
+PASS W2 prevents duplicate deposit through allowed actions
+PASS W2 notifies accountant after receipt
+PASS W2 expired-hold job is repeatable
+PASS Main schema updated: table/user/booking/payment counts unchanged
+PASS Main TransferredAt column and trusted constraint installed
+PASS Logout clears all three sessions
+RESULT PASS - service integration on SQL; manual UI acceptance remains.
+Cleanup PASS - removed only this run's newly created fixture database.
+Main business rows and credentials were not modified; approved schema-only update runs after W2 checks pass.

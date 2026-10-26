@@ -16,9 +16,9 @@ Không có SqlConnection, câu SQL, command hay lời gọi repository trong GUI
 | W1.1 | Project GUI đã được người dùng push, build được trên Windows. Chưa có xác nhận riêng cho phiên bản mới này từ VS Designer và máy Mac. |
 | W1.2 | Có config JSON, DPAPI LocalMachine, kiểm đúng tập SchemaVersions 1,2,3,4,10,20, bắt lỗi và log. Đã nối StartupService từ 77be8d0 bằng factory chung, SQL thật trả đúng phiên bản; check → lưu/đọc DPAPI → initialize đạt. Ca SQL StartupServiceTests của MAC đạt. Chưa kiểm tay nút F04. |
 | W1.3 | Control dùng chung hoàn thành. PagedGrid có khóa sắp xếp logic cho service, bỏ cột không hỗ trợ. |
-| W1.4 | Đã nối F01/AuthService, F02/SessionService, F03/Authorizer.Can. Bắt buộc đổi mật khẩu tạm trước khi mở chính; hủy đổi thì logout. Heartbeat 60 giây, khóa sau Session.IdleMinutes, mở khóa, logout, hết phiên về đăng nhập. Chỉ bật F02/F18/F24; các màn chưa nối ẩn tập trung ở ScreenRegistry. Bộ thử dịch vụ ba vai trò đã đạt trên DB tạm (RESULT PASS, Cleanup PASS). Giao diện Quản lý, menu, tái sử dụng tab và đăng xuất về F01 đã kiểm đạt; còn phiên GUI Nhân viên/Kế toán và các ca ngoại lệ. |
+| W1.4 | Đã nối F01/AuthService, F02/SessionService, F03/Authorizer.Can. Bắt buộc đổi mật khẩu tạm trước khi mở chính; hủy đổi thì logout. Heartbeat 60 giây, khóa sau Session.IdleMinutes, mở khóa, logout, hết phiên về đăng nhập. Đợt 1 đã kiểm F02/F18/F24; phạm vi đợt 2 hiện được bật tập trung ở ScreenRegistry. Bộ thử dịch vụ ba vai trò đã đạt trên DB tạm (RESULT PASS, Cleanup PASS). Giao diện Quản lý, menu, tái sử dụng tab và đăng xuất về F01 đã kiểm đạt; Nhân viên/Kế toán đã kiểm đúng menu, vai trò/khu vực và đăng xuất về F01; còn các ca ngoại lệ. |
 | W1.5 | F18 nối tìm kiếm/phân trang/sắp xếp qua StaffService, xem hồ sơ, tạo NV, khóa/mở, reset và hiện mật khẩu tạm một lần. Xuất toàn bộ bộ lọc qua các trang service; không xuất mật khẩu. F24 nối 6 tab CatalogService, editor khu vực/danh mục/ngày lễ/chính sách/tham số. Gửi giá trị gốc/RowVer để BLL kiểm đồng thời, reload khi xung đột; không tự gửi lại thao tác ghi. Dịch vụ F18/F24 đã đạt trên SQL thật ở DB tạm; giao diện Quản lý đã kiểm đọc/tìm nhân viên và đủ sáu tab danh mục. Chưa nghiệm thu thao tác ghi bằng GUI. |
-| W2–W6 | Có bố cục. Đã tải M2.1–M2.4, gồm cài đặt tạo đơn và thu cọc; chưa nối các màn đợt 2. DB chính chưa có cột TransferredAt. |
+| W2–W6 | Đợt 2 đã nối F05/F06/F07/F08/F09/F10/F13 và F03 tìm nhanh/thông báo/job, SQL 37 PASS. Đợt 3–6 còn bố cục. Xem giới hạn bên dưới. |
 | W7.3 | Có help/phím tắt, khóa theo idle, lưu cột theo UserId F18/F24. Chưa kiểm đủ DPI100/125/150%, màn1366×768, mở mọi form trong VS Designer. |
 | W8 | Chưa có ảnh luồng nghiệp vụ trên dữ liệu mẫu, không dùng ảnh layout-preview thay nghiệm thu. |
 
@@ -65,4 +65,61 @@ Bộ thử ghi đã chạy đạt trên database tạm riêng, có RESULT PASS v
 - Bộ thử dịch vụ do người dùng chạy Administrator: 16 PASS, RESULT PASS, Cleanup PASS. Bao phủ cấu hình, ba vai trò, đổi mật khẩu, heartbeat/mở khóa, F18, F24 và logout trên DB tạm.
 - Kiểm tra chỉ đọc sau bộ thử: HomestayDesktop_Dev có 38 bảng, 7 tài khoản, 24 đơn; Unicode/collation đúng, login ứng dụng không sysadmin/db_owner.
 - DB chính thiếu Payments.TransferredAt của D10. Chưa sửa schema, chạy lại seed hay reset DB chính. Cần phương án cập nhật bảo toàn dữ liệu trước nghiệm thu W2 trên DB này.
-- Đã kiểm giao diện thật bằng phiên Quản lý: F18 7 nhân viên, lọc NV0002 còn 1 dòng rồi khôi phục 7; đủ 6 tab F24 (3/8/5/13/2/26 dòng), mở lại không trùng tab, đăng xuất về F01. Không ghi thay đổi nhân viên/danh mục/tham số trên DB chính. Chi tiết: docs/screenshots/layout-preview/WIN_DOT1_UI_ACCEPTANCE.txt. Còn F04 thao tác tay, phiên GUI NV/KT và các ca ngoại lệ; chưa đánh dấu hoàn thành toàn bộ W1.2/W1.4/W1.5.
+- Đã kiểm giao diện thật bằng phiên Quản lý: F18 7 nhân viên, lọc NV0002 còn 1 dòng rồi khôi phục 7; đủ 6 tab F24 (3/8/5/13/2/26 dòng), mở lại không trùng tab, đăng xuất về F01. Không ghi thay đổi nhân viên/danh mục/tham số trên DB chính. Chi tiết: docs/screenshots/layout-preview/WIN_DOT1_UI_ACCEPTANCE.txt. Đã kiểm thêm menu, vai trò/khu vực và logout bằng GUI NV/KT. Còn F04 thao tác tay và các ca ngoại lệ; chưa đánh dấu hoàn thành toàn bộ W1.2/W1.4/W1.5.
+
+## Đợt 2 — bản tích hợp WIN đã kiểm SQL thật
+
+Đã nối dịch vụ thật cho F05 Tổng quan, F06 Tra phòng/lịch, F13 Khách hàng,
+F07 Báo giá/tạo đơn, F08 Danh sách đơn, F09 Chi tiết đơn và F10 Thu cọc.
+F03 có tìm nhanh Ctrl+K, thông báo theo tài khoản và JobRunner hết hạn giữ phòng
+sau đăng nhập/mỗi 60 giây, ngăn tick chồng nhau và hủy khi đóng phiên.
+
+- F06: bộ lọc khu vực/ngày/khách/giá/danh mục/tiện nghi, giá từng đêm,
+  chính sách hủy, lịch 14/31 ngày với màu và tooltip, mở chi tiết từ ô có đơn.
+- F13: tìm/phân trang/sắp xếp server, tạo/sửa, đổi số khi có quyền, lịch sử;
+  danh sách luôn che giấy tờ; ô giấy tờ mới trống giữ nguyên số cũ.
+- F07: tìm khách qua SĐT hoặc tạo nhanh trong transaction đặt phòng, chọn
+  loại/phòng, báo giá thật, giữ phòng và hướng dẫn chuyển khoản từ kết quả BLL;
+  đếm ngược dựa trên thời gian SQL + Stopwatch, không dùng giờ máy để quyết định lưu.
+- F08/F09: hàng đợi, tra chính xác, trạng thái đơn/thanh toán riêng,
+  RowVer, quyền thao tác từ AllowedActions, nhận phụ trách, hủy chưa có tiền,
+  lịch sử và chứng từ. Nút vòng đời đợt 3 tiếp tục ẩn.
+- F10: chuyển giờ Việt Nam sang UTC, tiền nguyên, chứng từ JPG/PNG tối đa 5 MB,
+  lưu phiếu qua PaymentService, chờ kế toán xác minh, không tự xác minh.
+- Kế toán được xem đơn/khách; không mở tra phòng/tạo đơn/thu cọc.
+- Danh sách nhân viên để giao lại hiện dùng StaffService cho Quản lý.
+  Nhân viên chưa có API lookup người nhận được phép: nút giao lại của NV
+  tiếp tục ẩn, cần MAC bổ sung hợp đồng; không yêu cầu nhập Id kỹ thuật.
+- Không thêm NuGet, tham chiếu GUI -> DAL, SQL trong form; không sửa thư mục MAC.
+- Có bộ thử riêng ngoài repo tại work/w2-flow-checks: tạo/dọn DB tạm,
+  đọc các màn trên SQL và bấm Save F07/F10 với phản hồi thành công được ghi nhận
+  bởi subclass kiểm thử. Sau tất cả PASS mới chạy cập nhật cấu trúc được người dùng duyệt.
+- Người dùng đã duyệt thêm Payments.TransferredAt và CHECK từ D10 vào
+  HomestayDesktop_Dev; script cục bộ Cap-nhat-TransferredAt.sql chỉ thêm cấu trúc,
+  không đổi dữ liệu cũ/mật khẩu/seed. Script đã chạy thành công sau khi bộ thử đạt; số bảng/tài khoản/đơn/phiếu không đổi.
+- Build solution riêng trong bin/W2Verified: 0 lỗi, 0 cảnh báo; Rules 274/274 đạt.
+  Bộ kiểm GUI/preview trước sửa cleanup: 74/74 đạt; ca hồi quy cleanup F07 sau sửa đạt.
+- W2-FLOW-RESULT.txt: 37 PASS, RESULT PASS, Cleanup PASS. Bằng chứng: docs/screenshots/layout-preview/WIN_DOT2_SQL_ACCEPTANCE.txt. Chưa đánh dấu hoàn thành hàng loạt vì còn lookup giao lại cho NV và các ca kiểm tay.
+- Bản mới ở work/w2-app đã được mở sau khi bộ thử SQL và cập nhật cột đạt; đang chờ đăng nhập NV0002 để kiểm menu thực tế.
+
+### Sửa lỗi đóng F07 sau khi tạo đơn
+
+Lượt SQL đầu đã đi qua lưu đơn F07 rồi dừng ở ObjectDisposedException khi đóng form.
+Đã tái hiện độc lập: Close giải phóng form, sau đó using/host gọi Dispose lần nữa;
+callback Disposed hủy CancellationTokenSource đã được giải phóng. Sửa cleanup có cờ
+chỉ chạy một lần. Kiểm tra Close rồi Dispose nhiều lần và Dispose khi chưa Show đều đạt.
+Lượt thất bại có Cleanup PASS; chưa chạy cập nhật cấu trúc DB chính.
+Đã chạy lại bản sửa: 37 PASS, RESULT PASS, Cleanup PASS; luồng đã qua F10 và cập nhật cột.
+
+### Kiểm giao diện thật W2
+
+Đã kiểm bằng phiên NV0002: đủ menu đợt 2, tổng quan có số liệu, tra 8 loại phòng,
+lịch Ba Đình 6 phòng/14 ngày có màu, 15 khách có che CCCD, 16 đơn của NV,
+chi tiết đơn hoàn thành có nút ghi bị khóa, phiếu thu và lịch sử đọc đúng.
+Màn F07 báo giá thực tế 690.000 đồng/đêm, cọc 207.000 đồng, không lưu trên DB chính.
+Thông báo hiện dữ liệu theo người dùng, không đánh dấu đã đọc trong lượt kiểm tay.
+Đã phát hiện/sửa Enter ở tìm nhanh, thêm ca hồi quy bàn phím; kiểm lại native
+mở đúng đơn từ kết quả đạt. Ctrl+N đã nối Tạo đơn trong chế độ sản xuất theo quyền.
+Bằng chứng: WIN_DOT2_UI_ACCEPTANCE.txt và WIN_DOT2_REGRESSION.txt cùng thư mục bằng chứng SQL.
+Bản đang chạy là work/w2-app-final; launcher Mo-ban-W2.cmd đã trỏ tới bản này.
+Chưa có ảnh W8 hoặc kiểm toàn bộ DPI/Designer. NV giao lại đơn vẫn chờ lookup từ MAC.

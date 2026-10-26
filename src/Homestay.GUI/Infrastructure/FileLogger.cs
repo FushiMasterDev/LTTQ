@@ -13,6 +13,17 @@ public sealed class FileLogger
         this.folder = Environment.ExpandEnvironmentVariables(folder);
         this.retainDays = retainDays;
     }
+    // Called only with a system maintenance count, never user input or credentials.
+    public void Maintenance(int expiredCount)
+    {
+        try {
+            lock(gate) {
+                Directory.CreateDirectory(folder);
+                File.AppendAllText(Path.Combine(folder, $"{DateTime.Today:yyyy-MM-dd}.log"),
+                    $"{DateTimeOffset.UtcNow:O} Maintenance ExpiredHolds={expiredCount}{Environment.NewLine}");
+            }
+        } catch(Exception e) when(e is IOException or UnauthorizedAccessException) { }
+    }
     public string Error(Exception exception)
     {
         var id = Guid.NewGuid().ToString("N")[..8].ToUpperInvariant();

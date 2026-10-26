@@ -1,0 +1,27 @@
+WIN W2 native UI acceptance — 2026-10-27
+User signed in as Staff NV0002 on the W2 application.
+
+PASS Production navigation exposes Overview, Availability/Calendar, Create Booking, Bookings, Customers, and Change Password.
+PASS Manager account/catalog administration is absent from Staff navigation.
+PASS Overview reads live counts: own bookings=16, overdue confirmation=1, arrivals=1, departures=1, unassigned=2.
+PASS Availability initially returns 8 sellable room types.
+PASS Ba Dinh calendar displays 6 rooms with 14 dated columns and distinct Available/Booked colors.
+PASS Customers displays 15 records and masks identity numbers.
+PASS Own bookings displays 16 records; booking status and payment state are separate.
+PASS Existing completed booking opens detail; deposit/cancellation/claim actions are disabled.
+PASS Completed-booking payment tab displays an existing verified receipt; history displays 6 transitions.
+PASS Create Booking loads 8 available room-type choices; quote for one sample night shows total 690000 and deposit 207000; no booking was saved on the main database.
+PASS Notification panel opens and displays the account's existing unread notification; no mark-read action submitted.
+PASS Exit confirmation closes the tested session.
+FOUND F03 quick-search Enter was consumed by general dialog keyboard handling.
+FIXED F03 now handles Enter before dialog navigation; Ctrl+N also opens production Create Booking when authorized.
+PASS Targeted offline regression reproduces the old failure and passes after the fix; F07 repeated-disposal regression remains PASS.
+PASS Native retest on fixed application: Enter opens a result for the exact booking code; choosing it opens that booking detail.
+
+SQL integration evidence separately has 37 PASS, RESULT PASS and Cleanup PASS, including actual F07/F10 Save buttons on a temporary DB.
+Main TransferredAt column/constraint were added as approved; post-update read-only counts: 38 tables, 7 users, 24 bookings.
+No customer/booking/payment edits were submitted on the main database during native UI checks.
+Normal sign-in/heartbeat/logout and the required hold-expiry job update operational records as part of application use.
+
+Known limitation: Staff reassignment target lookup has no BLL contract; Manager can choose recipients using StaffService. Staff reassignment remains hidden.
+Later booking lifecycle/accounting screens and full DPI/Designer acceptance remain outside this W2 completion claim.
