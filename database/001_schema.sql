@@ -640,6 +640,7 @@ CREATE TABLE dbo.Payments
     Type VARCHAR(20) NOT NULL,
     Method VARCHAR(20) NOT NULL,
     Amount DECIMAL(18,0) NOT NULL,
+    TransferredAt DATETIME2(3) NULL, -- UTC, thời điểm khách chuyển tiền (chỉ phiếu thu)
     BankTransactionId INT NULL,
     EvidenceFileId UNIQUEIDENTIFIER NULL,
     PayerOrPayeeName NVARCHAR(100) NULL,
@@ -665,6 +666,7 @@ CREATE TABLE dbo.Payments
     CONSTRAINT CK_Payments_ChangeRequest CHECK ((Type = 'AdditionalDeposit' AND ChangeRequestId IS NOT NULL) OR (Type <> 'AdditionalDeposit' AND ChangeRequestId IS NULL)),
     CONSTRAINT CK_Payments_Method CHECK (Method IN ('BankTransfer', 'Cash')),
     CONSTRAINT CK_Payments_Amount CHECK (Amount > 0),
+    CONSTRAINT CK_Payments_TransferredAt CHECK (TransferredAt IS NULL OR Direction = 'In'),
     CONSTRAINT CK_Payments_Status CHECK (Status IN ('Pending', 'Verified', 'Rejected')),
     CONSTRAINT CK_Payments_Verification CHECK (Status <> 'Verified' OR (VerifiedByUserId IS NOT NULL AND VerifiedAt IS NOT NULL)),
     CONSTRAINT CK_Payments_RejectReason CHECK (Status <> 'Rejected' OR (RejectReason IS NOT NULL AND LEN(LTRIM(RTRIM(RejectReason))) > 0)),

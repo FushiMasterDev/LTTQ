@@ -658,6 +658,7 @@ CREATE TABLE dbo.Payments
     Type VARCHAR(20) NOT NULL,
     Method VARCHAR(20) NOT NULL,
     Amount DECIMAL(18,0) NOT NULL,
+    TransferredAt DATETIME2(3) NULL, -- UTC, thời điểm khách chuyển tiền (chỉ phiếu thu)
     BankTransactionId INT NULL,
     EvidenceFileId UNIQUEIDENTIFIER NULL,
     PayerOrPayeeName NVARCHAR(100) NULL,
@@ -683,6 +684,7 @@ CREATE TABLE dbo.Payments
     CONSTRAINT CK_Payments_ChangeRequest CHECK ((Type = 'AdditionalDeposit' AND ChangeRequestId IS NOT NULL) OR (Type <> 'AdditionalDeposit' AND ChangeRequestId IS NULL)),
     CONSTRAINT CK_Payments_Method CHECK (Method IN ('BankTransfer', 'Cash')),
     CONSTRAINT CK_Payments_Amount CHECK (Amount > 0),
+    CONSTRAINT CK_Payments_TransferredAt CHECK (TransferredAt IS NULL OR Direction = 'In'),
     CONSTRAINT CK_Payments_Status CHECK (Status IN ('Pending', 'Verified', 'Rejected')),
     CONSTRAINT CK_Payments_Verification CHECK (Status <> 'Verified' OR (VerifiedByUserId IS NOT NULL AND VerifiedAt IS NOT NULL)),
     CONSTRAINT CK_Payments_RejectReason CHECK (Status <> 'Rejected' OR (RejectReason IS NOT NULL AND LEN(LTRIM(RTRIM(RejectReason))) > 0)),
@@ -2561,10 +2563,11 @@ FROM #PaymentPlan AS p JOIN #PaymentCodes AS k ON k.N = p.N;
 DECLARE @N INT = 1, @Id INT;
 WHILE @N <= (SELECT MAX(N) FROM #PaymentPlan)
 BEGIN
-    INSERT INTO dbo.Payments (VoucherNo, BookingId, Direction, Type, Method, Amount, PayerOrPayeeName,
+    INSERT INTO dbo.Payments (VoucherNo, BookingId, Direction, Type, Method, Amount, TransferredAt, PayerOrPayeeName,
         PayerOrPayeeAccount, TransferContent, BankRef, Status, RecordedByUserId, RecordedAt,
         VerifiedByUserId, VerifiedAt, RejectReason, Note, CreatedAt)
-    SELECT p.VoucherNo, p.BookingId, p.Direction, p.Type, p.Method, p.Amount, b.ContactName,
+    SELECT p.VoucherNo, p.BookingId, p.Direction, p.Type, p.Method, p.Amount,
+           CASE WHEN p.Direction = 'In' THEN CASE WHEN p.Method = 'Cash' THEN p.RecordedAt ELSE DATEADD(MINUTE, -2, p.RecordedAt) END END, b.ContactName,
            CASE WHEN p.Method = 'BankTransfer' THEN '000000000000' END,
            N'DU LIEU GIA ' + REPLACE(b.Code, '-', ''), p.BankRef, p.Status, p.RecordedBy, p.RecordedAt,
            p.VerifiedBy, p.VerifiedAt, p.RejectReason, N'Phiếu mẫu, không có giao dịch tiền thật', p.RecordedAt

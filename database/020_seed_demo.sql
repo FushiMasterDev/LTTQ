@@ -506,10 +506,11 @@ FROM #PaymentPlan AS p JOIN #PaymentCodes AS k ON k.N = p.N;
 DECLARE @N INT = 1, @Id INT;
 WHILE @N <= (SELECT MAX(N) FROM #PaymentPlan)
 BEGIN
-    INSERT INTO dbo.Payments (VoucherNo, BookingId, Direction, Type, Method, Amount, PayerOrPayeeName,
+    INSERT INTO dbo.Payments (VoucherNo, BookingId, Direction, Type, Method, Amount, TransferredAt, PayerOrPayeeName,
         PayerOrPayeeAccount, TransferContent, BankRef, Status, RecordedByUserId, RecordedAt,
         VerifiedByUserId, VerifiedAt, RejectReason, Note, CreatedAt)
-    SELECT p.VoucherNo, p.BookingId, p.Direction, p.Type, p.Method, p.Amount, b.ContactName,
+    SELECT p.VoucherNo, p.BookingId, p.Direction, p.Type, p.Method, p.Amount,
+           CASE WHEN p.Direction = 'In' THEN CASE WHEN p.Method = 'Cash' THEN p.RecordedAt ELSE DATEADD(MINUTE, -2, p.RecordedAt) END END, b.ContactName,
            CASE WHEN p.Method = 'BankTransfer' THEN '000000000000' END,
            N'DU LIEU GIA ' + REPLACE(b.Code, '-', ''), p.BankRef, p.Status, p.RecordedBy, p.RecordedAt,
            p.VerifiedBy, p.VerifiedAt, p.RejectReason, N'Phiếu mẫu, không có giao dịch tiền thật', p.RecordedAt
