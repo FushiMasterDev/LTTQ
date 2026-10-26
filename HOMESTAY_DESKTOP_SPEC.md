@@ -3,7 +3,7 @@
 | Mục | Nội dung |
 |---|---|
 | Tên dự án | Ứng dụng quản lý Homestay trên máy tính (C# WinForms) |
-| Phiên bản tài liệu | 0.3 — đã chốt Q01–Q20 (trừ định dạng tệp sao kê); học theo đồ án WinForms tham khảo: gộp form, không thư viện ngoài, quy chuẩn giao diện, khung báo cáo |
+| Phiên bản tài liệu | 0.4 — bỏ vai trò Chủ homestay (D9, mục 12.7). 0.3: đã chốt Q01–Q20 (trừ định dạng tệp sao kê); học theo đồ án WinForms tham khảo: gộp form, không thư viện ngoài, quy chuẩn giao diện, khung báo cáo |
 | Ngày lập | 26/10/2026; cập nhật 27/10/2026 |
 | Trạng thái | **Thiết kế, chưa triển khai.** Chưa có mã nguồn, chưa có database |
 | Phạm vi tài liệu | Nghiệp vụ, kiến trúc, database, phân quyền, màn hình, quy trình, kế hoạch triển khai |
@@ -58,7 +58,7 @@ Tài liệu này tự đầy đủ: mọi quy tắc nghiệp vụ dùng cho ứn
 
 1. **[ĐÃ CHỐT]** Xây dựng ứng dụng C# WinForms quản lý homestay, **độc lập**, có **database SQL Server riêng**. Không sửa mã nguồn hoặc database của hệ thống web hiện có.
 2. **[ĐÃ CHỐT]** Ưu tiên trải nghiệm và công việc hằng ngày của **nhân viên**: tra phòng, tạo đơn, xử lý đơn, ghi nhận thu tiền nhanh, ít thao tác.
-3. **[ĐÃ CHỐT]** Cung cấp **đầy đủ** chức năng cho **chủ homestay**, **quản lý**, **kế toán** trong phạm vi nghiệp vụ đã thống nhất. Không thu gọn ba vai trò này thành chức năng phụ.
+3. **[ĐÃ CHỐT]** Cung cấp **đầy đủ** chức năng cho **quản lý**, **kế toán** trong phạm vi nghiệp vụ đã thống nhất. Không thu gọn hai vai trò này thành chức năng phụ. Chủ homestay **không** dùng ứng dụng (D9): việc của chủ do nhân viên/quản lý ghi nhận thay.
 4. **[ĐÃ CHỐT]** Kiến trúc GUI – BLL – DAL – DTO; kiểm tra quyền và nghiệp vụ trong BLL, không chỉ ẩn nút trên giao diện.
 5. **[ĐÃ CHỐT]** Nhiều máy WinForms cùng kết nối một database của hệ thống desktop.
 
@@ -77,10 +77,10 @@ Nghiệp vụ lấy từ hệ thống web "Fuji Homestay" đang vận hành. Ph�
 
 | Câu hỏi | Trả lời | Nhãn |
 |---|---|---|
-| Nhân viên thuộc đâu? | Nhân viên (tư vấn, kế toán, quản lý) là **nhân viên của Fuji** — đơn vị trung gian, **không** thuộc từng cơ sở. Người vận hành tại cơ sở là **chủ homestay** (và người của chủ, dùng chung tài khoản chủ) | [KẾ THỪA] |
+| Nhân viên thuộc đâu? | Nhân viên (tư vấn, kế toán, quản lý) là **nhân viên của Fuji** — đơn vị trung gian, **không** thuộc từng cơ sở. Người vận hành tại cơ sở là **chủ homestay** — đối tác có hồ sơ trong hệ thống, **không có tài khoản**, liên lạc với Fuji qua điện thoại/Zalo | [KẾ THỪA]; chủ không dùng ứng dụng: [ĐÃ CHỐT] D9 |
 | Ai nhận đặt phòng? | Nhân viên Fuji tạo đơn thay khách (khách gọi điện, Zalo, Messenger, đến văn phòng). Ứng dụng desktop **không** có cổng cho khách tự đặt | [ĐÃ CHỐT] |
-| Ai duyệt đơn (xác nhận nhận khách)? | **Chủ homestay** xác nhận/từ chối trong 30 phút sau khi đơn có cọc. Nhân viên được xác nhận/từ chối **thay chủ** sau khi gọi điện cho chủ, bắt buộc ghi chú | [KẾ THỪA] |
-| Ai nhận/trả phòng? | **Chủ homestay** ghi nhận khách đã nhận phòng, đã trả phòng, không đến. Nhân viên được ghi nhận thay khi chủ báo qua điện thoại, bắt buộc ghi chú | [KẾ THỪA] |
+| Ai duyệt đơn (xác nhận nhận khách)? | **Chủ homestay** quyết định nhận/không nhận trong 30 phút sau khi đơn có cọc. Nhân viên gọi điện cho chủ rồi ghi nhận xác nhận/từ chối **thay chủ** trên ứng dụng, bắt buộc ghi chú | [KẾ THỪA]; chỉ còn đường thay chủ: [ĐÃ CHỐT] D9 |
+| Ai nhận/trả phòng? | **Chủ homestay** đón/trả khách tại cơ sở và báo qua điện thoại; nhân viên ghi nhận thay chủ (đã nhận phòng, đã trả phòng, không đến), bắt buộc ghi chú | [KẾ THỪA]; [ĐÃ CHỐT] D9 |
 | Ai thu tiền cọc? | Tiền cọc vào **tài khoản Fuji**. Nhân viên **ghi nhận** khoản khách báo đã chuyển (kèm ảnh chứng từ); **kế toán xác minh** với sao kê ngân hàng | [ĐÃ CHỐT] |
 | Ai thu 70% còn lại? | Chủ homestay thu trực tiếp tại cơ sở. Fuji **không** quản lý và **không ghi nhận** khoản này | [ĐÃ CHỐT] Q07 |
 | Ai chi tiền ra? | **Kế toán** chi hoàn cọc, khoản bù trùng phòng, tiền đối soát cho chủ, và ghi nhận đã chi | [KẾ THỪA] |
@@ -94,18 +94,18 @@ Nghiệp vụ lấy từ hệ thống web "Fuji Homestay" đang vận hành. Ph�
 | Nhân viên | `Staff` | Nhân viên tư vấn đặt phòng của Fuji. Vai trò dùng nhiều nhất |
 | Kế toán | `Accountant` | Nhân viên kế toán của Fuji |
 | Quản lý | `Manager` | Quản lý vận hành của Fuji. Có mọi quyền thao tác của Nhân viên, cộng quyền giám sát, phê duyệt, quản trị |
-| Chủ homestay | `Owner` | Đối tác sở hữu một hoặc nhiều homestay. Chỉ thấy dữ liệu thuộc sở hữu |
 | Hệ thống | `System` | Tác vụ tự động (hết hạn giữ phòng, cảnh báo…). Không phải tài khoản đăng nhập |
 
-- **[ĐÃ CHỐT] Q01** Không có vai trò "Quản trị hệ thống" riêng như bản web: việc tạo/khóa tài khoản, danh mục, cấu hình giao cho **Quản lý**. Ứng dụng có đúng bốn vai trò.
-- **[ĐÃ CHỐT]** Một tài khoản chỉ có một vai trò. Người vừa là nhân viên vừa là chủ phải có hai tài khoản.
+- **[ĐÃ CHỐT] Q01** Không có vai trò "Quản trị hệ thống" riêng như bản web: việc tạo/khóa tài khoản, danh mục, cấu hình giao cho **Quản lý**.
+- **[ĐÃ CHỐT] D9** Không có vai trò Chủ homestay: chủ là đối tác có hồ sơ (`Owners`), không có tài khoản đăng nhập. Ứng dụng có đúng **ba vai trò** đăng nhập: Nhân viên, Kế toán, Quản lý.
+- **[ĐÃ CHỐT]** Một tài khoản chỉ có một vai trò.
 
 ### 1.5. Phạm vi
 
 **Trong phạm vi desktop:**
 
 - Danh mục: khu vực, tiện nghi, danh mục loại phòng, ngày lễ, chính sách hủy chung, cấu hình nghiệp vụ.
-- Chủ homestay, homestay, giấy tờ pháp lý, hợp đồng và hoa hồng, duyệt homestay.
+- Hồ sơ chủ homestay (không có tài khoản), homestay, giấy tờ pháp lý, hợp đồng và hoa hồng, duyệt homestay.
 - Loại phòng, phòng, giá ba mức có lịch sử, tiện nghi, hình ảnh, chính sách hủy riêng, khóa phòng.
 - Khách hàng, đơn đặt phòng, giữ phòng, cọc, xác nhận, nhận/trả phòng, hủy, hoàn tiền, đổi ngày/loại phòng, trùng phòng, voucher xin lỗi.
 - Ghi nhận và xác minh thu tiền, nhập sao kê ngân hàng và đối chiếu, chi hoàn, chi khoản bù, đối soát với chủ, sổ thu chi, công nợ.
@@ -119,6 +119,7 @@ Nghiệp vụ lấy từ hệ thống web "Fuji Homestay" đang vận hành. Ph�
 | Webhook ngân hàng tự động (SePay/Casso), QR động | Cần máy chủ công khai nhận webhook; desktop dùng **nhập sao kê** thay thế | [ĐÃ CHỐT] |
 | Đăng nhập Google, OTP qua SMS | Không cần cho người dùng nội bộ | [ĐÃ CHỐT] |
 | Chủ tự đăng ký làm đối tác online | Nhân viên/Quản lý nhập hồ sơ chủ | [ĐÃ CHỐT] |
+| Chủ homestay dùng ứng dụng (xác nhận đơn, nhận/trả phòng, khóa phòng, xem đối soát, doanh thu) | Chủ báo qua điện thoại; nhân viên/Quản lý ghi nhận thay; Kế toán gửi bảng đối soát bằng bản in/CSV | [ĐÃ CHỐT] D9 |
 | Khách đánh giá homestay, chủ trả lời đánh giá | Không có cổng khách | [ĐÃ CHỐT] |
 | Gửi SMS/Zalo thật | Chưa có nhà cung cấp; chỉ thông báo trong ứng dụng | [ĐÃ CHỐT] |
 | Đồng bộ dữ liệu với hệ thống web | Hai hệ thống độc lập | [ĐÃ CHỐT] |
@@ -134,13 +135,13 @@ Nghiệp vụ lấy từ hệ thống web "Fuji Homestay" đang vận hành. Ph�
 | Tra phòng trống | Bảng phòng trống mọi homestay, ≤ 31 đêm; lịch tháng cho chủ/quản lý | Nhân viên không có lịch dạng lưới | Bảng phòng trống **và** lịch phòng dạng lưới cho nhân viên [ĐỀ XUẤT] |
 | Đặt phòng | Đặt theo loại phòng, hệ thống gán phòng, giữ 15 phút; nhân viên đặt hộ | — | Giữ nguyên; thêm chọn phòng cụ thể trong loại |
 | Thu cọc | Webhook tự khớp; khách tải ảnh bill; kế toán duyệt bill | Kết nối ngân hàng thật | Nhân viên ghi nhận + kế toán xác minh; nhập sao kê tự khớp; nhận cả tiền mặt tại văn phòng |
-| Xác nhận đơn | Chủ ≤ 30 phút; nhân viên thay chủ; cảnh báo quá hạn | — | Giữ nguyên |
-| Nhận/trả phòng | Chủ hoặc nhân viên | — | Giữ nguyên; bảng "Đón/trả khách hôm nay" |
+| Xác nhận đơn | Chủ ≤ 30 phút; nhân viên thay chủ; cảnh báo quá hạn | — | Chỉ nhân viên/Quản lý ghi nhận thay chủ (D9); giữ cảnh báo quá hạn |
+| Nhận/trả phòng | Chủ hoặc nhân viên | — | Nhân viên ghi nhận thay chủ (D9); bảng "Đón/trả khách hôm nay" |
 | Hủy, hoàn tiền | Chính sách hủy theo số ngày; hàng chờ hoàn cho kế toán | Phiếu chi chính thức | Tạo phiếu chi chờ chi ngay khi hủy |
 | Đổi ngày/loại phòng | Đầy đủ, hai bước duyệt | — | Giữ nguyên |
 | Trùng phòng | Ba phương án, khoản bù | — | Giữ nguyên |
 | Voucher xin lỗi | Đầy đủ | — | Giữ nguyên |
-| Đối soát | Tự lập 2 kỳ/tháng, gửi, chủ xác nhận, ghi nhận đã trả | — | Giữ nguyên |
+| Đối soát | Tự lập 2 kỳ/tháng, gửi, chủ xác nhận, ghi nhận đã trả | — | Bỏ bước chủ xác nhận trên ứng dụng (D9): Nháp → Đã gửi (in/CSV cho chủ) → Đã trả |
 | Phiếu thu/chi, sổ quỹ | — | Không có sổ thu chi, số phiếu | Số phiếu PT/PC, sổ thu chi [ĐỀ XUẤT] |
 | Công nợ | Dữ liệu rời rạc (đối soát chưa trả, hoàn chưa chi) | Không có màn tổng hợp | Màn công nợ tổng hợp [ĐỀ XUẤT] |
 | Phân công | Giao đơn cho nhân viên | Không giao việc ngoài đơn; không phạm vi khu vực | Giao đơn + việc (WorkTasks) + phạm vi theo khu vực (Q02) |
@@ -204,7 +205,7 @@ Nghiệp vụ lấy từ hệ thống web "Fuji Homestay" đang vận hành. Ph�
 ```
 
 - **[ĐÃ CHỐT]** Bốn lớp GUI – BLL – DAL – DTO.
-- **[ĐÃ CHỐT] Q03** Mô hình **hai tầng** (máy trạm nối thẳng SQL Server) trong LAN; chủ homestay ở xa vào qua **Tailscale** (gói miễn phí). Rủi ro đã chấp nhận: người có quyền quản trị máy trạm có thể lấy thông tin kết nối và bỏ qua BLL; giảm thiểu bằng các biện pháp ở mục 10.1. BLL viết không phụ thuộc WinForms để sau này đặt sau một máy chủ API mà không viết lại (khi số chủ vượt hạn mức miễn phí của Tailscale hoặc khi chạy thật).
+- **[ĐÃ CHỐT] Q03, D9** Mô hình **hai tầng** (máy trạm nối thẳng SQL Server) trong LAN văn phòng Fuji. Bỏ vai trò Chủ nên không còn người dùng ở xa, **không dùng Tailscale**. Rủi ro đã chấp nhận: người có quyền quản trị máy trạm có thể lấy thông tin kết nối và bỏ qua BLL; giảm thiểu bằng các biện pháp ở mục 10.1. BLL viết không phụ thuộc WinForms để sau này đặt sau một máy chủ API mà không viết lại (khi cần truy cập từ xa hoặc khi chạy thật).
 
 ### 3.2. Cấu trúc solution
 
@@ -248,7 +249,7 @@ HomestayDesktop/
 │       ├── Shell/                FrmLogin, FrmMain, FrmChangePassword, menu theo vai trò
 │       ├── Common/               UserControl dùng chung: lưới có phân trang, ô tìm kiếm, chọn ngày,
 │       │                         hộp thoại lỗi, định dạng tiền/ngày, AsyncLoader (chống tải cũ)
-│       ├── Staff/  Owner/  Manager/  Accountant/
+│       ├── Staff/  Manager/  Accountant/
 │       └── appsettings.json
 └── tests/
     ├── Homestay.BLL.Tests/       nghiệp vụ + đồng thời trên SQL Server thật
@@ -320,12 +321,10 @@ GUI FrmBookingCreate ── CreateBookingRequest ──► BLL BookingService.Cr
 
 **[ĐỀ XUẤT]**
 
-- Đăng nhập: tên đăng nhập + mật khẩu.
-  - Nhân viên: **mã nhân viên** (ví dụ `NV0012`).
-  - Chủ homestay: **số điện thoại** (nhập kiểu nội địa `09…`, hệ thống chuẩn hóa sang E.164 `+849…`).
-- Thành công → BLL tạo `SessionInfo` (UserId, vai trò, EmployeeId hoặc OwnerId, họ tên, danh sách khu vực được giao, `SecurityStamp`, `SessionId`) và giữ trong `ICurrentSession` (singleton trong tiến trình). GUI không tự sửa.
+- Đăng nhập: tên đăng nhập là **mã nhân viên** (ví dụ `NV0012`) + mật khẩu.
+- Thành công → BLL tạo `SessionInfo` (UserId, vai trò, EmployeeId, họ tên, danh sách khu vực được giao, `SecurityStamp`, `SessionId`) và giữ trong `ICurrentSession` (singleton trong tiến trình). GUI không tự sửa.
 - Mỗi lần đăng nhập ghi một dòng `UserSessions`. Tối đa **một phiên đang mở** mỗi tài khoản: đăng nhập máy khác thì phiên cũ bị đánh dấu kết thúc (`Replaced`). [ĐÃ CHỐT] Q05.
-- **Kiểm tra phiên còn hiệu lực:** trước mọi thao tác **ghi**, BLL đọc lại `Users.Status`, `Users.SecurityStamp`, trạng thái làm việc (nhân viên) và `UserSessions.EndedAt`. Khác lúc đăng nhập (bị khóa, đổi mật khẩu, đổi chức vụ, phiên bị thay) → `SessionExpiredException`, GUI đưa về màn đăng nhập. Thao tác chỉ đọc kiểm tra mỗi 60 giây cùng lượt cập nhật `LastSeenAt`.
+- **Kiểm tra phiên còn hiệu lực:** trước mọi thao tác **ghi**, BLL đọc lại `Users.Status`, `Users.SecurityStamp`, trạng thái làm việc và `UserSessions.EndedAt`. Khác lúc đăng nhập (bị khóa, đổi mật khẩu, đổi chức vụ, phiên bị thay) → `SessionExpiredException`, GUI đưa về màn đăng nhập. Thao tác chỉ đọc kiểm tra mỗi 60 giây cùng lượt cập nhật `LastSeenAt`.
 - Không thao tác **30 phút** → khóa màn hình, nhập lại mật khẩu để tiếp tục (cấu hình `Session.IdleMinutes`).
 - Đăng xuất: ghi `EndedAt`, `EndReason = Logout`, xóa `ICurrentSession`.
 
@@ -335,7 +334,7 @@ GUI FrmBookingCreate ── CreateBookingRequest ──► BLL BookingService.Cr
 
 - Enum `Permission` liệt kê mọi hành động ở mục 5.2. Bảng ánh xạ vai trò → quyền viết cứng trong `Authorizer` (không lưu trong database), là nguồn duy nhất cho cả BLL và GUI.
 - Mỗi hàm public của service bắt đầu bằng `Authorizer.Require(Permission.X)` rồi `DataScope.Ensure…(id)` cho phạm vi dữ liệu (mục 5.1).
-- Danh sách đọc luôn lọc phạm vi **trong câu SQL** (ví dụ `WHERE h.OwnerId = @OwnerId`), không tải hết rồi lọc ở GUI.
+- Danh sách đọc luôn lọc phạm vi **trong câu SQL** (ví dụ khu vực được giao `WHERE h.AreaId IN (…)`), không tải hết rồi lọc ở GUI.
 - Truy cập đối tượng ngoài phạm vi trả lỗi **"Không tìm thấy"**, không tiết lộ đối tượng có tồn tại.
 - GUI gọi `Authorizer.Can(Permission.X)` chỉ để ẩn/khóa nút; ẩn nút không thay cho kiểm tra ở BLL.
 
@@ -412,7 +411,7 @@ Mọi tác vụ dùng **giờ của máy chủ SQL** (`SYSUTCDATETIME()`), khôn
 
 - Một máy chủ trong LAN cài SQL Server (bật TCP/IP, mở cổng tường lửa chỉ cho dải mạng nội bộ). Database bật `READ_COMMITTED_SNAPSHOT ON` để người đọc không chặn người ghi.
 - Các máy trạm cài bản phát hành `dotnet publish` dạng self-contained (không cần cài .NET riêng), hoặc bộ cài đơn giản. Cập nhật: thay thư mục chương trình; ứng dụng kiểm tra `SchemaVersions` lúc khởi động và từ chối chạy nếu database cũ hơn hoặc mới hơn phiên bản nó hỗ trợ.
-- Chủ homestay ở xa văn phòng Fuji: cài **Tailscale** trên máy chủ SQL và máy của chủ (gói miễn phí, giới hạn số người dùng — kiểm tra hạn mức hiện hành khi triển khai). Luật truy cập (ACL) chỉ cho máy chủ đi tới cổng SQL Server, không cho đi tới máy khác trong mạng. [ĐÃ CHỐT] Q03.
+- Chỉ dùng trong LAN văn phòng; không mở cổng SQL Server ra Internet, không cài máy trạm ngoài văn phòng. Cần truy cập từ xa về sau → thêm máy chủ API (mục 3.1). [ĐÃ CHỐT] Q03, D9.
 - Sao lưu: full hằng ngày + log mỗi giờ (mô hình phục hồi FULL) cho môi trường chạy thật; thử khôi phục định kỳ. Không ghi mật khẩu vào script sao lưu.
 
 ---
@@ -427,7 +426,7 @@ Ký hiệu: **(P0)** cần cho giai đoạn đầu; số giai đoạn ở mục 
 |---|---|---|---|
 | N1 | Tổng quan công việc | Một màn hình mở ngay sau đăng nhập: đơn cần xử lý của tôi theo hàng đợi, đồng hồ đếm ngược giữ phòng, đơn chủ chưa xác nhận quá hạn, khách đến/đi hôm nay, việc được giao, thông báo mới | Mọi số liệu bấm vào được để mở danh sách đã lọc |
 | N2 | Tra phòng trống | Nhập khu vực, ngày nhận/trả, số khách, khoảng giá, danh mục phòng, tiện nghi → bảng homestay × loại phòng: số phòng trống/tổng, giá trung bình đêm, tổng tiền, cọc, sức chứa | Tối đa 31 đêm; luôn đọc trực tiếp database (không cache); loại hết phòng vẫn hiện với số trống 0 |
-| N3 | Lịch phòng | Lưới phòng × ngày (14–31 ngày) của một homestay hoặc một khu vực; màu theo tình trạng (mục 7.4); bấm ô trống để tạo đơn với ngày/phòng đã chọn; bấm ô đã đặt để mở đơn | Chỉ xem khóa phòng, không tạo khóa (khóa là việc của chủ/Quản lý) |
+| N3 | Lịch phòng | Lưới phòng × ngày (14–31 ngày) của một homestay hoặc một khu vực; màu theo tình trạng (mục 7.4); bấm ô trống để tạo đơn với ngày/phòng đã chọn; bấm ô đã đặt để mở đơn | Chỉ xem khóa phòng, không tạo khóa (khóa là việc của Quản lý) |
 | N4 | Khách hàng | Tìm theo SĐT/tên/email; tạo mới; sửa tên/email/CCCD/ghi chú nội bộ; xem lịch sử đơn và voucher còn dùng | SĐT là định danh, không sửa sau khi có đơn (sửa nhầm: Quản lý); CCCD hiện che, chỉ 4 số cuối |
 | N5 | Tạo đơn | Chọn khách (tìm SĐT, chưa có thì tạo nhanh) → chọn homestay/loại phòng/ngày/số khách → xem báo giá từng đêm, tổng, cọc, chính sách hủy → chọn voucher của khách (nếu có) → nhập người ở thật, SĐT người ở, kênh, yêu cầu đặc biệt → tạo | Đơn ở trạng thái "Chờ thanh toán", giữ phòng 15 phút; màn hiện thông tin chuyển khoản của Fuji và **nội dung chuyển khoản = mã đơn** để đọc cho khách |
 | N6 | Ghi nhận thu cọc | Khách báo đã chuyển → nhân viên ghi nhận số tiền, thời điểm, ngân hàng chuyển, tải ảnh chứng từ (nếu có) | Đơn sang "Chờ xác minh cọc", **ngừng đếm giờ giữ phòng**; kế toán xác minh |
@@ -441,26 +440,23 @@ Ký hiệu: **(P0)** cần cho giai đoạn đầu; số giai đoạn ở mục 
 | N14 | Việc được giao | Danh sách việc Quản lý giao (WorkTasks), đánh dấu xong kèm kết quả | |
 | N15 | Lịch sử thao tác của tôi | Nhật ký các thao tác của chính mình, lọc theo ngày/loại | |
 | N16 | Hiệu suất của tôi | Số đơn tạo, tỷ lệ chốt, doanh số, số đơn đang phụ trách | Không xem số liệu tài chính công ty |
+| N17 | Hồ sơ chủ & homestay | Nhập hồ sơ chủ mới; nhập homestay nháp theo mục 4.2 từ hồ sơ chủ gửi; gửi duyệt | Chỉ khi chủ còn `Pending` / homestay còn `Draft`; Quản lý duyệt — [ĐỀ XUẤT] D9 |
 
-### 4.2. Chủ homestay
+### 4.2. Hồ sơ homestay (nhập thay chủ)
+
+**[ĐÃ CHỐT] D9** Chủ homestay không dùng ứng dụng. Chủ gửi thông tin, giấy tờ, ảnh, giá cho Fuji; **Nhân viên** nhập khi homestay còn `Draft` rồi gửi duyệt; **Quản lý** làm được ở mọi trạng thái (mục 4.3 Q12). Mọi thay đổi ghi AuditLog với người thực hiện.
 
 | # | Nhóm | Chức năng | Ghi chú |
 |---|---|---|---|
-| C1 | Tổng quan | Đơn chờ tôi xác nhận (đếm ngược 30 phút), khách đến/đi hôm nay và ngày mai, đối soát mới gửi, thông báo | |
-| C2 | Homestay của tôi | Danh sách homestay thuộc sở hữu, trạng thái, hợp đồng (số, hoa hồng, hạn) | Chỉ xem hợp đồng |
-| C3 | Thêm homestay | Tạo homestay mới ở trạng thái Nháp, điền thông tin, tải giấy tờ, gửi duyệt | Quản lý duyệt |
-| C4 | Thông tin homestay | Sửa tên, SĐT liên hệ, giờ nhận/trả, mô tả, hướng dẫn nhận phòng | Sửa **địa chỉ/khu vực** hoặc tải lại **giấy phép kinh doanh/PCCC** khi đang hoạt động → homestay về "Chờ duyệt" |
-| C5 | Tiện nghi | Chọn tiện nghi từ danh mục chung | Tiện nghi gắn homestay, không gắn loại phòng |
-| C6 | Hình ảnh | Tải ảnh, sắp thứ tự, chọn ảnh bìa, gắn ảnh vào loại phòng | Homestay đang hoạt động không được xóa ảnh bìa duy nhất |
-| C7 | Loại phòng, phòng | Thêm/sửa loại phòng (danh mục, tên, sức chứa, diện tích, mô tả), thêm phòng (mã phòng), bật/tắt | Không xóa cứng; tắt chỉ chặn bán mới, đơn đã nhận giữ nguyên; không được tắt loại/phòng cuối cùng còn bán của homestay đang hoạt động |
-| C8 | Bảng giá | Xem giá hiện hành ba mức; thêm phiên bản giá có hiệu lực từ hôm nay hoặc tương lai | Không sửa giá đã có hiệu lực; đơn cũ giữ giá lúc đặt |
-| C9 | Chính sách hủy riêng | Tạo chính sách riêng (mọi ngày / ngày lễ) thay chính sách chung; tắt để quay về chính sách chung | Không sửa chính sách đã có đơn dùng; thay = tạo mới + tắt cũ |
-| C10 | Lịch & khóa phòng | Lịch phòng × ngày của homestay mình; khóa phòng theo khoảng ngày (khách kênh khác / bảo trì); mở khóa | Không khóa trùng đơn hoặc khóa khác |
-| C11 | Đơn của tôi | Đơn của homestay mình **từ khi đã có cọc**; xác nhận (có thể đổi phòng cùng loại) / từ chối (lý do); ghi nhận nhận phòng, trả phòng, không đến; báo trùng phòng | Không thấy đơn chưa có cọc; chỉ thấy tên, SĐT người ở, số khách, yêu cầu đặc biệt, **không** thấy CCCD, ghi chú nội bộ, lịch sử thanh toán của khách |
-| C12 | Đón/trả khách | Lịch nhận/trả phòng theo ngày, tối đa 31 ngày | |
-| C13 | Đối soát | Danh sách bảng đối soát đã gửi; chi tiết từng đơn; xác nhận số liệu (không bắt buộc); gửi phản hồi sai số liệu | Không thấy bảng Nháp |
-| C14 | Doanh thu | Doanh thu theo tháng/homestay: tiền phòng đơn hoàn thành, phần cọc giữ lại, hoa hồng, tiền Fuji đã chuyển; công suất phòng | Số liệu tạm tính có ghi chú khác với bảng đã gửi |
-| C15 | Thông tin chủ | Xem/sửa họ tên, email, địa chỉ; xem tài khoản ngân hàng; đổi mật khẩu | Chủ **không** tự đổi tài khoản ngân hàng: gửi yêu cầu (tạo việc cho Quản lý), Quản lý gọi xác minh rồi cập nhật — [ĐÃ CHỐT] Q09 |
+| H1 | Danh sách homestay | Lọc theo chủ, khu vực, trạng thái; xem hợp đồng (số, hoa hồng, hạn), số loại phòng/phòng | |
+| H2 | Thêm homestay | Tạo homestay mới ở trạng thái Nháp cho một chủ đã có hồ sơ, điền thông tin, tải giấy tờ, gửi duyệt | Quản lý duyệt |
+| H3 | Thông tin homestay | Sửa tên, SĐT liên hệ, giờ nhận/trả, mô tả, hướng dẫn nhận phòng | Sửa **địa chỉ/khu vực** hoặc tải lại **giấy phép kinh doanh/PCCC** khi đang hoạt động → homestay về "Chờ duyệt" |
+| H4 | Tiện nghi | Chọn tiện nghi từ danh mục chung | Tiện nghi gắn homestay, không gắn loại phòng |
+| H5 | Hình ảnh | Tải ảnh, sắp thứ tự, chọn ảnh bìa, gắn ảnh vào loại phòng | Homestay đang hoạt động không được xóa ảnh bìa duy nhất |
+| H6 | Loại phòng, phòng | Thêm/sửa loại phòng (danh mục, tên, sức chứa, diện tích, mô tả), thêm phòng (mã phòng), bật/tắt | Không xóa cứng; tắt chỉ chặn bán mới, đơn đã nhận giữ nguyên; không được tắt loại/phòng cuối cùng còn bán của homestay đang hoạt động |
+| H7 | Bảng giá | Xem giá hiện hành ba mức; thêm phiên bản giá có hiệu lực từ hôm nay hoặc tương lai | Không sửa giá đã có hiệu lực; đơn cũ giữ giá lúc đặt |
+| H8 | Chính sách hủy riêng | Tạo chính sách riêng (mọi ngày / ngày lễ) thay chính sách chung; tắt để quay về chính sách chung | Không sửa chính sách đã có đơn dùng; thay = tạo mới + tắt cũ |
+| H9 | Khóa phòng | Khi chủ báo: khóa phòng theo khoảng ngày (khách kênh khác / bảo trì); mở khóa | Chỉ Quản lý; không khóa trùng đơn hoặc khóa khác |
 
 ### 4.3. Quản lý
 
@@ -476,10 +472,10 @@ Quản lý có **mọi chức năng của Nhân viên** (mục 4.1) trên toàn 
 | Q6 | Duyệt yêu cầu đổi/hủy | Xem yêu cầu, số tiền dự kiến; duyệt (hệ thống tính lại giá, khác thì từ chối) hoặc từ chối có lý do |
 | Q7 | Trùng phòng | Mọi phương án, gồm hủy + hoàn tiền + cấp voucher |
 | Q8 | Voucher | Cấp voucher xin lỗi cho khách gắn với đơn bị ảnh hưởng; thu hồi có lý do; xem số dư |
-| Q9 | Chủ homestay | Tạo hồ sơ chủ (thông tin, ngân hàng), cấp tài khoản chủ, duyệt chủ, tạm ngưng |
+| Q9 | Chủ homestay | Tạo/sửa hồ sơ chủ (thông tin, ngân hàng), duyệt chủ, tạm ngưng; đổi tài khoản ngân hàng sau khi gọi xác minh với chủ |
 | Q10 | Duyệt homestay | Hàng chờ duyệt; danh sách điều kiện còn thiếu; duyệt / trả về nháp (lý do) / tạm ngưng (lý do) / mở lại / kết thúc |
 | Q11 | Hợp đồng | Tạo hợp đồng (số hợp đồng, ngày, hoa hồng), gia hạn (lùi ngày kết thúc), chấm dứt (lý do) |
-| Q12 | Thay mặt chủ | Sửa thông tin/phòng/giá/ảnh/khóa phòng của homestay bất kỳ khi chủ nhờ (ghi AuditLog với người thực hiện là Quản lý) |
+| Q12 | Hồ sơ homestay | Mọi chức năng mục 4.2 (H1–H9) trên homestay ở mọi trạng thái, gồm khóa phòng (ghi AuditLog với người thực hiện là Quản lý) |
 | Q13 | Danh mục | Khu vực, tiện nghi, danh mục loại phòng, ngày lễ, chính sách hủy chung |
 | Q14 | Cấu hình | Tham số nghiệp vụ (mục 7.7) có kiểm tra khoảng giá trị |
 | Q15 | Báo cáo | Đơn theo trạng thái/kênh/khu vực; doanh thu, hoa hồng, Fuji thực thu (tạm tính); tỷ lệ hủy, chủ từ chối, hết hạn; tốc độ chủ xác nhận; hiệu suất nhân viên; công suất phòng; trùng phòng; xuất CSV |
@@ -495,7 +491,7 @@ Quản lý có **mọi chức năng của Nhân viên** (mục 4.1) trên toàn 
 | K4 | Chi hoàn tiền | Hàng chờ phiếu chi hoàn `Pending` (sinh khi hủy/từ chối); ghi nhận đã chuyển: mã giao dịch, ngày, ảnh chứng từ (tùy chọn) |
 | K5 | Chi khoản bù | Khoản bù trùng phòng của đơn thay thế đã hoàn thành; ghi nhận đã chuyển cho chủ homestay mới; từ chối có lý do |
 | K6 | Cọc bổ sung | Xác minh khoản thu thêm của yêu cầu đổi → áp dụng thay đổi vào đơn |
-| K7 | Đối soát | Lập/lập lại bảng nháp; xem chi tiết và đơn chưa chốt trong kỳ; gửi chủ; mở lại (lý do); ghi nhận đã trả (mã giao dịch); xem phản hồi của chủ |
+| K7 | Đối soát | Lập/lập lại bảng nháp; xem chi tiết và đơn chưa chốt trong kỳ; gửi (in/xuất CSV gửi chủ ngoài hệ thống); mở lại (lý do); ghi nhận đã trả (mã giao dịch); ghi phản hồi chủ báo qua điện thoại |
 | K8 | Sổ thu chi | Danh sách phiếu thu/phiếu chi đã xác minh theo ngày; in phiếu; xuất CSV |
 | K9 | Công nợ | Phải trả chủ (đối soát đã gửi chưa trả), phải trả khách (hoàn chưa chi, tiền chuyển dư chưa trả), khoản bù chờ chi, phải thu (cọc bổ sung chờ, giao dịch thiếu tiền) |
 | K10 | Báo cáo tài chính | Tiền cọc đã thu, đã hoàn, phần giữ lại, hoa hồng, voucher Fuji chịu, Fuji thực thu, khoản bù đã chi, tiền đã chuyển chủ — theo kỳ/tháng/homestay/khu vực |
@@ -510,7 +506,6 @@ Quản lý có **mọi chức năng của Nhân viên** (mục 4.1) trên toàn 
 
 | Vai trò | Phạm vi | Nhãn |
 |---|---|---|
-| Chủ homestay | Chỉ dữ liệu có `Homestays.OwnerId = OwnerId của phiên`; đơn chỉ từ trạng thái `Deposited` trở đi | [KẾ THỪA] |
 | Nhân viên | **Tra phòng trống, lịch phòng, khách hàng: toàn hệ thống** (khách gọi hỏi homestay ở bất kỳ đâu). **Xử lý đơn:** đơn thuộc homestay trong khu vực được giao, **cộng** đơn mình tạo hoặc mình phụ trách ở bất kỳ khu vực nào. Đơn ngoài phạm vi: chỉ xem | [ĐÃ CHỐT] Q02 |
 | Quản lý | Theo khu vực được giao; cờ `HasAllAreas = 1` → toàn hệ thống. Quản lý đầu tiên mặc định toàn hệ thống | [ĐÃ CHỐT] Q02 |
 | Kế toán | Toàn bộ dữ liệu tài chính; đơn chỉ đọc | [KẾ THỪA] |
@@ -519,97 +514,96 @@ Nhân viên/Quản lý chưa được gán khu vực nào và không có `HasAll
 
 ### 5.2. Ma trận hành động
 
-Ký hiệu: ✔ được phép trên toàn bộ dữ liệu · **PV** trong phạm vi được giao (mục 5.1) · **SH** chỉ dữ liệu thuộc sở hữu · **R** chỉ xem · **TC** chỉ khi thay chủ, bắt buộc ghi chú · — không được phép.
+Ký hiệu: ✔ được phép trên toàn bộ dữ liệu · **PV** trong phạm vi được giao (mục 5.1) · **Nháp** chỉ khi homestay đang `Draft` (hồ sơ chủ: khi còn `Pending`) · **R** chỉ xem · **TC** chỉ khi thay chủ, bắt buộc ghi chú · — không được phép. Không có cột Chủ homestay (D9).
 
 **A. Tài khoản, danh mục, cấu hình**
 
-| Hành động | NV | Chủ | QL | KT |
-|---|---|---|---|---|
-| Đăng nhập, đổi mật khẩu của mình | ✔ | ✔ | ✔ | ✔ |
-| Tạo nhân viên, đổi chức vụ, nghỉ việc | — | — | ✔ | — |
-| Khóa/mở khóa, đặt lại mật khẩu tài khoản khác | — | — | ✔ (không tự khóa mình; luôn còn ≥ 1 Quản lý hoạt động) | — |
-| Gán khu vực cho nhân viên | — | — | ✔ | — |
-| Xem phiên đăng nhập, buộc đăng xuất | — | — | ✔ | — |
-| Danh mục: khu vực, tiện nghi, danh mục phòng, ngày lễ | R | R | ✔ | R |
-| Chính sách hủy chung | R | R | ✔ | R |
-| Cấu hình tham số nghiệp vụ | — | — | ✔ | R |
-| Xem nhật ký hệ thống (AuditLogs) | Của mình | — | ✔ | Bảng tài chính |
+| Hành động | NV | QL | KT |
+|---|---|---|---|
+| Đăng nhập, đổi mật khẩu của mình | ✔ | ✔ | ✔ |
+| Tạo nhân viên, đổi chức vụ, nghỉ việc | — | ✔ | — |
+| Khóa/mở khóa, đặt lại mật khẩu tài khoản khác | — | ✔ (không tự khóa mình; luôn còn ≥ 1 Quản lý hoạt động) | — |
+| Gán khu vực cho nhân viên | — | ✔ | — |
+| Xem phiên đăng nhập, buộc đăng xuất | — | ✔ | — |
+| Danh mục: khu vực, tiện nghi, danh mục phòng, ngày lễ | R | ✔ | R |
+| Chính sách hủy chung | R | ✔ | R |
+| Cấu hình tham số nghiệp vụ | — | ✔ | R |
+| Xem nhật ký hệ thống (AuditLogs) | Của mình | ✔ | Bảng tài chính |
 
 **B. Chủ, homestay, hợp đồng**
 
-| Hành động | NV | Chủ | QL | KT |
-|---|---|---|---|---|
-| Tạo/sửa hồ sơ chủ | ✔ (khi chủ chưa có tài khoản) | Thông tin cá nhân của mình | ✔ | R |
-| Cấp tài khoản chủ, duyệt chủ | — | — | ✔ | — |
-| Đổi tài khoản ngân hàng của chủ | — | Gửi yêu cầu | ✔ (sau khi xác minh) | R |
-| Tạo homestay nháp | ✔ (cho chủ chưa có tài khoản) | SH | ✔ | — |
-| Sửa thông tin, tiện nghi, ảnh, giấy tờ | — | SH | ✔ | — |
-| Gửi homestay đi duyệt | — | SH | ✔ | — |
-| Duyệt / trả về / tạm ngưng / mở lại / kết thúc homestay | — | — | ✔ (không duyệt homestay do chính mình tạo nháp) | — |
-| Tạo, gia hạn, chấm dứt hợp đồng | — | R (SH) | ✔ | R |
-| Xem giấy tờ pháp lý | — | SH | ✔ | — |
+| Hành động | NV | QL | KT |
+|---|---|---|---|
+| Tạo/sửa hồ sơ chủ | Nháp | ✔ | R |
+| Duyệt chủ | — | ✔ | — |
+| Đổi tài khoản ngân hàng của chủ | — | ✔ (sau khi xác minh) | R |
+| Tạo homestay nháp | ✔ | ✔ | — |
+| Sửa thông tin, tiện nghi, ảnh, giấy tờ | Nháp | ✔ | — |
+| Gửi homestay đi duyệt | Nháp | ✔ | — |
+| Duyệt / trả về / tạm ngưng / mở lại / kết thúc homestay | — | ✔ (không duyệt homestay do chính mình tạo nháp) | — |
+| Tạo, gia hạn, chấm dứt hợp đồng | — | ✔ | R |
+| Xem giấy tờ pháp lý | Nháp | ✔ | — |
 
 **C. Phòng, giá, lịch**
 
-| Hành động | NV | Chủ | QL | KT |
-|---|---|---|---|---|
-| Thêm/sửa/bật/tắt loại phòng, phòng | — | SH | ✔ | — |
-| Thêm phiên bản giá | — | SH | ✔ | — |
-| Chính sách hủy riêng | — | SH | ✔ | — |
-| Xem lịch phòng | ✔ | SH | ✔ | — |
-| Khóa / mở khóa phòng | — | SH | ✔ | — |
-| Tra phòng trống, báo giá | ✔ | SH | ✔ | — |
+| Hành động | NV | QL | KT |
+|---|---|---|---|
+| Thêm/sửa/bật/tắt loại phòng, phòng | Nháp | ✔ | — |
+| Thêm phiên bản giá | Nháp | ✔ | — |
+| Chính sách hủy riêng | Nháp | ✔ | — |
+| Xem lịch phòng | ✔ | ✔ | — |
+| Khóa / mở khóa phòng | — | ✔ | — |
+| Tra phòng trống, báo giá | ✔ | ✔ | — |
 
 **D. Khách hàng, đơn**
 
-| Hành động | NV | Chủ | QL | KT |
-|---|---|---|---|---|
-| Tìm, tạo khách; sửa tên/email/ghi chú | ✔ | — | ✔ | R |
-| Xem CCCD đầy đủ | — (che, 4 số cuối) | — | ✔ | — |
-| Sửa SĐT khách đã có đơn | — | — | ✔ | — |
-| Tạo đơn, áp voucher của khách | ✔ | — | ✔ | — |
-| Xem danh sách, chi tiết đơn | ✔ (sửa: PV) | SH, từ Deposited | ✔ | R |
-| Nhận phụ trách đơn chưa giao | PV | — | ✔ | — |
-| Giao/giao lại đơn cho người khác | Đơn mình phụ trách | — | ✔ | — |
-| Ghi nhận thu cọc / cọc bổ sung (khách báo đã chuyển) | PV | — | ✔ | ✔ |
-| Xác nhận / từ chối đơn | TC, PV | SH | TC | — |
-| Đổi phòng cùng loại khi xác nhận | TC, PV | SH | ✔ | — |
-| Nhận phòng / trả phòng / không đến | TC, PV | SH | TC | — |
-| Hủy đơn chưa có tiền (Chờ thanh toán) | PV | — | ✔ | — |
-| Gửi yêu cầu hủy đơn đã cọc | PV | — | ✔ | — |
-| Gửi yêu cầu đổi ngày / loại phòng | PV | — | ✔ | — |
-| Duyệt / từ chối yêu cầu đổi/hủy | — | — | ✔ (không duyệt yêu cầu của chính mình) | — |
-| Báo sự cố trùng phòng | PV | SH | ✔ | — |
-| Trùng phòng: chuyển phòng cùng loại, tạo đơn thay thế | PV | — | ✔ | — |
-| Trùng phòng: hủy + hoàn + voucher | — | — | ✔ | — |
-| Cấp / thu hồi voucher | — | — | ✔ | R |
+| Hành động | NV | QL | KT |
+|---|---|---|---|
+| Tìm, tạo khách; sửa tên/email/ghi chú | ✔ | ✔ | R |
+| Xem CCCD đầy đủ | — (che, 4 số cuối) | ✔ | — |
+| Sửa SĐT khách đã có đơn | — | ✔ | — |
+| Tạo đơn, áp voucher của khách | ✔ | ✔ | — |
+| Xem danh sách, chi tiết đơn | ✔ (sửa: PV) | ✔ | R |
+| Nhận phụ trách đơn chưa giao | PV | ✔ | — |
+| Giao/giao lại đơn cho người khác | Đơn mình phụ trách | ✔ | — |
+| Ghi nhận thu cọc / cọc bổ sung (khách báo đã chuyển) | PV | ✔ | ✔ |
+| Xác nhận / từ chối đơn | TC, PV | TC | — |
+| Đổi phòng cùng loại khi xác nhận | TC, PV | ✔ | — |
+| Nhận phòng / trả phòng / không đến | TC, PV | TC | — |
+| Hủy đơn chưa có tiền (Chờ thanh toán) | PV | ✔ | — |
+| Gửi yêu cầu hủy đơn đã cọc | PV | ✔ | — |
+| Gửi yêu cầu đổi ngày / loại phòng | PV | ✔ | — |
+| Duyệt / từ chối yêu cầu đổi/hủy | — | ✔ (không duyệt yêu cầu của chính mình) | — |
+| Báo sự cố trùng phòng | PV | ✔ | — |
+| Trùng phòng: chuyển phòng cùng loại, tạo đơn thay thế | PV | ✔ | — |
+| Trùng phòng: hủy + hoàn + voucher | — | ✔ | — |
+| Cấp / thu hồi voucher | — | ✔ | R |
 
 **E. Tiền**
 
-| Hành động | NV | Chủ | QL | KT |
-|---|---|---|---|---|
-| Xác minh / từ chối phiếu thu | — | — | — | ✔ (không xác minh phiếu do chính mình ghi nhận) |
-| Nhập sao kê, tự khớp, khớp tay, bỏ qua giao dịch | — | — | R | ✔ |
-| Ghi nhận đã hoàn tiền giao dịch không khớp | — | — | — | ✔ |
-| Ghi nhận đã chi hoàn tiền cho đơn | — | — | — | ✔ |
-| Ghi nhận đã chi / từ chối khoản bù | — | — | — | ✔ |
-| Xác nhận cọc bổ sung của yêu cầu đổi | — | — | — | ✔ (khác người gửi và người duyệt) |
-| Lập bảng đối soát nháp | — | — | ✔ | ✔ |
-| Gửi / mở lại / ghi nhận đã trả đối soát | — | — | R | ✔ |
-| Xem đối soát | — | SH, trừ Nháp | ✔ | ✔ |
-| Chủ xác nhận / phản hồi đối soát | — | SH | — | — |
-| Sổ thu chi, công nợ, in phiếu | — | — | R | ✔ |
+| Hành động | NV | QL | KT |
+|---|---|---|---|
+| Xác minh / từ chối phiếu thu | — | — | ✔ (không xác minh phiếu do chính mình ghi nhận) |
+| Nhập sao kê, tự khớp, khớp tay, bỏ qua giao dịch | — | R | ✔ |
+| Ghi nhận đã hoàn tiền giao dịch không khớp | — | — | ✔ |
+| Ghi nhận đã chi hoàn tiền cho đơn | — | — | ✔ |
+| Ghi nhận đã chi / từ chối khoản bù | — | — | ✔ |
+| Xác nhận cọc bổ sung của yêu cầu đổi | — | — | ✔ (khác người gửi và người duyệt) |
+| Lập bảng đối soát nháp | — | ✔ | ✔ |
+| Gửi / mở lại / ghi nhận đã trả đối soát, ghi phản hồi của chủ | — | R | ✔ |
+| Xem đối soát | — | ✔ | ✔ |
+| Sổ thu chi, công nợ, in phiếu | — | R | ✔ |
 
 **F. Báo cáo, công việc**
 
-| Hành động | NV | Chủ | QL | KT |
-|---|---|---|---|---|
-| Hiệu suất của chính mình | ✔ | — | ✔ | — |
-| Báo cáo vận hành, hiệu suất mọi nhân viên, công suất phòng | — | — | ✔ | — |
-| Báo cáo tài chính công ty | — | — | ✔ | ✔ |
-| Doanh thu homestay của mình | — | SH | ✔ | ✔ |
-| Giao việc (WorkTasks) | — | — | ✔ | — |
-| Xem / cập nhật việc được giao cho mình | ✔ | — | ✔ | ✔ |
+| Hành động | NV | QL | KT |
+|---|---|---|---|
+| Hiệu suất của chính mình | ✔ | ✔ | — |
+| Báo cáo vận hành, hiệu suất mọi nhân viên, công suất phòng | — | ✔ | — |
+| Báo cáo tài chính công ty | — | ✔ | ✔ |
+| Doanh thu theo homestay | — | ✔ | ✔ |
+| Giao việc (WorkTasks) | — | ✔ | — |
+| Xem / cập nhật việc được giao cho mình | ✔ | ✔ | ✔ |
 
 ### 5.3. Tách nhiệm vụ (bắt buộc ở BLL, một phần ở CHECK)
 
@@ -648,7 +642,6 @@ Ký hiệu: ✔ được phép trên toàn bộ dữ liệu · **PV** trong ph�
 ```mermaid
 erDiagram
     Users ||--o| Employees : "đăng nhập của"
-    Users ||--o| Owners : "đăng nhập của"
     Users ||--o{ UserSessions : ""
     Users ||--o{ Notifications : ""
     Employees ||--o{ EmployeeAreas : ""
@@ -708,10 +701,9 @@ Tóm tắt quan hệ chính:
 | Cột | Kiểu | Ràng buộc | Ghi chú |
 |---|---|---|---|
 | Id | int | PK | |
-| Username | varchar(50) | NOT NULL, UNIQUE | Mã nhân viên hoặc SĐT E.164 của chủ |
+| Username | varchar(50) | NOT NULL, UNIQUE | Mã nhân viên |
 | PasswordHash | varchar(255) | NOT NULL | Chuỗi PBKDF2 (mục 3.10) |
-| UserType | varchar(10) | NOT NULL, CHECK IN (`Employee`, `Owner`) | |
-| Status | varchar(20) | NOT NULL, CHECK IN (`Active`, `Locked`, `Disabled`) | `Disabled` = nhân viên nghỉ việc/tạm nghỉ, chủ ngừng hợp tác |
+| Status | varchar(20) | NOT NULL, CHECK IN (`Active`, `Locked`, `Disabled`) | `Disabled` = nhân viên nghỉ việc/tạm nghỉ |
 | MustChangePassword | bit | NOT NULL DEFAULT 1 | |
 | FailedLoginCount | int | NOT NULL DEFAULT 0, CHECK ≥ 0 | |
 | LockoutEndUtc | datetime2(3) | NULL | Khóa tạm do sai mật khẩu |
@@ -743,12 +735,11 @@ Tóm tắt quan hệ chính:
 | AssignedByEmployeeId | int | FK → Employees, NOT NULL |
 | AssignedAt | datetime2(3) | NOT NULL |
 
-**`Owners`** — chủ homestay
+**`Owners`** — hồ sơ chủ homestay (đối tác, **không** có tài khoản đăng nhập — D9)
 
 | Cột | Kiểu | Ràng buộc | Ghi chú |
 |---|---|---|---|
 | Id | int | PK | |
-| UserId | int | FK → Users, NULL, UNIQUE (lọc khác NULL) | NULL = chưa cấp tài khoản |
 | FullName | nvarchar(100) | NOT NULL | |
 | Phone | varchar(16) | NOT NULL, UNIQUE | |
 | Email | nvarchar(256) | NULL | |
@@ -975,7 +966,7 @@ Ràng buộc chéo không làm được bằng FK, kiểm ở BLL: `RoomTypes.Ho
 | DayType | varchar(10) | CHECK IN (`Weekday`, `Weekend`, `Holiday`) |
 | Price | decimal(18,0) | CHECK > 0 |
 
-**`BookingStatusHistories`**: Id bigint PK; BookingId FK NOT NULL; FromStatus varchar(20) NULL (NULL khi tạo); ToStatus varchar(20) NOT NULL; ActorType varchar(10) CHECK IN (`Employee`, `Owner`, `System`); ActorUserId int FK → Users NULL (NULL khi System); OnBehalfOfOwner bit NOT NULL DEFAULT 0; Note nvarchar(500) NULL; ChangedAt datetime2(3). CHECK `OnBehalfOfOwner = 0 OR Note <> ''`.
+**`BookingStatusHistories`**: Id bigint PK; BookingId FK NOT NULL; FromStatus varchar(20) NULL (NULL khi tạo); ToStatus varchar(20) NOT NULL; ActorType varchar(10) CHECK IN (`Employee`, `System`); ActorUserId int FK → Users NULL (NULL khi System); OnBehalfOfOwner bit NOT NULL DEFAULT 0; Note nvarchar(500) NULL; ChangedAt datetime2(3). CHECK `OnBehalfOfOwner = 0 OR Note <> ''`.
 
 **`BookingChangeRequests`** — yêu cầu đổi/hủy
 
@@ -1094,12 +1085,11 @@ Chỉ mục duy nhất có lọc (chống ghi trùng khi nhiều người thao t
 | PeriodNo | tinyint | CHECK IN (1, 2) — kỳ 1: ngày 1–15; kỳ 2: 16–cuối tháng |
 | | | UNIQUE (HomestayId, Year, Month, PeriodNo) |
 | TotalRoomAmount, TotalRetained, TotalCommission, TotalDiscount, PayoutAmount | decimal(18,0) | NOT NULL, ≥ 0; CHECK `TotalCommission <= TotalRetained`, `PayoutAmount = TotalRetained - TotalCommission` |
-| Status | varchar(20) | CHECK IN (`Draft`, `Sent`, `Confirmed`, `Paid`) |
+| Status | varchar(20) | CHECK IN (`Draft`, `Sent`, `Paid`) — không có `Confirmed` (D9) |
 | SentAt, SentByUserId | | Bắt buộc khi khác `Draft` |
-| ConfirmedAt | datetime2(3) | NULL — chủ xác nhận (không bắt buộc) |
 | PaidAt, PaidByUserId | | Bắt buộc khi `Paid` |
 | PaidBankRef | varchar(100) | Bắt buộc khi `Paid` và `PayoutAmount > 0` |
-| OwnerFeedback | nvarchar(500) | NULL — phản hồi gần nhất của chủ; lịch sử đủ ở AuditLogs |
+| OwnerFeedback | nvarchar(500) | NULL — phản hồi gần nhất của chủ (chủ báo qua điện thoại, Kế toán ghi); lịch sử đủ ở AuditLogs |
 | RowVer | rowversion | |
 
 **`SettlementItems`** — từng đơn trong kỳ
@@ -1181,7 +1171,7 @@ Mặc định đề xuất: tiền dịch vụ khách trả tại cơ sở như 
 | Bookings | UNIQUE (Code); (CustomerId); (HomestayId, CheckIn); (Status, HoldExpiresAt); (Status, ConfirmDeadlineAt); (AssignedEmployeeId, Status); (CreatedByEmployeeId, CreatedAt); (CheckOut, Status) | Tra cứu, hàng đợi, job, đối soát, báo cáo |
 | Customers | UNIQUE (Phone); (FullName) | Tìm khách |
 | RoomTypePrices | UNIQUE (RoomTypeId, DayType, EffectiveFrom) | Giá hiệu lực |
-| Homestays | (AreaId, Status); (OwnerId) | Tìm kiếm, phạm vi chủ |
+| Homestays | (AreaId, Status); (OwnerId) | Tìm kiếm, lọc theo chủ |
 | Payments | UNIQUE (VoucherNo); (BookingId); (Status, Type, RecordedAt); các unique có lọc ở 6.3.F | Hàng chờ kế toán |
 | BankTransactions | UNIQUE (AccountNumber, BankReference); (MatchStatus, TransactionTime); (MatchedBookingId) | |
 | Settlements | UNIQUE (HomestayId, Year, Month, PeriodNo); (Status) | |
@@ -1196,7 +1186,7 @@ Mặc định đề xuất: tiền dịch vụ khách trả tại cơ sở như 
 | `vw_BookingPaymentState` | Mỗi đơn một dòng: trạng thái thanh toán (mục 7.3) tính từ `Payments` + `Bookings` |
 | `vw_RoomDayState` | Không lưu sẵn; BLL dựng lưới tình trạng phòng từ một truy vấn `RoomNights` + `Bookings.Status` + `Rooms.IsActive` cho khoảng ngày (mục 7.4) |
 | `vw_CashBook` | Sổ thu chi: hợp của phiếu thu/chi `Verified` (`Payments`), tiền chuyển chủ (`Settlements` `Paid`), hoàn giao dịch không khớp (`BankTransactions` `Refunded`); cột ngày, số phiếu/mã tham chiếu, loại, thu, chi, đối tượng, người ghi |
-| `vw_Payables` | Công nợ: đối soát `Sent/Confirmed` chưa trả; phiếu chi hoàn/khoản bù `Pending`; giao dịch chuyển dư có ghi chú chưa hoàn |
+| `vw_Payables` | Công nợ: đối soát `Sent` chưa trả; phiếu chi hoàn/khoản bù `Pending`; giao dịch chuyển dư có ghi chú chưa hoàn |
 
 ---
 
@@ -1216,7 +1206,7 @@ Mặc định đề xuất: tiền dịch vụ khách trả tại cơ sở như 
 |---|---|---|---|
 | `AwaitingPayment` | Chờ thanh toán | Có, đến `HoldExpiresAt` | Vừa tạo, chờ khách chuyển cọc |
 | `PaymentSubmitted` | Chờ xác minh cọc | Có, không hết hạn | Đã ghi nhận khách chuyển, chờ kế toán |
-| `Deposited` | Đã cọc – chờ chủ xác nhận | Có | Chủ có 30 phút để xác nhận |
+| `Deposited` | Đã cọc – chờ chủ xác nhận | Có | Chủ có 30 phút để quyết định (nhân viên ghi nhận thay) |
 | `Confirmed` | Đã xác nhận | Có | Được cung cấp địa chỉ, SĐT cơ sở, hướng dẫn nhận phòng cho khách |
 | `CheckedIn` | Đang ở | Có | |
 | `Completed` | Hoàn thành | Giữ dòng để thống kê | Vào kỳ đối soát |
@@ -1237,14 +1227,14 @@ Mặc định đề xuất: tiền dịch vụ khách trả tại cơ sở như 
 | `PaymentSubmitted` | `Deposited` | KT xác minh | Người xác minh ≠ người ghi nhận | [ĐÃ CHỐT] |
 | `PaymentSubmitted` | `AwaitingPayment` | KT từ chối lần 1 | `HoldExpiresAt = now + 15 phút` | [KẾ THỪA] |
 | `PaymentSubmitted` | `Expired` | KT từ chối lần thứ `MaxReceiptRejections` (2) | | [KẾ THỪA] |
-| `Deposited` | `Confirmed` | Chủ (SH); NV/QL thay chủ (ghi chú) | Có thể đổi sang phòng khác cùng loại còn trống | [KẾ THỪA] |
-| `Deposited` | `Rejected` | Chủ (SH); NV/QL thay chủ | Lý do bắt buộc | [KẾ THỪA] |
+| `Deposited` | `Confirmed` | NV (PV)/QL thay chủ (ghi chú) | Có thể đổi sang phòng khác cùng loại còn trống | [KẾ THỪA] |
+| `Deposited` | `Rejected` | NV (PV)/QL thay chủ | Lý do bắt buộc | [KẾ THỪA] |
 | `Deposited` | `Cancelled` | Quản lý duyệt yêu cầu hủy | | [KẾ THỪA] |
-| `Confirmed` | `CheckedIn` | Chủ; NV/QL thay chủ | Hôm nay ≥ `CheckIn` | [KẾ THỪA] |
-| `Confirmed` | `NoShow` | Chủ; NV/QL thay chủ | Hôm nay > `CheckIn` (khách được đến muộn trong ngày nhận phòng) | [KẾ THỪA] |
+| `Confirmed` | `CheckedIn` | NV (PV)/QL thay chủ | Hôm nay ≥ `CheckIn` | [KẾ THỪA] |
+| `Confirmed` | `NoShow` | NV (PV)/QL thay chủ | Hôm nay > `CheckIn` (khách được đến muộn trong ngày nhận phòng) | [KẾ THỪA] |
 | `Confirmed` | `Cancelled` | Quản lý duyệt yêu cầu hủy; xử lý trùng phòng | | [KẾ THỪA] |
 | `Confirmed` | `Deposited` | **Chỉ nội bộ** khi áp dụng yêu cầu đổi ngày/loại phòng | `ConfirmedAt = NULL`, chủ xác nhận lại trong 30 phút | [KẾ THỪA] |
-| `CheckedIn` | `Completed` | Chủ; NV/QL thay chủ | | [KẾ THỪA] |
+| `CheckedIn` | `Completed` | NV (PV)/QL thay chủ | | [KẾ THỪA] |
 | `Expired`, `Rejected`, `Cancelled`, `NoShow`, `Completed` | — | — | Trạng thái cuối | [KẾ THỪA] |
 
 - **[ĐÃ CHỐT]** Không cho hủy khi đơn có phiếu thu `Pending`: kế toán phải xác minh hoặc từ chối trước, tránh tiền đã chuyển nhưng đơn đã hủy mà không ai hoàn.
@@ -1308,13 +1298,13 @@ Trên mọi danh sách đơn hiển thị **hai cột** "Trạng thái đơn" v�
 
 **Yêu cầu đổi/hủy:** `Pending` → `Applied` (QL duyệt, không phải thu thêm) | `AwaitingPayment` (QL duyệt, phải thu thêm; giữ phòng mới) | `Rejected` (QL, lý do). `AwaitingPayment` → `Applied` (KT xác minh tiền) | `Expired` (quá hạn khách nộp) | `Rejected` (KT từ chối, lý do).
 
-**Đối soát:** `Draft` → `Sent` (KT) → `Confirmed` (chủ, tùy chọn) → `Paid` (KT); `Sent` → `Paid` được phép khi chủ không xác nhận; `Sent`/`Confirmed` → `Draft` (KT mở lại, lý do bắt buộc); `Paid` là cuối.
+**Đối soát:** `Draft` → `Sent` (KT; in/xuất CSV gửi chủ ngoài hệ thống) → `Paid` (KT); `Sent` → `Draft` (KT mở lại, lý do bắt buộc, ví dụ chủ báo sai số liệu); `Paid` là cuối. Không có bước chủ xác nhận (D9).
 
 **Homestay:**
 
 | Từ | Đến được | Ai |
 |---|---|---|
-| `Draft` | `PendingReview` (gửi duyệt), `Ended` | Chủ/QL gửi; QL kết thúc |
+| `Draft` | `PendingReview` (gửi duyệt), `Ended` | NV/QL gửi; QL kết thúc |
 | `PendingReview` | `Active` (duyệt), `Draft` (trả về, lý do), `Ended` | QL |
 | `Active` | `PendingReview` (tự động khi sửa địa chỉ/khu vực/giấy phép/PCCC), `Suspended` (lý do), `Ended` | Hệ thống / QL |
 | `Suspended` | `Active` (mở lại, lý do), `Ended` | QL |
@@ -1326,7 +1316,7 @@ Chỉ `Active` mới bán mới. `Suspended`/`Ended`/`PendingReview` chặn đơ
 
 **Voucher:** `Active` ↔ `UsedUp` (số dư về 0 / được cộng trả); `Active`/`UsedUp` → `Expired` (hệ thống); `Active`/`UsedUp` → `Revoked` (QL, lý do).
 
-**Tài khoản:** `Active` ↔ `Locked` (QL, lý do); `Active` → `Disabled` khi nhân viên `Suspended`/`Resigned` hoặc chủ ngừng; `Disabled` → `Active` khi nhân viên trở lại `Active`.
+**Tài khoản:** `Active` ↔ `Locked` (QL, lý do); `Active` → `Disabled` khi nhân viên `Suspended`/`Resigned`; `Disabled` → `Active` khi nhân viên trở lại `Active`.
 
 **Việc giao:** `Open` → `Done` (người được giao, kết quả) | `Cancelled` (người giao).
 
@@ -1389,7 +1379,7 @@ Tính tiền (chốt lúc gửi):
 - `NewTotalAmount` = giá mới theo 7.6.1.
 - `AdditionalDeposit = MAX(0, RoundToThousand(DepositRate × NewTotalAmount) − DepositCarriedOver)`.
 - `NewTotalAmount < DepositCarriedOver` → **chặn** (không hoàn tiền mặt khi xuống hạng).
-- Khi áp dụng: `DepositAmount mới = DepositCarriedOver + AdditionalDeposit`; `ChangeFeeAmount += ChangeFee`; thay `BookingNights`, `RoomNights`, `RoomId`, `RoomTypeId`, ngày, `TotalAmount`; đơn `Confirmed` về `Deposited`, `ConfirmedAt = NULL`, `ConfirmDeadlineAt = now + 30 phút`; báo chủ xác nhận lại.
+- Khi áp dụng: `DepositAmount mới = DepositCarriedOver + AdditionalDeposit`; `ChangeFeeAmount += ChangeFee`; thay `BookingNights`, `RoomNights`, `RoomId`, `RoomTypeId`, ngày, `TotalAmount`; đơn `Confirmed` về `Deposited`, `ConfirmedAt = NULL`, `ConfirmDeadlineAt = now + 30 phút`; báo nhân viên phụ trách gọi chủ xác nhận lại.
 - Trước khi duyệt và trước khi áp dụng, hệ thống tính lại giá; khác `NewTotalAmount` → từ chối với lý do "Giá đã thay đổi, vui lòng gửi lại".
 - Phí đổi ngày chia với chủ: Fuji hưởng `MIN(Round(ChangeFeeAmount × CommissionRate), ChangeFeeAmount)`, chủ nhận phần còn lại (qua đối soát).
 - Chủ từ chối lịch mới sau đổi → đơn `Rejected`, hoàn 100% `AmountDue` hiện tại theo luồng từ chối; **phí đổi không tự hoàn**; Quản lý có thể cấp voucher xin lỗi.
@@ -1524,20 +1514,20 @@ Ngân hàng nhận cọc: **MB Bank** [ĐÃ CHỐT]. Định dạng cột của 
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 
-| Nhân viên | Chủ homestay | Quản lý | Kế toán |
-|---|---|---|---|
-| Tổng quan | Tổng quan | Tổng quan vận hành | Tổng quan tài chính |
-| Tra phòng trống | Đơn chờ xác nhận | Giám sát đơn | Xác minh thu cọc |
-| Lịch phòng | Đón/trả khách | *Nhóm Nhân viên* (mọi mục bên trái) | Sao kê ngân hàng |
-| Tạo đơn | Lịch & khóa phòng | Phân công | Chi hoàn tiền |
-| Đơn đặt phòng | Đơn của tôi | Duyệt đổi/hủy | Chi khoản bù |
-| Nhận/trả phòng hôm nay | Homestay của tôi | Voucher | Cọc bổ sung |
-| Khách hàng | Loại phòng & phòng | Chủ homestay | Đối soát |
-| Việc được giao | Bảng giá | Duyệt homestay | Sổ thu chi |
-| Lịch sử thao tác | Đối soát | Hợp đồng | Công nợ |
-| Hiệu suất của tôi | Doanh thu | Nhân viên & tài khoản | Báo cáo tài chính |
-| | Thông tin của tôi | Danh mục, cấu hình | Tra cứu đơn |
-| | | Báo cáo, nhật ký hệ thống | |
+| Nhân viên | Quản lý | Kế toán |
+|---|---|---|
+| Tổng quan | Tổng quan vận hành | Tổng quan tài chính |
+| Tra phòng trống | Giám sát đơn | Xác minh thu cọc |
+| Lịch phòng | *Nhóm Nhân viên* (mọi mục bên trái) | Sao kê ngân hàng |
+| Tạo đơn | Phân công | Chi hoàn tiền |
+| Đơn đặt phòng | Duyệt đổi/hủy | Chi khoản bù |
+| Nhận/trả phòng hôm nay | Voucher | Cọc bổ sung |
+| Khách hàng | Chủ homestay | Đối soát |
+| Chủ homestay (nhập hồ sơ) | Homestay, duyệt, khóa phòng | Sổ thu chi |
+| Homestay (nhập nháp) | Hợp đồng | Công nợ |
+| Việc được giao | Nhân viên & tài khoản | Báo cáo tài chính |
+| Lịch sử thao tác | Danh mục, cấu hình | Tra cứu đơn |
+| Hiệu suất của tôi | Báo cáo, nhật ký hệ thống | |
 
 ### 8.3. Danh sách màn hình
 
@@ -1571,21 +1561,15 @@ Ngân hàng nhận cọc: **MB Bank** [ĐÃ CHỐT]. Định dạng cột của 
 | S13 | Lịch sử thao tác của tôi | Thời điểm, hành động, đối tượng, ghi chú | Lọc ngày/loại, mở đối tượng |
 | S14 | Hiệu suất của tôi | Số đơn tạo, tỷ lệ chốt, doanh số, đơn đang phụ trách theo tháng | Chọn khoảng ngày |
 
-**Chủ homestay**
+**Hồ sơ homestay** (Quản lý; Nhân viên khi homestay còn `Draft`) — thay nhóm màn Chủ homestay (D9)
 
 | Mã | Màn hình | Dữ liệu | Thao tác |
 |---|---|---|---|
-| O01 | Tổng quan | Đơn chờ xác nhận (đếm ngược), khách đến/đi hôm nay và mai, đối soát mới, thông báo | Mở đơn, xác nhận nhanh |
-| O02 | Homestay của tôi | Tên, khu vực, trạng thái, hợp đồng (số, hoa hồng, hạn), số loại phòng/phòng | Thêm homestay, mở hồ sơ, gửi duyệt |
-| O03 | Hồ sơ homestay | Tab: Thông tin; Tiện nghi; Hình ảnh (lưới ảnh, ảnh bìa, gắn loại phòng); Giấy tờ (loại, hạn, xem); Chính sách hủy riêng; Lịch sử duyệt | Sửa, tải ảnh/giấy tờ, sắp thứ tự, chọn bìa, gửi duyệt; cảnh báo trước khi sửa địa chỉ/giấy phép làm homestay về chờ duyệt |
-| O04 | Loại phòng & phòng | Cây loại phòng → phòng; sức chứa, danh mục, trạng thái bật/tắt; đơn sắp tới khi tắt | Thêm/sửa/bật/tắt |
-| O05 | Bảng giá | Theo loại phòng: giá hiện hành 3 mức, các phiên bản tương lai, lịch sử | Thêm phiên bản giá, sửa phiên bản tương lai |
-| O06 | Lịch & khóa phòng | Như S03 cho homestay của mình | Chọn ô/khoảng → khóa (lý do, ghi chú); bấm khóa → mở khóa |
-| O07 | Đơn của tôi | Tab: Chờ xác nhận, Sắp đến, Đang ở, Đã xong, Đã hủy/từ chối; cột: mã, người ở, SĐT, số khách, phòng, ngày, yêu cầu đặc biệt, hạn xác nhận | Xác nhận (chọn phòng khác cùng loại nếu cần), từ chối (lý do), nhận/trả phòng, không đến, báo trùng phòng |
-| O08 | Đón/trả khách | Lịch theo ngày (tối đa 31 ngày): nhận phòng, trả phòng | Lọc ngày, mở đơn |
-| O09 | Đối soát | Danh sách kỳ (trừ Nháp): kỳ, tổng tiền phòng, giữ lại, hoa hồng, chuyển chủ, trạng thái; chi tiết từng đơn | Xác nhận số liệu, gửi phản hồi (1–500 ký tự), in, xuất CSV |
-| O10 | Doanh thu | Theo tháng/homestay: đơn hoàn thành, tiền phòng, giữ lại, hoa hồng, đã nhận từ Fuji, công suất phòng | Chọn khoảng |
-| O11 | Thông tin của tôi | Họ tên, SĐT, email, địa chỉ, ngân hàng (che số tài khoản) | Sửa thông tin cá nhân, đổi mật khẩu |
+| D01 | Danh sách homestay | Tên, chủ, khu vực, trạng thái, hợp đồng (số, hoa hồng, hạn), số loại phòng/phòng | Thêm homestay, mở hồ sơ, gửi duyệt |
+| D02 | Hồ sơ homestay | Tab: Thông tin; Tiện nghi; Hình ảnh (lưới ảnh, ảnh bìa, gắn loại phòng); Giấy tờ (loại, hạn, xem); Chính sách hủy riêng; Lịch sử duyệt | Sửa, tải ảnh/giấy tờ, sắp thứ tự, chọn bìa, gửi duyệt; cảnh báo trước khi sửa địa chỉ/giấy phép làm homestay về chờ duyệt |
+| D03 | Loại phòng & phòng | Cây loại phòng → phòng; sức chứa, danh mục, trạng thái bật/tắt; đơn sắp tới khi tắt | Thêm/sửa/bật/tắt |
+| D04 | Bảng giá | Theo loại phòng: giá hiện hành 3 mức, các phiên bản tương lai, lịch sử | Thêm phiên bản giá, sửa phiên bản tương lai |
+| D05 | Khóa phòng | Như S03, homestay bất kỳ (chỉ Quản lý) | Chọn ô/khoảng → khóa (lý do, ghi chú); bấm khóa → mở khóa |
 
 **Quản lý** (ngoài các màn Nhân viên)
 
@@ -1599,8 +1583,8 @@ Ngân hàng nhận cọc: **MB Bank** [ĐÃ CHỐT]. Định dạng cột của 
 | M06 | Phạm vi khu vực | Ma trận nhân viên × khu vực, cờ toàn hệ thống | Gán/bỏ |
 | M07 | Duyệt đổi/hủy | Yêu cầu chờ; so sánh trước/sau; tiền dự kiến; người gửi | Duyệt, từ chối (lý do) |
 | M08 | Voucher | Mã, khách, giá trị, số dư, hạn, trạng thái, đơn nguồn | Cấp, thu hồi (lý do) |
-| M09 | Chủ homestay | Danh sách chủ, trạng thái, số homestay, ngân hàng | Tạo, sửa, cấp tài khoản, duyệt, tạm ngưng |
-| M10 | Duyệt homestay | Hàng chờ (ngày gửi); danh sách điều kiện đạt/thiếu; xem hồ sơ như O03 | Duyệt, trả về, tạm ngưng, mở lại, kết thúc (lý do) |
+| M09 | Chủ homestay | Danh sách chủ, trạng thái, số homestay, ngân hàng | Tạo, sửa (gồm ngân hàng, sau khi gọi xác minh), duyệt, tạm ngưng |
+| M10 | Duyệt homestay | Hàng chờ (ngày gửi); danh sách điều kiện đạt/thiếu; xem hồ sơ như D02 | Duyệt, trả về, tạm ngưng, mở lại, kết thúc (lý do) |
 | M11 | Hợp đồng | Số, homestay, chủ, ngày, hoa hồng, trạng thái, sắp hết hạn | Tạo, gia hạn, chấm dứt |
 | M12 | Danh mục | Tab: Khu vực, Tiện nghi, Danh mục phòng, Ngày lễ | Thêm, sửa, ẩn |
 | M13 | Chính sách hủy chung | Chính sách `All`/`Holiday` và mốc | Tạo phiên bản mới, bật/tắt |
@@ -1619,7 +1603,7 @@ Ngân hàng nhận cọc: **MB Bank** [ĐÃ CHỐT]. Định dạng cột của 
 | A05 | Chi khoản bù | Khoản bù chờ; trạng thái đơn thay thế; ngân hàng chủ mới | Ghi nhận đã chi; từ chối (lý do) |
 | A06 | Cọc bổ sung | Yêu cầu đổi chờ tiền; hạn khách nộp; phiếu thu liên quan | Xác minh tiền → áp dụng; từ chối |
 | A07 | Đối soát | Lọc năm/tháng/kỳ/homestay/trạng thái; tổng tiền | Lập/lập lại nháp; mở chi tiết |
-| A08 | Chi tiết đối soát | Bảng từng đơn (công thức mục 7.6.6), đơn chưa chốt (chặn gửi), khoản bù liên quan (chỉ hiển thị), ngân hàng chủ, phản hồi chủ, lịch sử | Gửi, mở lại (lý do), ghi nhận đã trả, xuất CSV/in |
+| A08 | Chi tiết đối soát | Bảng từng đơn (công thức mục 7.6.6), đơn chưa chốt (chặn gửi), khoản bù liên quan (chỉ hiển thị), ngân hàng chủ, phản hồi chủ, lịch sử | Gửi, mở lại (lý do), ghi phản hồi chủ, ghi nhận đã trả, xuất CSV/in |
 | A09 | Sổ thu chi | `vw_CashBook` theo khoảng ngày; tổng thu, tổng chi, chênh lệch | In phiếu thu/chi, xuất CSV |
 | A10 | Công nợ | Tab: Phải trả chủ; Phải trả khách; Khoản bù; Phải thu | Mở chứng từ gốc |
 | A11 | Báo cáo tài chính | Mục 4.4 K10 | Xuất CSV |
@@ -1698,7 +1682,7 @@ Ngân hàng nhận cọc: **MB Bank** [ĐÃ CHỐT]. Định dạng cột của 
 
 ### 8.5. Gộp màn hình thành form (cách B) [ĐÃ CHỐT 27/10/2026]
 
-Mã màn hình ở 8.3 là **chức năng màn hình**; khi viết code gộp thành **32 form** (chưa tính hộp thoại xác nhận, bản in). Một form dùng cho nhiều vai trò thì hiện tab/nút theo quyền, dữ liệu lọc theo phạm vi ở BLL.
+Mã màn hình ở 8.3 là **chức năng màn hình**; khi viết code gộp thành **31 form** (F17 bỏ theo D9, các form khác giữ số hiệu) (chưa tính hộp thoại xác nhận, bản in). Một form dùng cho nhiều vai trò thì hiện tab/nút theo quyền, dữ liệu lọc theo phạm vi ở BLL.
 
 | Form | Gồm màn hình | Vai trò dùng |
 |---|---|---|
@@ -1706,33 +1690,33 @@ Mã màn hình ở 8.3 là **chức năng màn hình**; khi viết code gộp th
 | F02 Đổi mật khẩu | C02 | Tất cả |
 | F03 Cửa sổ chính | C03, C04 (khung thông báo bên phải) | Tất cả |
 | F04 Cấu hình kết nối | C06 | Cài đặt |
-| F05 Tổng quan | S01, O01, M01, A01 (thẻ chỉ số theo vai trò) | Tất cả |
-| F06 Tra phòng & lịch phòng | S02, S03, O06 (tab Tra phòng, tab Lịch; chủ/QL có thêm khóa phòng) | NV, Chủ, QL |
+| F05 Tổng quan | S01, M01, A01 (thẻ chỉ số theo vai trò) | Tất cả |
+| F06 Tra phòng & lịch phòng | S02, S03, D05 (tab Tra phòng, tab Lịch; QL có thêm khóa phòng) | NV, QL |
 | F07 Tạo đơn | S04 | NV, QL |
-| F08 Danh sách đơn | S05, S11, O07, O08, M02, M03, A12 (tab hàng đợi theo vai trò; QL chọn nhiều dòng để giao) | Tất cả |
-| F09 Chi tiết đơn | S06 (chủ và kế toán thấy phần được phép, nút theo quyền) | Tất cả |
+| F08 Danh sách đơn | S05, S11, M02, M03, A12 (tab hàng đợi theo vai trò; QL chọn nhiều dòng để giao) | Tất cả |
+| F09 Chi tiết đơn | S06 (kế toán chỉ đọc; nút theo quyền) | Tất cả |
 | F10 Ghi nhận thu tiền (hộp thoại) | S07 | NV, QL, KT |
 | F11 Yêu cầu đổi/hủy (hộp thoại) | S08 | NV, QL |
 | F12 Xử lý trùng phòng | S09 | NV, QL |
 | F13 Khách hàng | S10 | NV, QL, KT (đọc) |
 | F14 Của tôi | S12, S13, S14 (tab Việc được giao, Lịch sử thao tác, Hiệu suất) | NV, QL, KT |
-| F15 Danh sách homestay | O02, M10 (tab Chờ duyệt cho QL) | Chủ, QL |
-| F16 Hồ sơ homestay | O03, O04, O05 + hợp đồng (xem) + nút duyệt M10 (tab Thông tin, Tiện nghi, Ảnh, Giấy tờ, Loại phòng & phòng, Bảng giá, Chính sách hủy, Hợp đồng, Lịch sử) | Chủ, QL |
-| F17 Thông tin của tôi | O11 | Chủ |
+| F15 Danh sách homestay | D01, M10 (tab Chờ duyệt cho QL) | NV (nháp), QL |
+| F16 Hồ sơ homestay | D02, D03, D04 + hợp đồng (xem) + nút duyệt M10 (tab Thông tin, Tiện nghi, Ảnh, Giấy tờ, Loại phòng & phòng, Bảng giá, Chính sách hủy, Hợp đồng, Lịch sử) | NV (nháp), QL |
+| ~~F17 Thông tin của tôi~~ | Bỏ (D9) | — |
 | F18 Nhân viên & tài khoản | M05, M06 (tab Nhân viên, Khu vực, Phiên đăng nhập) | QL |
 | F19 Giao việc | M04 | QL |
 | F20 Duyệt đổi/hủy | M07 | QL |
 | F21 Voucher | M08 | QL |
-| F22 Chủ homestay | M09 | QL |
+| F22 Chủ homestay | M09 | NV (tạo, chủ `Pending`), QL |
 | F23 Hợp đồng | M11 | QL |
 | F24 Danh mục & cấu hình | M12, M13, M14 (tab Khu vực, Tiện nghi, Danh mục phòng, Ngày lễ, Chính sách hủy chung, Tham số) | QL |
-| F25 Báo cáo | M15, A11, O10 (tab theo vai trò) | QL, KT, Chủ |
+| F25 Báo cáo | M15, A11 (tab theo vai trò) | QL, KT |
 | F26 Nhật ký hệ thống | M16 | QL |
 | F27 Xác minh thu cọc | A02 | KT |
 | F28 Sao kê ngân hàng | A03 (kèm bước xem trước khi nhập tệp) | KT |
 | F29 Hàng chờ chi & cọc bổ sung | A04, A05, A06 (tab Hoàn tiền, Khoản bù, Cọc bổ sung) | KT |
-| F30 Danh sách đối soát | A07, O09 | KT, Chủ, QL (đọc) |
-| F31 Chi tiết đối soát | A08 (chủ: xác nhận/phản hồi; KT: gửi/mở lại/trả; in) | KT, Chủ, QL (đọc) |
+| F30 Danh sách đối soát | A07 | KT, QL (đọc) |
+| F31 Chi tiết đối soát | A08 (KT: gửi/mở lại/trả, ghi phản hồi của chủ; in) | KT, QL (đọc) |
 | F32 Sổ thu chi & công nợ | A09, A10 (tab Sổ thu chi, Công nợ; in phiếu) | KT, QL (đọc) |
 
 Bản in (dùng `PrintDocument`, không phải form): **phiếu thu/phiếu chi** (số phiếu, ngày, đối tượng, mã đơn, số tiền bằng số và bằng chữ, người lập, người xác minh) và **bảng đối soát** (thông tin kỳ, chủ, ngân hàng, bảng từng đơn, tổng).
@@ -1751,10 +1735,10 @@ Khách gọi ─► NV tra phòng (S02/S03) ─► báo giá, cọc, chính sác
           │                          ─► KT xác minh (A02) ─► Deposited
           ├─ KT nhập sao kê, tự khớp (A03) ─► Deposited (không cần NV ghi nhận)
           └─ Quá 15' không có phiếu ─► Expired, nhả phòng, trả voucher
-Deposited ─► thông báo chủ (O01/O07) + NV phụ trách; ConfirmDeadlineAt = +30'
-          ├─ Chủ xác nhận ─► Confirmed ─► NV gửi khách địa chỉ, SĐT cơ sở, hướng dẫn
-          ├─ Chủ từ chối ─► Rejected, nhả phòng, phiếu chi hoàn 100% Pending, trả voucher
-          └─ Quá 30' ─► cảnh báo NV phụ trách ─► NV gọi chủ ─► xác nhận/từ chối thay chủ
+Deposited ─► thông báo NV phụ trách ─► NV gọi chủ; ConfirmDeadlineAt = +30'
+          ├─ Chủ đồng ý ─► NV ghi nhận thay chủ ─► Confirmed ─► NV gửi khách địa chỉ, SĐT cơ sở, hướng dẫn
+          ├─ Chủ từ chối ─► NV ghi nhận thay chủ ─► Rejected, nhả phòng, phiếu chi hoàn 100% Pending, trả voucher
+          └─ Quá 30' chưa ghi nhận ─► cảnh báo NV phụ trách (chưa giao: mọi Quản lý) ─► gọi lại chủ
 ```
 
 Chi tiết tạo đơn (BLL, một transaction):
@@ -1776,22 +1760,22 @@ Chi tiết tạo đơn (BLL, một transaction):
 | Bước | Ai | Hệ thống làm |
 |---|---|---|
 | Ghi nhận khách đã chuyển | NV/QL/KT | Tạo phiếu thu `Deposit`, `Pending`; đơn `AwaitingPayment → PaymentSubmitted`; báo Kế toán. Từ chối nếu đơn đã quá hạn giữ phòng → hướng dẫn tạo đơn mới |
-| Xác minh | KT (≠ người ghi nhận) | Phiếu `Verified`; số tiền ≥ AmountDue thì đơn → `Deposited`, `DepositedAt`, `ConfirmDeadlineAt`; báo chủ và NV phụ trách. Thiếu tiền → không được xác minh, phải từ chối hoặc chờ khách chuyển bù |
+| Xác minh | KT (≠ người ghi nhận) | Phiếu `Verified`; số tiền ≥ AmountDue thì đơn → `Deposited`, `DepositedAt`, `ConfirmDeadlineAt`; báo NV phụ trách (NV gọi chủ). Thiếu tiền → không được xác minh, phải từ chối hoặc chờ khách chuyển bù |
 | Từ chối | KT | Phiếu `Rejected` + lý do; `ReceiptRejectCount += 1`; < giới hạn → đơn về `AwaitingPayment`, gia hạn 15 phút; = giới hạn → `Expired`, nhả phòng; báo NV phụ trách |
 | Tự khớp sao kê | KT nhập tệp | Mục 7.6.7 |
 
-### 9.3. Chủ xác nhận / từ chối
+### 9.3. Xác nhận / từ chối thay chủ
 
-- Chủ thấy đơn từ `Deposited`. Xác nhận trong 30 phút; được chọn phòng khác cùng loại còn trống (đổi `RoomNights` trong cùng transaction).
+- Đơn `Deposited` → nhân viên phụ trách gọi chủ; chủ quyết định trong 30 phút. Nhân viên ghi nhận thay chủ (ghi chú bắt buộc, `OnBehalfOfOwner = 1`); khi xác nhận được chọn phòng khác cùng loại còn trống theo yêu cầu của chủ (đổi `RoomNights` trong cùng transaction).
 - Từ chối: lý do bắt buộc; đơn `Rejected`; nhả phòng; `RefundAmount = AmountDue`; phiếu chi hoàn `Pending`; trả voucher 100%.
-- Hai người (chủ và nhân viên thay chủ) cùng bấm: `UPDATE … WHERE Status = 'Deposited' AND RowVer = @RowVer` → chỉ một người thành công, người kia nhận thông báo dữ liệu đã thay đổi.
+- Hai người (ví dụ nhân viên phụ trách và Quản lý) cùng bấm: `UPDATE … WHERE Status = 'Deposited' AND RowVer = @RowVer` → chỉ một người thành công, người kia nhận thông báo dữ liệu đã thay đổi.
 
 ### 9.4. Nhận phòng, trả phòng, không đến
 
 - Nhận phòng: từ ngày `CheckIn`; `Confirmed → CheckedIn`.
 - Trả phòng: `CheckedIn → Completed`; giữ `RoomNights`; đơn vào kỳ đối soát theo `CheckOut`.
 - Không đến: từ ngày sau `CheckIn`; `Confirmed → NoShow`; nhả phòng; không hoàn; không trả voucher.
-- Nhân viên/Quản lý làm thay: ghi chú bắt buộc, `OnBehalfOfOwner = 1`.
+- Mọi thao tác do Nhân viên/Quản lý ghi nhận thay chủ khi chủ báo: ghi chú bắt buộc, `OnBehalfOfOwner = 1`.
 - Thu 70% còn lại tại cơ sở: chủ tự thu, hệ thống không ghi nhận (Q07).
 
 ### 9.5. Hủy và hoàn tiền
@@ -1826,7 +1810,7 @@ Applied: đơn Confirmed → Deposited, chủ xác nhận lại trong 30'
 
 ### 9.7. Trùng phòng
 
-1. Chủ hoặc NV báo sự cố trên đơn `Confirmed` → AuditLog `Overbooking.Reported`, thông báo NV phụ trách và Quản lý.
+1. Chủ báo qua điện thoại, NV ghi nhận sự cố trên đơn `Confirmed` → AuditLog `Overbooking.Reported`, thông báo NV phụ trách và Quản lý.
 2. NV/QL mở S09, xem đề xuất.
 3. Chọn phương án theo mục 7.6.5; mọi bước trong một transaction; lỗi trùng khóa → rollback toàn bộ.
 4. Không cung cấp địa chỉ/SĐT homestay mới cho khách trước khi đơn mới được chủ mới xác nhận.
@@ -1843,16 +1827,16 @@ Applied: đơn Confirmed → Deposited, chủ xác nhận lại trong 30'
 ```text
 Hết kỳ + 2 ngày ─► JobRunner / KT lập nháp (Draft) theo từng homestay có dòng
 KT kiểm tra (A08) ─► còn đơn chưa chốt? ─► NV/chủ cập nhật trạng thái đơn ─► lập lại
-KT gửi ─► Sent (SentAt) ─► thông báo chủ
-Chủ xem (O09) ─► xác nhận (tùy chọn, Confirmed) hoặc gửi phản hồi sai số liệu ─► báo KT
+KT gửi ─► Sent (SentAt) ─► in / xuất CSV, gửi chủ ngoài hệ thống (email, Zalo)
+Chủ báo sai số liệu ─► KT ghi phản hồi (OwnerFeedback)
    KT mở lại (lý do) ─► Draft ─► sửa nguồn ─► lập lại ─► gửi lại
-KT chuyển khoản cho chủ ngoài hệ thống ─► ghi nhận Paid (mã giao dịch) ─► báo chủ
+KT chuyển khoản cho chủ ngoài hệ thống ─► ghi nhận Paid (mã giao dịch)
 ```
 
 ### 9.10. Đưa homestay vào bán
 
-1. QL (hoặc NV khi chủ chưa có tài khoản) tạo hồ sơ chủ, thông tin ngân hàng → QL duyệt chủ (`Approved`), cấp tài khoản chủ (mật khẩu tạm).
-2. Chủ (hoặc QL thay) tạo homestay `Draft`: thông tin, tiện nghi, ảnh bìa, loại phòng, phòng, giá ba mức, giấy phép kinh doanh, PCCC, ảnh thực tế (còn hạn).
+1. NV/QL nhập hồ sơ chủ, thông tin ngân hàng → QL duyệt chủ (`Approved`). Chủ không có tài khoản (D9).
+2. NV/QL nhập homestay `Draft` theo hồ sơ chủ gửi: thông tin, tiện nghi, ảnh bìa, loại phòng, phòng, giá ba mức, giấy phép kinh doanh, PCCC, ảnh thực tế (còn hạn).
 3. Gửi duyệt → `PendingReview`, `SubmittedAt`.
 4. QL tạo hợp đồng (`Active`, phủ hôm nay).
 5. QL duyệt khi đủ: chủ `Approved`; hợp đồng `Active` phủ hôm nay; giấy phép và PCCC còn hạn; ít nhất một loại phòng bật có phòng bật và đủ ba giá hiệu lực hôm nay; có ảnh bìa; địa chỉ, SĐT liên hệ, mô tả không rỗng. Thiếu → hiện danh sách thiếu, không đổi trạng thái.
@@ -1872,13 +1856,13 @@ KT chuyển khoản cho chủ ngoài hệ thống ─► ghi nhận Paid (mã gi
 | Tài khoản SQL của ứng dụng | Không dùng `sa`, không `db_owner`. Role `app_homestay`: `SELECT/INSERT/UPDATE` trên bảng nghiệp vụ; `DELETE` chỉ trên `RoomNights`, `RoomBlocks`, `HomestayAmenities`, `HomestayImages`, `EmployeeAreas`, `Notifications`; `DENY UPDATE, DELETE` trên `AuditLogs`, `BookingStatusHistories`; không có quyền DDL | [ĐỀ XUẤT] |
 | Tài khoản quản trị database | Tách riêng, chỉ dùng chạy script, không cài trên máy trạm | [ĐỀ XUẤT] |
 | Chuỗi kết nối | DPAPI phạm vi máy; không trong Git; `Encrypt=True` | [ĐỀ XUẤT] |
-| Mạng | SQL Server chỉ mở trong LAN và mạng Tailscale; ACL Tailscale chỉ cho tới cổng SQL; không mở cổng 1433 ra Internet | [ĐÃ CHỐT] Q03 |
+| Mạng | SQL Server chỉ mở trong LAN văn phòng; không mở cổng 1433 ra Internet | [ĐÃ CHỐT] Q03, D9 |
 | SQL injection | Chỉ dùng `SqlParameter`; không ghép chuỗi người dùng nhập vào SQL; tên cột sắp xếp lấy từ danh sách cho phép | [ĐỀ XUẤT] |
 | Dữ liệu nhạy cảm | CCCD che với Nhân viên; số tài khoản ngân hàng che trừ Kế toán/Quản lý; ảnh chứng từ, giấy tờ chỉ mở qua BLL có kiểm quyền; không ghi vào log | [KẾ THỪA] + [ĐỀ XUẤT] |
 | Liên hệ homestay | Chỉ cung cấp cho khách khi đơn đã xác nhận (nhắc trên giao diện) | [KẾ THỪA] |
 | Tệp tải lên | Kiểm chữ ký tệp, ≤ 5 MB, tên do hệ thống sinh | [KẾ THỪA] |
 | Tài liệu, mã nguồn | Không chứa mật khẩu, khóa, số tài khoản thật | [ĐÃ CHỐT] |
-| Rủi ro còn lại của mô hình hai tầng (đã chấp nhận) | Người có quyền quản trị máy trạm có thể giải mã thông tin kết nối và gọi SQL trực tiếp, vượt qua BLL — nghiêm trọng hơn với máy của chủ (ngoài văn phòng). Ràng buộc database (PK, CHECK, unique, DENY) vẫn chặn dữ liệu sai cấu trúc, nhưng không chặn được hành vi trong quyền SQL. Cách khắc phục triệt để: thêm máy chủ API (BLL chạy trên máy chủ) | [ĐÃ CHỐT] Q03 |
+| Rủi ro còn lại của mô hình hai tầng (đã chấp nhận) | Người có quyền quản trị máy trạm có thể giải mã thông tin kết nối và gọi SQL trực tiếp, vượt qua BLL. Ràng buộc database (PK, CHECK, unique, DENY) vẫn chặn dữ liệu sai cấu trúc, nhưng không chặn được hành vi trong quyền SQL. Cách khắc phục triệt để: thêm máy chủ API (BLL chạy trên máy chủ) | [ĐÃ CHỐT] Q03 |
 
 ### 10.2. Transaction
 
@@ -1930,7 +1914,7 @@ Theo mục 3.8. Thêm:
 
 ## 11. Kế hoạch triển khai
 
-Nguyên tắc: **[ĐÃ CHỐT]** xây nền dùng chung trước, ưu tiên luồng nhân viên, sau đó chủ homestay, quản lý, kế toán theo phụ thuộc. **Database tạo đủ cho bốn vai trò ngay giai đoạn 0**; giao diện làm dần. Mỗi giai đoạn kết thúc bằng một luồng nghiệp vụ chạy được từ đầu đến cuối.
+Nguyên tắc: **[ĐÃ CHỐT]** xây nền dùng chung trước, ưu tiên luồng nhân viên, sau đó hồ sơ homestay, quản lý, kế toán theo phụ thuộc. **Database tạo đủ cho ba vai trò ngay giai đoạn 0**; giao diện làm dần. Mỗi giai đoạn kết thúc bằng một luồng nghiệp vụ chạy được từ đầu đến cuối.
 
 ### Giai đoạn 0 — Nền tảng
 
@@ -1948,7 +1932,7 @@ Nguyên tắc: **[ĐÃ CHỐT]** xây nền dùng chung trước, ưu tiên lu�
 | Mục | Nội dung |
 |---|---|
 | Database | Dùng: Owners, Homestays, HomestayAmenities, HomestayImages, VerificationDocuments, Contracts, CancellationPolicies/Rules, RoomTypes, Rooms, RoomTypePrices, StoredFiles |
-| Màn hình | F22, F15, F16 ở chế độ Quản lý (dùng chung form với chủ), F23, F24 tab Chính sách hủy chung |
+| Màn hình | F22, F15, F16, F23, F24 tab Chính sách hủy chung |
 | Nghiệp vụ | Tạo chủ, homestay nháp, loại phòng/phòng, giá ba mức có lịch sử, ảnh, giấy tờ, hợp đồng, điều kiện duyệt, chuyển trạng thái homestay |
 | Đầu ra | Có homestay `Active` để bán |
 | Tiêu chí | Không duyệt được homestay thiếu điều kiện (hiện đúng danh sách thiếu); không tạo được hợp đồng `Active` thứ hai; giá đã hiệu lực không sửa được; hoa hồng ngoài 10–15% bị chặn; dữ liệu mẫu ≥ 5 homestay, 3 khu vực |
@@ -1968,20 +1952,20 @@ Nguyên tắc: **[ĐÃ CHỐT]** xây nền dùng chung trước, ưu tiên lu�
 | Mục | Nội dung |
 |---|---|
 | Database | Payments (chi hoàn), BookingChangeRequests (chỉ `Cancel`) |
-| Màn hình | F27, F29 tab Hoàn tiền, F11 (chỉ hủy), F20 (chỉ hủy), F08 tab Nhận/trả hôm nay và tab Đơn của tôi cho chủ (xác nhận/từ chối/nhận/trả phòng) |
-| Nghiệp vụ | Kế toán xác minh/từ chối phiếu (giới hạn 2 lần); chủ hoặc NV thay chủ xác nhận/từ chối, đổi phòng cùng loại; nhận/trả phòng, không đến; yêu cầu hủy + Quản lý duyệt + tính hoàn + phiếu chi; Quản lý hủy đơn do homestay không phục vụ được (hoàn 100%); cảnh báo chủ chậm xác nhận |
+| Màn hình | F27, F29 tab Hoàn tiền, F11 (chỉ hủy), F20 (chỉ hủy), F08 tab Nhận/trả hôm nay và tab Chờ chủ xác nhận (ghi nhận thay chủ: xác nhận/từ chối/nhận/trả phòng) |
+| Nghiệp vụ | Kế toán xác minh/từ chối phiếu (giới hạn 2 lần); NV/QL thay chủ xác nhận/từ chối, đổi phòng cùng loại; nhận/trả phòng, không đến; yêu cầu hủy + Quản lý duyệt + tính hoàn + phiếu chi; Quản lý hủy đơn do homestay không phục vụ được (hoàn 100%); cảnh báo chủ chậm xác nhận |
 | Đầu ra | Một đơn đi trọn: tạo → cọc → xác minh → xác nhận → nhận phòng → hoàn thành; và các nhánh hủy/từ chối/không đến có hoàn tiền |
 | Tiêu chí | Test bảng chuyển trạng thái (mọi chuyển không hợp lệ bị chặn); test hoàn tiền theo chính sách chung/riêng/lễ; người ghi nhận không tự xác minh được; hai người cùng xác nhận một đơn → một thành công; hai kế toán cùng chi hoàn → một thành công; CHECK trạng thái–mốc thời gian không bị vi phạm |
 
-### Giai đoạn 4 — Ứng dụng chủ homestay đầy đủ
+### Giai đoạn 4 — Hồ sơ homestay nhập thay chủ, khóa phòng
 
 | Mục | Nội dung |
 |---|---|
 | Database | RoomBlocks; dùng lại các bảng trước |
-| Màn hình | F15, F16, F17; F06 tab Lịch + khóa phòng; F08, F09, F25 ở chế độ chủ |
-| Nghiệp vụ | Phạm vi sở hữu; khóa/mở khóa phòng; sửa nội dung (địa chỉ/giấy phép → chờ duyệt); thêm homestay và gửi duyệt; giá; chính sách riêng; lịch đón/trả; báo trùng phòng |
-| Đầu ra | Chủ tự vận hành homestay của mình trên desktop |
-| Tiêu chí | Chủ A không xem/sửa được bất kỳ dữ liệu nào của chủ B (test gọi BLL trực tiếp với Id của chủ B → "không tìm thấy"); chủ không thấy đơn trước `Deposited`, không thấy CCCD/ghi chú nội bộ; khóa trùng đơn bị chặn kèm mã đơn; tắt phòng cuối cùng của homestay `Active` bị chặn |
+| Màn hình | F15, F16 đầy đủ (Nhân viên ở chế độ nháp), F22 cho Nhân viên; F06 tab Lịch + khóa phòng (Quản lý) |
+| Nghiệp vụ | Nhân viên nhập hồ sơ chủ `Pending` và homestay `Draft`, gửi duyệt; Quản lý sửa homestay đang hoạt động (địa chỉ/giấy phép → chờ duyệt), giá, chính sách riêng; khóa/mở khóa phòng khi chủ báo; báo trùng phòng thay chủ |
+| Đầu ra | Fuji tự vận hành dữ liệu homestay thay chủ |
+| Tiêu chí | Nhân viên không sửa được homestay khác `Draft`, không khóa được phòng (gọi BLL trực tiếp → bị chặn); Quản lý không duyệt nháp do mình tạo; khóa trùng đơn bị chặn kèm mã đơn; tắt phòng cuối cùng của homestay `Active` bị chặn |
 
 ### Giai đoạn 5 — Quản lý: phân công và giám sát
 
@@ -1999,7 +1983,7 @@ Nguyên tắc: **[ĐÃ CHỐT]** xây nền dùng chung trước, ưu tiên lu�
 |---|---|
 | Database | BankTransactions, Settlements, SettlementItems; view `vw_CashBook`, `vw_Payables` |
 | Màn hình | F27 hoàn chỉnh, F28, F30, F31, F32; F29 tab Hoàn tiền; bản in phiếu thu/chi, bảng đối soát |
-| Nghiệp vụ | Nhập tay giao dịch + tự khớp + xử lý tay; nhập tệp sao kê MB Bank (khi có tệp mẫu, Q12); lập/gửi/mở lại/trả đối soát; chủ xác nhận/phản hồi; sổ thu chi, in phiếu; công nợ |
+| Nghiệp vụ | Nhập tay giao dịch + tự khớp + xử lý tay; nhập tệp sao kê MB Bank (khi có tệp mẫu, Q12); lập/gửi/mở lại/trả đối soát; ghi phản hồi của chủ; sổ thu chi, in phiếu; công nợ |
 | Đầu ra | Kế toán khép kín dòng tiền vào – ra – đối soát |
 | Tiêu chí | Test bảng ví dụ mục 7.6.3 và công thức 7.6.6 (gồm phí đổi, đơn bị thay thế dù chưa làm G8 vẫn test bằng dữ liệu dựng sẵn); nhập cùng giao dịch hai lần không tạo trùng; hai kế toán cùng lập đối soát một homestay một kỳ → một bảng; gửi bị chặn khi còn đơn chưa chốt; tổng sổ thu chi khớp tổng phiếu; bản in đúng số tiền bằng chữ |
 
@@ -2009,7 +1993,7 @@ Nguyên tắc: **[ĐÃ CHỐT]** xây nền dùng chung trước, ưu tiên lu�
 |---|---|
 | Màn hình | F25, F26, F14 tab Lịch sử và Hiệu suất; xuất CSV |
 | Nghiệp vụ | Mọi chỉ tiêu mục 4.3 Q15, 4.4 K10, 7.6.8 dùng chung lớp công thức |
-| Tiêu chí | Số liệu báo cáo khớp truy vấn đối chiếu viết tay trên dữ liệu mẫu; Nhân viên chỉ thấy hiệu suất của mình; Kế toán chỉ thấy báo cáo tài chính; Chủ chỉ thấy homestay của mình |
+| Tiêu chí | Số liệu báo cáo khớp truy vấn đối chiếu viết tay trên dữ liệu mẫu; Nhân viên chỉ thấy hiệu suất của mình; Kế toán chỉ thấy báo cáo tài chính |
 
 ### Giai đoạn 8 — Nghiệp vụ ngoại lệ (làm nếu kịp)
 
@@ -2027,7 +2011,7 @@ Database đã có đủ bảng từ G0. Chưa làm thì các mục menu tương 
 
 | Mục | Nội dung |
 |---|---|
-| Việc | Kiểm thử nhiều máy thật (≥ 3 máy, có một máy qua Tailscale) theo kịch bản; kiểm thử phân quyền theo ma trận 5.2 (mỗi ô một ca); **mở toàn bộ form với từng vai trò** trên dữ liệu mẫu; **kiểm thử tự động bấm mọi nút, đổi mọi bộ lọc, nhấp đúp mọi bảng** trên bản sao database; **chọn "Có" ở mọi hộp xác nhận** trên bản sao rồi kiểm số liệu; kiểm thử ở tỉ lệ màn hình 100%, 125%, 150%; hiệu năng với dữ liệu lớn (150 homestay, 1.500 phòng, 1 năm đơn); tệp `install_demo.sql` tạo database mới; gói phát hành self-contained; hướng dẫn cài máy chủ, máy trạm, Tailscale, sao lưu/khôi phục; bảng kết quả chạy thử cho báo cáo (mục 14) |
+| Việc | Kiểm thử nhiều máy thật (≥ 3 máy trong LAN) theo kịch bản; kiểm thử phân quyền theo ma trận 5.2 (mỗi ô một ca); **mở toàn bộ form với từng vai trò** trên dữ liệu mẫu; **kiểm thử tự động bấm mọi nút, đổi mọi bộ lọc, nhấp đúp mọi bảng** trên bản sao database; **chọn "Có" ở mọi hộp xác nhận** trên bản sao rồi kiểm số liệu; kiểm thử ở tỉ lệ màn hình 100%, 125%, 150%; hiệu năng với dữ liệu lớn (150 homestay, 1.500 phòng, 1 năm đơn); tệp `install_demo.sql` tạo database mới; gói phát hành self-contained; hướng dẫn cài máy chủ, máy trạm, sao lưu/khôi phục; bảng kết quả chạy thử cho báo cáo (mục 14) |
 | Tiêu chí | Mọi ca của ma trận quyền đạt; không lỗi chưa xử lý trong log; không chữ bị cắt ở 150%; database tạo từ `install_demo.sql` khớp số bảng, view, CHECK, khóa ngoại và số liệu mẫu; khôi phục từ bản sao lưu thành công |
 
 ### Phụ thuộc giữa giai đoạn
@@ -2051,13 +2035,13 @@ G4, G5, G6 làm song song được sau G3. G9 luôn làm, kể cả khi bỏ G8.
 | C1 | Ứng dụng C# WinForms độc lập, database SQL Server riêng |
 | C2 | Không sửa mã nguồn và database của hệ thống web; hệ thống web chỉ là nguồn tham khảo nghiệp vụ |
 | C3 | Ưu tiên trải nghiệm, luồng làm việc của nhân viên |
-| C4 | Đủ chức năng cho chủ homestay, quản lý, kế toán; không thu gọn thành chức năng phụ |
+| C4 | Đủ chức năng cho quản lý, kế toán; không thu gọn thành chức năng phụ (vai trò chủ homestay bỏ theo D9) |
 | C5 | Kiến trúc GUI – BLL – DAL – DTO; nghiệp vụ và quyền kiểm ở BLL |
 | C6 | Nhiều máy WinForms dùng chung database của hệ thống desktop |
 | C7 | Mật khẩu lưu bằng hàm băm phù hợp |
-| C8 | Chủ chỉ xem dữ liệu thuộc sở hữu; nhân viên và quản lý chỉ truy cập phạm vi được giao |
+| C8 | Nhân viên và quản lý chỉ truy cập phạm vi được giao (vế "chủ chỉ xem dữ liệu thuộc sở hữu" bỏ theo D9) |
 | C9 | Lưu giá tại thời điểm đặt và lịch sử giao dịch để thay đổi giá không làm sai đơn cũ |
-| C10 | Giai đoạn đầu có thể ít chức năng nhưng kiến trúc và database tính đủ bốn vai trò |
+| C10 | Giai đoạn đầu có thể ít chức năng nhưng kiến trúc và database tính đủ ba vai trò |
 | C11 | Không ghi mật khẩu, thông tin bí mật vào tài liệu |
 
 ### 12.2. Quy tắc kế thừa từ hệ thống tham khảo — đã chốt giữ nguyên cho desktop (27/10/2026)
@@ -2069,13 +2053,13 @@ G4, G5, G6 làm song song được sau G3. G9 luôn làm, kể cả khi bỏ G8.
 | K3 | Giữ phòng 15 phút chờ cọc; ảnh/chứng từ chuyển khoản do kế toán xác minh; từ chối lần 1 thêm 15 phút, lần 2 hết hạn |
 | K4 | Cọc 30% làm tròn nghìn vào tài khoản Fuji; 70% trả tại cơ sở |
 | K5 | Giá ba mức (ngày thường, cuối tuần = đêm thứ Sáu/thứ Bảy, ngày lễ) theo loại phòng, có lịch sử hiệu lực; đơn lưu giá từng đêm |
-| K6 | Chủ xác nhận trong 30 phút sau khi có cọc; quá hạn cảnh báo nhân viên, đơn không tự đổi trạng thái; nhân viên được xác nhận thay chủ có ghi chú |
+| K6 | Chủ xác nhận trong 30 phút sau khi có cọc; quá hạn cảnh báo nhân viên, đơn không tự đổi trạng thái; nhân viên được xác nhận thay chủ có ghi chú; desktop chỉ có đường thay chủ (D9) |
 | K7 | Hoa hồng theo hợp đồng (10–15%), một hợp đồng hiệu lực mỗi homestay; đơn lưu tỷ lệ lúc đặt |
 | K8 | Chính sách hủy riêng ưu tiên hơn chung; có phạm vi ngày lễ; chung 7 ngày 100% / 3 ngày 50% / dưới 3 ngày 0%; hoàn trên tiền khách thực chuyển; chủ từ chối hoàn 100%; không đến không hoàn |
 | K9 | Đổi ngày/loại phòng: phí đổi = phần cọc mất theo chính sách lúc gửi; cọc còn lại chuyển sang; thu thêm theo tổng mới; không hoàn khi xuống hạng; Quản lý duyệt → Kế toán xác nhận tiền; người gửi không tự duyệt; ≥ 3 ngày trước nhận phòng, tối đa 2 lần, trong 90 ngày; chưa cho đổi đơn có voucher |
 | K10 | Trùng phòng: ba phương án; khoản bù Fuji chịu, chi sau khi đơn thay thế hoàn thành, không trừ chủ cũ |
 | K11 | Voucher xin lỗi: Quản lý cấp, 5% tổng đơn (50–200 nghìn), 6 tháng, giảm tối đa 20% hoa hồng của đơn, Fuji chịu |
-| K12 | Đối soát hai kỳ/tháng theo ngày trả phòng; chủ xác nhận không bắt buộc; công thức mục 7.6.6 |
+| K12 | Đối soát hai kỳ/tháng theo ngày trả phòng; công thức mục 7.6.6; desktop bỏ bước chủ xác nhận (D9) |
 | K13 | Homestay phải được Quản lý duyệt mới bán; sửa địa chỉ/giấy tờ pháp lý đưa về chờ duyệt; sửa giá/phòng/ảnh/mô tả lưu thẳng và ghi nhật ký |
 | K14 | Tắt phòng chặn bán mới, giữ đơn đã nhận |
 | K15 | Doanh số theo người tạo đơn; xử lý theo người phụ trách; tỷ lệ chốt = đơn mình tạo được xác nhận / đơn mình tạo |
@@ -2106,15 +2090,15 @@ G4, G5, G6 làm song song được sau G3. G9 luôn làm, kể cả khi bỏ G8.
 
 | # | Câu hỏi | Quyết định |
 |---|---|---|
-| Q01 | Vai trò Quản trị hệ thống riêng? | **Không tách.** Quản lý tạo/khóa tài khoản, sửa danh mục, cấu hình; ứng dụng có 4 vai trò |
+| Q01 | Vai trò Quản trị hệ thống riêng? | **Không tách.** Quản lý tạo/khóa tài khoản, sửa danh mục, cấu hình; ứng dụng có 3 vai trò (sau D9) |
 | Q02 | Phạm vi được giao tính theo gì? | **Theo khu vực.** Tra phòng, tạo đơn, khách hàng: toàn hệ thống. Xử lý đơn: khu vực được giao + đơn mình tạo/phụ trách. `HasAllAreas` cho người phụ trách toàn hệ thống |
-| Q03 | Kiến trúc, cách chủ ở xa truy cập | **Hai tầng**; chủ ở xa vào qua **Tailscale gói miễn phí**. Chấp nhận rủi ro ở mục 10.1; nâng lên máy chủ API khi đông chủ hoặc chạy thật |
+| Q03 | Kiến trúc, cách chủ ở xa truy cập | **Hai tầng** trong LAN; phần Tailscale cho chủ ở xa bỏ theo D9. Chấp nhận rủi ro ở mục 10.1; nâng lên máy chủ API khi cần truy cập từ xa hoặc chạy thật |
 | Q04 | Xác thực SQL Server | **Tài khoản SQL riêng** quyền tối thiểu + DPAPI |
 | Q05 | Nhiều phiên cùng lúc? | **Không** — một phiên mỗi tài khoản, đăng nhập máy mới kết thúc phiên cũ |
 | Q06 | Nơi lưu tệp | **Trong database** (`StoredFiles`, ≤ 5 MB/tệp) |
 | Q07 | Ghi nhận 70% trả tại cơ sở? | **Không ghi** |
 | Q08 | Dịch vụ phát sinh? | **Chưa làm**; giữ thiết kế module 6.3.H |
-| Q09 | Chủ tự đổi tài khoản ngân hàng? | **Không**; chủ gửi yêu cầu, Quản lý xác minh rồi cập nhật |
+| Q09 | Chủ tự đổi tài khoản ngân hàng? | **Không** (chủ không dùng ứng dụng, D9); chủ báo, Quản lý gọi xác minh rồi cập nhật |
 | Q10 | Nhận tiền mặt? | **Có**, phương thức `Cash`; nhân viên ghi nhận, kế toán xác minh |
 | Q11 | Trả phòng sớm | **Ghi Hoàn thành, không hoàn**, không tính lại tiền |
 | Q12 | Ngân hàng, tệp sao kê | **MB Bank**; tệp mẫu người đặt hàng gửi sau — định dạng cột **còn mở** (12.5) |
@@ -2139,7 +2123,7 @@ Sau khi đối chiếu báo cáo một đồ án WinForms cùng khóa (quản l�
 
 | # | Quyết định |
 |---|---|
-| D1 | Quy mô spec tương đương đồ án tham khảo; giữ đủ bốn vai trò, **gộp thành 32 form** (mục 8.5) |
+| D1 | Quy mô spec tương đương đồ án tham khảo; **gộp thành 32 form** (mục 8.5; còn 31 sau D9) |
 | D2 | Nghiệp vụ ngoại lệ (đổi ngày/loại phòng, trùng phòng đầy đủ, voucher) chuyển xuống **giai đoạn 8, làm nếu kịp**; database vẫn tạo đủ từ đầu |
 | D3 | **Không dùng thư viện ngoài**, trừ trình điều khiển SQL Server; ADO.NET thuần, log/cấu hình/nhập xuất tệp tự viết bằng thư viện có sẵn (mục 2) |
 | D4 | Áp dụng quy chuẩn giao diện chung (mục 8.1) |
@@ -2147,6 +2131,12 @@ Sau khi đối chiếu báo cáo một đồ án WinForms cùng khóa (quản l�
 | D6 | Báo cáo đồ án theo khung mục 14; kiểm thử theo cách của đồ án tham khảo (mở mọi form, bấm mọi nút, đối chiếu số liệu tay) |
 | D7 | **Không** học theo: băm mật khẩu SHA-256 không salt (giữ PBKDF2), không tách lớp (giữ GUI–BLL–DAL–DTO), kiểm soát đồng thời lỏng (giữ khóa chính + rowversion) |
 | D8 | Giữ **.NET 10** (đồ án tham khảo dùng .NET Framework 4.7.2). Nếu cần tuyệt đối không có gói NuGet nào thì phải chuyển .NET Framework 4.8 (có sẵn `System.Data.SqlClient`), đổi lại mất `Rfc2898DeriveBytes.Pbkdf2` tĩnh và các tính năng ngôn ngữ mới — hiện **không** chuyển |
+
+### 12.7. Bỏ vai trò Chủ homestay (27/10/2026)
+
+| # | Quyết định |
+|---|---|
+| D9 | **Không làm vai trò Chủ homestay.** Chủ là đối tác có hồ sơ (`Owners`), không có tài khoản đăng nhập; ứng dụng còn ba vai trò: Nhân viên, Kế toán, Quản lý. Việc của chủ chuyển sang: xác nhận/từ chối đơn, nhận/trả phòng, không đến, báo trùng phòng → Nhân viên/Quản lý ghi nhận thay chủ (bắt buộc ghi chú); nhập homestay → Nhân viên khi `Draft`, Quản lý ở mọi trạng thái (mục 4.2); khóa phòng → Quản lý; đối soát bỏ bước chủ xác nhận (`Draft → Sent → Paid`), gửi chủ bằng bản in/CSV, Kế toán ghi phản hồi. Bỏ `Users.UserType`, `Owners.UserId`, `Settlements.ConfirmedAt`, trạng thái `Settlements.Confirmed`, `ActorType = Owner`. Bỏ Tailscale (chỉ LAN). Còn 31 form (bỏ F17). Quyền của Nhân viên trên hồ sơ nháp là [ĐỀ XUẤT] |
 
 ## 13. Thuật ngữ
 
@@ -2164,7 +2154,6 @@ Sau khi đối chiếu báo cáo một đồ án WinForms cùng khóa (quản l�
 | Fuji thực thu | Hoa hồng − phần voucher Fuji chịu |
 | Khoản bù | Tiền Fuji trả thêm cho chủ mới khi chuyển khách sang phòng đắt hơn do trùng phòng |
 | Phạm vi (PV) | Tập dữ liệu một nhân viên/quản lý được thao tác |
-| Sở hữu (SH) | Dữ liệu thuộc homestay của chính chủ đăng nhập |
 | E.164 | Định dạng SĐT quốc tế, ví dụ `+84912345678` |
 
 ---
@@ -2186,12 +2175,12 @@ Theo bố cục đồ án WinForms tham khảo, bổ sung phần kiến trúc v�
 7. Sơ đồ phân rã chức năng theo menu; **bảng tổng hợp chức năng với tình trạng** Hoàn thành / Hoàn thành một phần / Chưa làm.
 8. Đặc điểm giao diện chung (mục 8.1).
 
-**Chương 2. Giao diện và chức năng** — mỗi form một mục: ảnh chụp từ phần mềm chạy dữ liệu mẫu; mô tả từng thao tác và tác dụng; thông báo lỗi tiếng Việt; khác biệt theo vai trò (ảnh menu từng vai trò). Thứ tự: đăng nhập và cửa sổ chính → nhân viên → chủ homestay → quản lý → kế toán. Mỗi luồng chính (mục 9) có một chuỗi ảnh đi từ đầu đến cuối.
+**Chương 2. Giao diện và chức năng** — mỗi form một mục: ảnh chụp từ phần mềm chạy dữ liệu mẫu; mô tả từng thao tác và tác dụng; thông báo lỗi tiếng Việt; khác biệt theo vai trò (ảnh menu từng vai trò). Thứ tự: đăng nhập và cửa sổ chính → nhân viên → quản lý → kế toán. Mỗi luồng chính (mục 9) có một chuỗi ảnh đi từ đầu đến cuối.
 
 **Chương 3. Tổng kết**
 
 1. Bảng kết quả chạy thử: nội dung kiểm tra, kết quả, đánh giá — gồm đăng nhập sai/khóa tạm, phân quyền từng vai trò, mở toàn bộ form, kiểm thử tự động bấm mọi nút, **10 luồng đặt cùng lúc**, ví dụ tiền mục 7.6.3 đối chiếu tay, một kỳ đối soát đối chiếu tay, hiển thị 150%, tạo database từ tệp cài đặt.
 2. Các phần chưa hoàn thiện và hạn chế (ghi trung thực, gồm rủi ro mô hình hai tầng mục 10.1).
-3. Hướng phát triển (máy chủ API, cổng khách, kết nối ngân hàng tự động, SMS/Zalo, dịch vụ phát sinh).
+3. Hướng phát triển (máy chủ API, ứng dụng cho chủ homestay, cổng khách, kết nối ngân hàng tự động, SMS/Zalo, dịch vụ phát sinh).
 
 **Tổng kết** — kết quả đạt được, kiến thức rèn luyện.
