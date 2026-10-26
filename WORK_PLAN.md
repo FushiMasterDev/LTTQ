@@ -63,17 +63,20 @@ Mac đã kiểm: .NET SDK 10.0.400, Docker, chip Intel (SQL Server 2022 chạy t
 
 ```bash
 # SQL Server trong Docker; mật khẩu sa đặt qua biến môi trường, không ghi vào repo
-docker run -d --name homestay-sql -p 1433:1433 \
-  -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD="$SA_PASSWORD" -e MSSQL_COLLATION=Vietnamese_CI_AS \
-  mcr.microsoft.com/mssql/server:2022-latest
+# KHÔNG đặt MSSQL_COLLATION: collation server Vietnamese_CI_AS làm sp_getapplock hỏng trên Linux (xp_userlock);
+# database vẫn là Vietnamese_CI_AS vì install_demo.sql tự đặt. Chỉ mở cổng ở 127.0.0.1.
+docker run -d --name homestay-desktop-sql -p 127.0.0.1:14330:1433 \
+  -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD="$SA_PASSWORD" \
+  mcr.microsoft.com/mssql/server:2022-CU27-ubuntu-22.04
 dotnet build HomestayDesktop.sln     # GUI có EnableWindowsTargeting nên build được trên Mac
-dotnet test
+HOMESTAY_TEST_CONNECTION="Server=127.0.0.1,14330;Database=HomestayDesktop_Dev;User ID=homestay_app;Password=…;Encrypt=True;TrustServerCertificate=True" \
+  dotnet test                        # thiếu biến này thì test SQL tự Skip
 ```
 
 **WIN**
 
 1. Visual Studio 2026, workload ".NET desktop development".
-2. SQL Server 2022 Developer hoặc Express, collation `Vietnamese_CI_AS`, bật TCP/IP; SQL Server Management Studio.
+2. SQL Server 2022 Developer hoặc Express **bản cập nhật (CU) mới nhất**, collation server để mặc định (database tự được tạo `Vietnamese_CI_AS` bởi script), bật TCP/IP; SQL Server Management Studio.
 3. Mở `database/install_demo.sql` trong SSMS, bật **Query → SQLCMD Mode**, đặt `:setvar DbName HomestayDesktop`, `:setvar AppSqlPassword …`, `:setvar FirstManagerPassword …`, `:setvar DemoPassword …`, chạy.
 4. Chạy ứng dụng lần đầu → màn F04 Cấu hình kết nối → lưu `connection.dat` (DPAPI). Môi trường phát triển được `TrustServerCertificate=true`.
 
@@ -103,7 +106,7 @@ Mục tiêu: đăng nhập được bằng tài khoản mẫu của 3 vai trò, 
 
 - [x] **M1.1** ⛳ (làm ngay, chỉ đụng `database/`) `001_schema.sql` (mọi bảng mục 6.3 trừ module H), `002_indexes.sql`, `003_views.sql`, `004_security.sql`, `build_install.sh` → `install_demo.sql`. Xong khi: chạy sạch trên database trống, chạy lại không lỗi.
 - [x] **M1.2** ⛳ `010_seed_reference.sql`, `020_seed_demo.sql` theo **mục 4** (dữ liệu đủ cho mọi màn, kể cả màn làm ở đợt sau).
-- [ ] **M1.3** ⛳ (không chờ WIN) Tạo `HomestayDesktop.sln` + `src/Homestay.DTO|DAL|BLL` (Class Library `net10.0`) + `tests/Homestay.Rules.Tests`, `tests/Homestay.BLL.Tests` (xUnit), tham chiếu đúng spec 3.2, gói `Microsoft.Data.SqlClient` 6.x vào DAL. Sau đó DTO chung `PagedResult<T>`, `PageRequest`, `Lookup` (push riêng trước để WIN làm W1.3); hạ tầng DAL `ConnectionFactory`, `UnitOfWork`, `DbClock`, `SqlErrorTranslator`, hàm đọc dòng dùng chung; BLL các exception, `ICurrentSession`, enum `Permission` đủ mục 5.2, `Authorizer`, `DataScope`, `AuditWriter`, `SettingsProvider`; `PasswordHasher` + test.
+- [x] **M1.3** ⛳ (không chờ WIN) Tạo `HomestayDesktop.sln` + `src/Homestay.DTO|DAL|BLL` (Class Library `net10.0`) + `tests/Homestay.Rules.Tests`, `tests/Homestay.BLL.Tests` (xUnit), tham chiếu đúng spec 3.2, gói `Microsoft.Data.SqlClient` 6.x vào DAL. Sau đó DTO chung `PagedResult<T>`, `PageRequest`, `Lookup` (push riêng trước để WIN làm W1.3); hạ tầng DAL `ConnectionFactory`, `UnitOfWork`, `DbClock`, `SqlErrorTranslator`, hàm đọc dòng dùng chung; BLL các exception, `ICurrentSession`, enum `Permission` đủ mục 5.2, `Authorizer`, `DataScope`, `AuditWriter`, `SettingsProvider`; `PasswordHasher` + test.
 - [ ] **M1.4** ⛳ Hợp đồng + cài đặt: `AuthService`, `SessionService` (đăng nhập, khóa tạm 5 lần sai, đổi mật khẩu bắt buộc, một phiên mỗi tài khoản, kiểm phiên trước thao tác ghi), `StaffService` (tạo nhân viên, khóa/mở, đặt lại mật khẩu), `CatalogService` (khu vực, tiện nghi, danh mục phòng, ngày lễ, chính sách hủy chung, tham số).
 
 Xong đợt khi: trên máy WIN đăng nhập được NV/QL/KT mẫu; sai 5 lần bị khóa; QL tạo nhân viên mới, nhân viên đổi mật khẩu tạm; QL sửa danh mục và tham số.
