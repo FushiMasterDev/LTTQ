@@ -19,7 +19,7 @@ public partial class FrmLogin : ScreenForm
         };
         AcceptButton = loginButton;
         CancelButton = cancelButton;
-        HelpText = "Dùng mã nhân viên và mật khẩu được cấp. Sau 5 lần nhập sai, tài khoản bị khóa tạm 15 phút. Chưa có dịch vụ AuthService ở nhánh dev nên bố cục này chưa đăng nhập được.";
+        HelpText = "Dùng mã nhân viên và mật khẩu được cấp. Sau 5 lần nhập sai, tài khoản bị khóa tạm 15 phút. Chức năng đang được hoàn thiện.";
     }
     public FrmLogin(AppServices services) : this()
     { this.services = services; loginButton.Enabled = false; }
@@ -30,12 +30,12 @@ public partial class FrmLogin : ScreenForm
         try
         {
             await services.CheckConnectionAsync(services.Connections.Load(), CancellationToken.None);
-            noticeLabel.Text = "Đã kết nối máy chủ · Chờ dịch vụ đăng nhập M1.4.";
+            noticeLabel.Text = "Đã kết nối máy chủ · Chức năng đăng nhập đang được hoàn thiện.";
             loginButton.Enabled = true;
         }
         catch (Exception exception)
         {
-            noticeLabel.Text = "Chưa xác thực được kết nối. Vui lòng kiểm tra cấu hình và bộ dịch vụ BLL.";
+            noticeLabel.Text = "Chưa xác thực được kết nối. Vui lòng kiểm tra cấu hình và phiên bản ứng dụng.";
             ErrorHandler.Show(exception, this);
         }
     }

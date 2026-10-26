@@ -8,7 +8,7 @@ public static class ErrorHandler
         if (exception is OperationCanceledException) return;
         var message = exception switch
         {
-            NotImplementedException => "Chức năng đang làm. Đang chờ hợp đồng BLL/DTO từ phía MAC.",
+            NotImplementedException => "Chức năng đang làm. Vui lòng thử lại sau.",
             InvalidDataException or ArgumentException => exception.Message,
             UnauthorizedAccessException => "Bạn không có quyền thực hiện thao tác này.",
             _ => $"Có lỗi xảy ra (mã lỗi: {Logger?.Error(exception) ?? "CHUA-CO-LOG"}). Vui lòng báo quản lý."

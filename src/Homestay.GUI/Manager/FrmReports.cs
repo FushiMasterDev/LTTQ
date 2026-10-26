@@ -7,6 +7,6 @@ public partial class FrmReports : ScreenForm
     public FrmReports()
     {
         InitializeComponent();
-        HelpText = "Tab báo cáo theo quyền từ BLL; Kế toán chỉ thấy tài chính. Mọi công thức dùng ReportService, không tự tính trong GUI.";
+        HelpText = "Tab báo cáo theo quyền từ hệ thống; Kế toán chỉ thấy tài chính. Mọi công thức dùng hệ thống, không tự tính trong GUI.";
     }
 }

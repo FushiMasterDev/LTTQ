@@ -7,6 +7,6 @@ public partial class FrmMyWork : ScreenForm
     public FrmMyWork()
     {
         InitializeComponent();
-        HelpText = "Chỉ lấy dữ liệu của phiên đăng nhập hiện tại. Kết quả và hoàn thành công việc phải lưu qua TaskService. Chưa nối dịch vụ.";
+        HelpText = "Chỉ lấy dữ liệu của phiên đăng nhập hiện tại. Kết quả và hoàn thành công việc phải lưu qua hệ thống. Chức năng đang được hoàn thiện.";
     }
 }

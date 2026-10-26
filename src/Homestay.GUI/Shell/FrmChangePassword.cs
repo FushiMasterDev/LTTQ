@@ -13,7 +13,7 @@ public partial class FrmChangePassword : ScreenForm
             newPassword.UseSystemPasswordChar = !showPassword.Checked;
             confirmPassword.UseSystemPasswordChar = !showPassword.Checked;
         };
-        HelpText = "Nhập mật khẩu hiện tại và mật khẩu mới hai lần. Quy tắc và việc thay đổi mật khẩu được kiểm tra bởi AuthService; chưa có ở M1.4.";
+        HelpText = "Nhập mật khẩu hiện tại và mật khẩu mới hai lần. Quy tắc và việc thay đổi mật khẩu được kiểm tra bởi hệ thống; chưa có ở .";
     }
     protected override void OnFormClosed(FormClosedEventArgs e)
     {
