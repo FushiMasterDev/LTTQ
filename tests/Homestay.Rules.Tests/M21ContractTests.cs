@@ -12,16 +12,16 @@ public sealed class M21ContractTests
         var current = new CurrentSession(); current.Set(new SessionInfo { UserId = 1, EmployeeId = 1, Position = role });
         return (current, new Authorizer(current));
     }
-    private static BookingService Bookings() => new(null!, null!, null!, null!, null!, null!, null!, null!, null!);
-
     [Fact]
-    public async Task FourM24DeferredWritesFailExplicitlyBeforeDoingWork()
+    public async Task M24WritesValidateInputBeforeOpeningDatabase()
     {
-        var b = Bookings();
-        await Assert.ThrowsAsync<NotImplementedException>(() => b.ClaimAsync(new(1, new byte[8])));
-        await Assert.ThrowsAsync<NotImplementedException>(() => b.ReassignAsync(new(1, 2, new byte[8])));
-        await Assert.ThrowsAsync<NotImplementedException>(() => b.CancelUnpaidAsync(new(1, "Test", new byte[8])));
-        await Assert.ThrowsAsync<NotImplementedException>(() => new PaymentService().RecordReceiptAsync(new()));
+        var s = Session(Position.Manager);
+        var b = new BookingService(s.Authorizer, s.Current, null!, null!, null!, null!, null!, null!, null!);
+        await Assert.ThrowsAsync<BusinessException>(() => b.ClaimAsync(new(1, [])));
+        await Assert.ThrowsAsync<BusinessException>(() => b.ReassignAsync(new(1, 2, [])));
+        await Assert.ThrowsAsync<BusinessException>(() => b.CancelUnpaidAsync(new(1, "Test", [])));
+        var payments = new PaymentService(s.Authorizer, s.Current, null!, null!, null!, null!, null!, null!, null!, b, null!, "test");
+        await Assert.ThrowsAsync<BusinessException>(() => payments.RecordReceiptAsync(new()));
     }
     [Fact]
     public async Task AccountantReadOnlyCannotWriteCustomerOrAccessAvailability()

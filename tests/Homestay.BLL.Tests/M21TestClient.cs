@@ -19,6 +19,7 @@ internal sealed class M21TestClient
     public BookingService Bookings { get; }
     public NotificationService Notifications { get; }
     public FileService Files { get; }
+    public PaymentService Payments { get; }
     public M21TestClient()
     {
         var auth = new Authorizer(Current);
@@ -31,6 +32,8 @@ internal sealed class M21TestClient
         Bookings = new(auth, Current, new DataScope(Current), Factory, new BookingRepository(), customers, clock, settings, Availability, writes, new AuditWriter(), Login.Machine);
         Notifications = new(Current, Factory, writes, new NotificationRepository(), clock);
         Files = new(auth, Factory, new EvidenceRepository());
+        Payments = new(auth, Current, new DataScope(Current), writes, new BookingRepository(), new PaymentRepository(),
+            new EvidenceRepository(), new NotificationRepository(), clock, Bookings, new AuditWriter(), Login.Machine);
     }
     public async Task<TestIdentity> LoginNewAsync(Position role = Position.Manager, int? areaId = null, bool allAreas = true)
     {

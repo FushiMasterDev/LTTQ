@@ -6,6 +6,29 @@ namespace Homestay.DAL.Repositories;
 
 public sealed class NotificationRepository
 {
+    public async Task NotifyAccountantsAsync(UnitOfWork db, string message, int paymentId, DateTime now, CancellationToken ct)
+    {
+        using var command = db.CreateCommand("""
+            INSERT dbo.Notifications(UserId,Message,RefType,RefId,IsRead,CreatedAt)
+            SELECT e.UserId,@message,'Payment',@ref,0,@now FROM dbo.Employees e JOIN dbo.Users u ON u.Id=e.UserId
+            WHERE e.Position='Accountant' AND e.EmploymentStatus='Active' AND u.Status='Active';
+            """);
+        command.Parameters.AddNVarChar("@message", 500, message);
+        command.Parameters.AddVarChar("@ref", 30, paymentId.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        command.Parameters.AddUtcDateTime("@now", now);
+        await db.ExecuteAsync(command, ct).ConfigureAwait(false);
+    }
+
+    public async Task NotifyBookingAssigneeAsync(UnitOfWork db, int userId, string message, int bookingId, DateTime now, CancellationToken ct)
+    {
+        using var command = db.CreateCommand("INSERT dbo.Notifications(UserId,Message,RefType,RefId,IsRead,CreatedAt) VALUES(@user,@message,'Booking',@ref,0,@now);");
+        command.Parameters.AddInt32("@user", userId);
+        command.Parameters.AddNVarChar("@message", 500, message);
+        command.Parameters.AddVarChar("@ref", 30, bookingId.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        command.Parameters.AddUtcDateTime("@now", now);
+        await db.ExecuteAsync(command, ct).ConfigureAwait(false);
+    }
+
     public async Task<int> CountUnreadAsync(DbSession db, int userId, CancellationToken ct)
     {
         using var command = db.CreateCommand("SELECT COUNT(*) FROM dbo.Notifications WHERE UserId=@user AND IsRead=0;");

@@ -17,4 +17,10 @@ public sealed record RecordReceiptRequest
     public string? EvidenceFileName { get; init; }
     public byte[] RowVer { get; init; } = [];
 }
-public sealed record RecordReceiptResult(BookingDetail Booking, BookingPaymentItem Receipt);
+public sealed record RecordReceiptResult(BookingDetail Booking, BookingPaymentItem Receipt)
+{
+    public string VoucherNo => Receipt.VoucherNo;
+    public BookingStatus Status => Booking.Booking.Status;
+    public bool IsInsufficient { get; init; }
+    public string? Warning { get; init; }
+}

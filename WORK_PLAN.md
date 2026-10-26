@@ -120,7 +120,7 @@ Mục tiêu: tra phòng → tạo đơn → ghi nhận thu cọc chạy trọn. 
 - [x] **M2.1** ⛳ Hợp đồng: `AvailabilityService` (tra phòng trống, lưới lịch phòng), `CustomerService`, `BookingService` (báo giá, tạo đơn, danh sách theo tab hàng đợi, chi tiết, nhận phụ trách, giao lại, hủy đơn chưa có tiền, tìm nhanh), `PaymentService.RecordReceipt`, `NotificationService` (số chưa đọc, danh sách, đánh dấu đã đọc), `FileService` (tải/mở ảnh chứng từ). Hàm đọc chạy thật trên seed.
 - [x] **M2.2** `PricingCalculator`, chọn chính sách hủy + test (ngày thường/cuối tuần/lễ, đổi giá giữa kỳ ở, làm tròn cọc).
 - [x] **M2.3** Tạo đơn đầy đủ (khóa `RoomType:{id}`, `RoomNights`, `Counters`, giữ 15 phút), nhả giữ phòng quá hạn tại chỗ, `JobRunner` chỉ với tác vụ hết hạn giữ phòng; **test 10 luồng** cùng đặt.
-- [ ] **M2.4** Ghi nhận thu cọc, nhận phụ trách/giao lại, hủy đơn chưa có tiền, thông báo; test khách thứ 4 đơn chờ bị chặn.
+- [x] **M2.4** Ghi nhận thu cọc, nhận phụ trách/giao lại, hủy đơn chưa có tiền, thông báo; test khách thứ 4 đơn chờ bị chặn.
 
 **WIN** (vẽ form ngay; nối dữ liệu sau M2.1)
 

@@ -64,7 +64,7 @@ public sealed class BookingService(Authorizer authorizer, ICurrentSession curren
     {
         return BusinessErrorTranslator.ExecuteAsync(ct => factory.ReadAsync((db, token) => ReadDetailAsync(db, id, code, token), ct), cancellationToken);
     }
-    private async Task<BookingDetail> ReadDetailAsync(DbSession db, int? id, string? code, CancellationToken ct)
+    internal async Task<BookingDetail> ReadDetailAsync(DbSession db, int? id, string? code, CancellationToken ct)
     {
         var scope = dataScope.BookingFilter();
         var session = currentSession.RequireSession();
@@ -180,10 +180,11 @@ public sealed class BookingService(Authorizer authorizer, ICurrentSession curren
             var code = BookingCreationRules.FormatCode(now, await repository.NextSequenceAsync(db, BookingCreationRules.CounterKey(now), ct).ConfigureAwait(false));
             var hold = now.AddMinutes(await settings.GetBookingHoldMinutesAsync(ct, db).ConfigureAwait(false));
             // Header precedes ledger because FK_RoomNights_BookingId is checked immediately by SQL Server.
+            BookingStateMachine.Require(null, BookingStatus.AwaitingPayment, BookingStateMachine.Actor(session.Position));
             var id = await repository.InsertAsync(db, normalized, customerId, session.EmployeeId, candidate, room.RoomId, code, now, hold, price, policy.Id, ct).ConfigureAwait(false);
             await repository.InsertNightsAsync(db, id, room.RoomId, price.Nights, ct).ConfigureAwait(false);
-            await repository.InsertCreationHistoryAsync(db, id, session.UserId, now, ct).ConfigureAwait(false);
-            await audit.WriteAsync(db, new(session.UserId, "Booking.Create", "Bookings", id.ToString(System.Globalization.CultureInfo.InvariantCulture), null,
+            await new BookingStatusWriter(repository, audit).ChangeStatusAsync(db, id, null, BookingStatus.AwaitingPayment, null,
+                BookingStateMachine.Actor(session.Position), now, new(session.UserId, "Booking.Create", "Bookings", id.ToString(System.Globalization.CultureInfo.InvariantCulture), null,
                 new { Code = code, CustomerId = customerId, candidate.HomestayId, normalized.RoomTypeId, RoomId = room.RoomId,
                     normalized.CheckIn, normalized.CheckOut, normalized.Guests, Status = nameof(BookingStatus.AwaitingPayment),
                     price.TotalAmount, price.DepositRate, price.DepositAmount, CommissionRate = candidate.CommissionRate, CancellationPolicyId = policy.Id, HoldExpiresAtUtc = hold }, null, machineName), ct).ConfigureAwait(false);
@@ -200,30 +201,106 @@ public sealed class BookingService(Authorizer authorizer, ICurrentSession curren
         var maxGuests = await repository.GetMaxGuestsAsync(db, request.RoomTypeId, ct).ConfigureAwait(false) ?? throw new NotFoundException();
         BookingCreationRules.ValidateStay(request, now, maxNights, maxGuests);
     }
-    /// <summary>M2.4: Require BookingClaim + phạm vi; chỉ đơn chưa giao, kiểm RowVer trong transaction, audit/thông báo.</summary>
     public Task<BookingDetail> ClaimAsync(ClaimBookingRequest request, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("M2.4: nhận phụ trách chưa triển khai.");
-    /// <summary>M2.4: Require BookingAssign + phạm vi; NV chỉ giao đơn mình phụ trách; người nhận Active,
-    /// kiểm RowVer, không đổi CreatedByEmployeeId, audit/thông báo trong transaction.</summary>
+    {
+        authorizer.Require(Permission.BookingClaim);
+        ArgumentNullException.ThrowIfNull(request);
+        StaffInputRules.RowVer(request.RowVer);
+        var version = request.RowVer.ToArray();
+        return writes.ExecuteAsync(async (db, ct) =>
+        {
+            var old = await WritableAsync(db, request.BookingId, ct).ConfigureAwait(false);
+            const string claimed = "Đơn vừa được người khác nhận phụ trách. Đã tải lại.";
+            if (old.AssignedEmployeeId is not null) throw new ConcurrencyException(claimed);
+            CheckVersion(old, version);
+            if (BookingStateMachine.IsTerminal(old.Status)) throw new BusinessException("Đơn đã kết thúc. Vui lòng tải lại đơn.");
+            var session = currentSession.RequireSession();
+            var now = await clock.GetUtcNowAsync(db, ct).ConfigureAwait(false);
+            if (await repository.AssignAsync(db, old.Id, session.EmployeeId, version, true, now, ct).ConfigureAwait(false) == 0)
+                throw new ConcurrencyException(claimed);
+            await AssignmentAuditAsync(db, "Booking.Claim", old, session.EmployeeId, ct).ConfigureAwait(false);
+            return await ReadDetailAsync(db, old.Id, null, ct).ConfigureAwait(false);
+        }, cancellationToken);
+    }
+
     public Task<BookingDetail> ReassignAsync(ReassignBookingRequest request, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("M2.4: giao lại chưa triển khai.");
-    /// <summary>M2.4: Require BookingCancelUnpaid + phạm vi, RowVer; AwaitingPayment, lý do bắt buộc,
-    /// không phiếu Pending/Verified; đổi trạng thái qua máy trạng thái, nhả RoomNights và ghi lịch sử/audit/thông báo cùng transaction.</summary>
+    {
+        authorizer.Require(Permission.BookingAssign);
+        ArgumentNullException.ThrowIfNull(request);
+        StaffInputRules.RowVer(request.RowVer);
+        var version = request.RowVer.ToArray();
+        return writes.ExecuteAsync(async (db, ct) =>
+        {
+            var old = await WritableAsync(db, request.BookingId, ct).ConfigureAwait(false);
+            var session = currentSession.RequireSession();
+            if (authorizer.GetAccess(Permission.BookingAssign) == AccessLevel.Own && old.AssignedEmployeeId != session.EmployeeId)
+                throw new ForbiddenException("Chỉ được giao lại đơn mình đang phụ trách.");
+            CheckVersion(old, version);
+            if (BookingStateMachine.IsTerminal(old.Status)) throw new BusinessException("Đơn đã kết thúc. Vui lòng tải lại đơn.");
+            if (old.AssignedEmployeeId == request.AssignedEmployeeId) throw new BusinessException("Vui lòng chọn người phụ trách khác người hiện tại.");
+            var userId = await repository.GetAssignableUserAsync(db, request.AssignedEmployeeId, ct).ConfigureAwait(false)
+                ?? throw new BusinessException("Người nhận phải là Nhân viên hoặc Quản lý đang làm việc và có tài khoản hoạt động. Vui lòng chọn lại.");
+            var now = await clock.GetUtcNowAsync(db, ct).ConfigureAwait(false);
+            if (await repository.AssignAsync(db, old.Id, request.AssignedEmployeeId, version, false, now, ct).ConfigureAwait(false) == 0)
+                throw new ConcurrencyException();
+            await AssignmentAuditAsync(db, "Booking.Reassign", old, request.AssignedEmployeeId, ct).ConfigureAwait(false);
+            await new NotificationRepository().NotifyBookingAssigneeAsync(db, userId, $"Bạn được giao phụ trách đơn {old.Code}", old.Id, now, ct).ConfigureAwait(false);
+            return await ReadDetailAsync(db, old.Id, null, ct).ConfigureAwait(false);
+        }, cancellationToken);
+    }
+
     public Task<BookingDetail> CancelUnpaidAsync(CancelUnpaidBookingRequest request, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException("M2.4: hủy đơn chưa có tiền chưa triển khai.");
+    {
+        authorizer.Require(Permission.BookingCancelUnpaid);
+        ArgumentNullException.ThrowIfNull(request);
+        StaffInputRules.RowVer(request.RowVer);
+        var version = request.RowVer.ToArray();
+        var reason = request.Reason?.Trim();
+        if (string.IsNullOrWhiteSpace(reason) || reason.Length > 500)
+            throw new BusinessException("Lý do hủy cần từ 1 đến 500 ký tự. Vui lòng bổ sung.");
+        return writes.ExecuteAsync(async (db, ct) =>
+        {
+            var old = await WritableAsync(db, request.BookingId, ct).ConfigureAwait(false);
+            CheckVersion(old, version);
+            if (await repository.HasActiveDepositAsync(db, old.Id, ct).ConfigureAwait(false))
+                throw new BusinessException("Đơn đã có phiếu thu chờ xác minh. Vui lòng chờ kế toán xử lý trước khi hủy.");
+            if (old.Status != BookingStatus.AwaitingPayment)
+                throw new BusinessException("Chỉ được hủy ngay đơn Chờ thanh toán. Vui lòng tải lại đơn.");
+            var session = currentSession.RequireSession();
+            await new BookingStatusWriter(repository, audit).ChangeStatusAsync(db, old.Id, old.Status, BookingStatus.Cancelled, version,
+                BookingStateMachine.Actor(session.Position), await clock.GetUtcNowAsync(db, ct).ConfigureAwait(false),
+                new(session.UserId, "Booking.CancelUnpaid", "Bookings", old.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    new { Status = old.Status.ToString() }, new { Status = nameof(BookingStatus.Cancelled), CancelReason = reason, RefundAmount = (decimal?)null }, reason, machineName), ct).ConfigureAwait(false);
+            return await ReadDetailAsync(db, old.Id, null, ct).ConfigureAwait(false);
+        }, cancellationToken);
+    }
+
+    private async Task<BookingWriteSnapshot> WritableAsync(UnitOfWork db, int id, CancellationToken ct)
+    {
+        await dataScope.EnsureBookingWritableAsync(db, id, ct).ConfigureAwait(false);
+        var scope = dataScope.BookingFilter();
+        return await repository.GetForUpdateAsync(db, id, scope.Condition, scope.AddParametersTo, ct).ConfigureAwait(false) ?? throw new NotFoundException();
+    }
+    internal static void CheckVersion(BookingWriteSnapshot booking, byte[] rowVer)
+    {
+        if (!booking.RowVer.AsSpan().SequenceEqual(rowVer)) throw new ConcurrencyException();
+    }
+    private Task AssignmentAuditAsync(UnitOfWork db, string action, BookingWriteSnapshot old, int employeeId, CancellationToken ct) =>
+        audit.WriteAsync(db, new(currentSession.RequireSession().UserId, action, "Bookings", old.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            new { old.AssignedEmployeeId }, new { AssignedEmployeeId = employeeId }, null, machineName), ct);
 
     private IReadOnlyList<BookingAction> Actions(BookingDetail detail, bool inScope, DateTime now)
     {
         var session = currentSession.RequireSession();
-        if (!inScope || session.Position == Position.Accountant) return [];
+        if (!inScope) return [];
         var b = detail.Booking; var result = new List<BookingAction>();
-        var terminal = b.Status is BookingStatus.Completed or BookingStatus.Expired or BookingStatus.Cancelled or BookingStatus.Rejected or BookingStatus.NoShow;
-        var pending = detail.Payments.Any(p => p.Status == PaymentStatus.Pending);
-        var money = detail.Payments.Any(p => p.Status == PaymentStatus.Verified && p.Type is PaymentType.Deposit or PaymentType.AdditionalDeposit);
+        var terminal = BookingStateMachine.IsTerminal(b.Status);
+        var pending = detail.Payments.Any(p => p.Type == PaymentType.Deposit && p.Status == PaymentStatus.Pending);
+        var money = detail.Payments.Any(p => p.Status == PaymentStatus.Verified && p.Type == PaymentType.Deposit);
         void Add(BookingAction action, Permission permission, bool condition) { if (condition && authorizer.Can(permission)) result.Add(action); }
         Add(BookingAction.Claim, Permission.BookingClaim, !terminal && b.AssignedEmployeeId is null);
         Add(BookingAction.Reassign, Permission.BookingAssign, !terminal && (authorizer.GetAccess(Permission.BookingAssign) != AccessLevel.Own || b.AssignedEmployeeId == session.EmployeeId));
-        Add(BookingAction.RecordDeposit, Permission.PaymentRecord, b.Status == BookingStatus.AwaitingPayment && detail.HoldExpiresAtUtc >= now && !pending && !money);
+        Add(BookingAction.RecordDeposit, Permission.PaymentRecord, b.Status == BookingStatus.AwaitingPayment && detail.HoldExpiresAtUtc > now && !pending && !money);
         Add(BookingAction.CancelUnpaid, Permission.BookingCancelUnpaid, b.Status == BookingStatus.AwaitingPayment && !pending && !money);
         return result;
     }

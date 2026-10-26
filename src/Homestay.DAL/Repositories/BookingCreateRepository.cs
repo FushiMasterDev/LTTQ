@@ -109,15 +109,4 @@ public sealed partial class BookingRepository
         }
     }
 
-    public async Task InsertCreationHistoryAsync(UnitOfWork db, int bookingId, int userId, DateTime now, CancellationToken ct)
-    {
-        using var command = db.CreateCommand("""
-            INSERT dbo.BookingStatusHistories(BookingId,FromStatus,ToStatus,ActorType,ActorUserId,ChangedAt)
-            VALUES(@id,NULL,'AwaitingPayment','Employee',@user,@now);
-            """);
-        command.Parameters.AddInt32("@id", bookingId);
-        command.Parameters.AddInt32("@user", userId);
-        command.Parameters.AddUtcDateTime("@now", now);
-        await db.ExecuteAsync(command, ct).ConfigureAwait(false);
-    }
 }
