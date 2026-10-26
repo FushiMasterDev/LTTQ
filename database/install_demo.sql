@@ -1937,7 +1937,10 @@ BEGIN
     DECLARE @Salt64 VARCHAR(24), @Hash64 VARCHAR(44);
     SELECT @Salt64 = CAST(N'' AS XML).value('xs:base64Binary(sql:variable("@Salt"))', 'varchar(24)'),
            @Hash64 = CAST(N'' AS XML).value('xs:base64Binary(sql:variable("@Result"))', 'varchar(44)');
-    SET @Encoded = 'PBKDF2-SHA256$1000$' + @Salt64 + '$' + @Hash64;
+    -- Thủ tục nằm ở tempdb: ghép ASCII bằng collation cố định, không theo server.
+    SET @Encoded = 'PBKDF2-SHA256$1000$' COLLATE Latin1_General_100_BIN2
+        + @Salt64 COLLATE Latin1_General_100_BIN2
+        + '$' COLLATE Latin1_General_100_BIN2 + @Hash64 COLLATE Latin1_General_100_BIN2;
 END;
 GO
 -- Vector đối chiếu hashlib.pbkdf2_hmac, có dấu và khóa UTF-8 dài hơn 64 byte.
@@ -2110,7 +2113,10 @@ BEGIN
     DECLARE @Salt64 VARCHAR(24), @Hash64 VARCHAR(44);
     SELECT @Salt64 = CAST(N'' AS XML).value('xs:base64Binary(sql:variable("@Salt"))', 'varchar(24)'),
            @Hash64 = CAST(N'' AS XML).value('xs:base64Binary(sql:variable("@Result"))', 'varchar(44)');
-    SET @Encoded = 'PBKDF2-SHA256$1000$' + @Salt64 + '$' + @Hash64;
+    -- Thủ tục nằm ở tempdb: ghép ASCII bằng collation cố định, không theo server.
+    SET @Encoded = 'PBKDF2-SHA256$1000$' COLLATE Latin1_General_100_BIN2
+        + @Salt64 COLLATE Latin1_General_100_BIN2
+        + '$' COLLATE Latin1_General_100_BIN2 + @Hash64 COLLATE Latin1_General_100_BIN2;
 END;
 GO
 -- Vector đối chiếu hashlib.pbkdf2_hmac, có dấu và khóa UTF-8 dài hơn 64 byte.
@@ -2141,9 +2147,11 @@ WHILE DATEADD(DAY, 2, @End) >= @Today
 INSERT INTO #Context
 SELECT @Now, @Today, @End, e.Id, e.UserId FROM dbo.Employees AS e WHERE e.EmployeeCode = 'NV0001';
 IF (SELECT COUNT(*) FROM #Context) <> 1 THROW 51011, N'Không tìm thấy Quản lý NV0001.', 1;
-CREATE TABLE #Employees (Code VARCHAR(20) PRIMARY KEY, Id INT, UserId INT);
+-- Cột chuỗi trong bảng tạm dùng collation database nghiệp vụ thay vì tempdb/server.
+CREATE TABLE #Employees (Code VARCHAR(20) COLLATE DATABASE_DEFAULT PRIMARY KEY, Id INT, UserId INT);
 INSERT INTO #Employees SELECT 'NV0001', ManagerId, ManagerUserId FROM #Context;
-DECLARE @Accounts TABLE (N INT, FullName NVARCHAR(100), Position VARCHAR(20));
+DECLARE @Accounts TABLE (N INT, FullName NVARCHAR(100) COLLATE DATABASE_DEFAULT,
+    Position VARCHAR(20) COLLATE DATABASE_DEFAULT);
 INSERT INTO @Accounts VALUES
     (2, N'Nguyễn An Mẫu', 'Staff'), (3, N'Trần Bình Mẫu', 'Staff'), (4, N'Lê Chi Mẫu', 'Staff'),
     (5, N'Phạm Dũng Mẫu', 'Manager'), (6, N'Hoàng Hà Mẫu', 'Accountant'), (7, N'Vũ Lan Mẫu', 'Accountant');
@@ -2237,7 +2245,7 @@ SELECT h.ImageId, 'HomestayImage', N'homestay-mau-' + CONVERT(NVARCHAR(1), h.N) 
 FROM #Homestays AS h JOIN #Images AS i ON i.N = h.N CROSS JOIN #Context AS c;
 INSERT INTO dbo.HomestayImages (HomestayId, FileId, Caption, SortOrder, IsCover)
 SELECT Id, ImageId, N'Ảnh màu minh họa - dữ liệu giả', 0, 1 FROM #Homestays;
-CREATE TABLE #Documents (HomestayId INT, DocumentType VARCHAR(30), FileId UNIQUEIDENTIFIER);
+CREATE TABLE #Documents (HomestayId INT, DocumentType VARCHAR(30) COLLATE DATABASE_DEFAULT, FileId UNIQUEIDENTIFIER);
 INSERT INTO #Documents
 SELECT h.Id, d.DocumentType, NEWID() FROM #Homestays AS h
 CROSS JOIN (VALUES ('BusinessLicense'), ('FireSafety')) AS d(DocumentType) WHERE h.N <= 4;
@@ -2323,10 +2331,10 @@ END;
 GO
 CREATE TABLE #Plan
 (
-    N INT PRIMARY KEY, Status VARCHAR(20), HomestayN INT, Slot INT, CheckIn DATE, CheckOut DATE,
+    N INT PRIMARY KEY, Status VARCHAR(20) COLLATE DATABASE_DEFAULT, HomestayN INT, Slot INT, CheckIn DATE, CheckOut DATE,
     CreatedAt DATETIME2(3), HoldExpiresAt DATETIME2(3), SubmittedAt DATETIME2(3), DepositedAt DATETIME2(3),
     ConfirmedAt DATETIME2(3), CheckedInAt DATETIME2(3), CompletedAt DATETIME2(3), EndAt DATETIME2(3),
-    Code VARCHAR(20), BookingId INT
+    Code VARCHAR(20) COLLATE DATABASE_DEFAULT, BookingId INT
 );
 INSERT INTO #Plan (N, Status, HomestayN, Slot, CheckIn, CheckOut, CreatedAt)
 SELECT v.N, v.Status, v.H, v.Slot, DATEADD(DAY, v.Arrival, c.Today), DATEADD(DAY, v.Departure, c.Today),
@@ -2369,7 +2377,7 @@ UPDATE #Plan SET HoldExpiresAt = DATEADD(MINUTE, 15, CreatedAt),
 -- Ca này minh họa gửi lại trong hạn ban đầu, không minh họa gia hạn sau từ chối lần đầu của 7.2/9.2.
 UPDATE #Plan SET SubmittedAt = DATEADD(MINUTE, 5, CreatedAt), EndAt = DATEADD(MINUTE, 6, CreatedAt) WHERE N = 16;
 -- Mã theo ngày tạo tại Việt Nam, lấy tiếp bộ đếm hiện có thay vì giả định bắt đầu từ 1.
-CREATE TABLE #BookingCodes (N INT PRIMARY KEY, CounterKey VARCHAR(30), Seq INT);
+CREATE TABLE #BookingCodes (N INT PRIMARY KEY, CounterKey VARCHAR(30) COLLATE DATABASE_DEFAULT, Seq INT);
 INSERT INTO #BookingCodes
 SELECT p.N, k.CounterKey, ISNULL(c.LastValue, 0) + CONVERT(INT, ROW_NUMBER() OVER (PARTITION BY k.CounterKey ORDER BY p.N))
 FROM #Plan AS p
@@ -2379,7 +2387,8 @@ IF EXISTS (SELECT 1 FROM #BookingCodes WHERE Seq > 999)
     THROW 51012, N'Bộ đếm mã đơn trong ngày vượt 999.', 1;
 UPDATE p SET Code = k.CounterKey + '-' + RIGHT('000' + CONVERT(VARCHAR(3), k.Seq), 3)
 FROM #Plan AS p JOIN #BookingCodes AS k ON k.N = p.N;
-CREATE TABLE #NightPrices (N INT, [Date] DATE, DayType VARCHAR(10), Price DECIMAL(18,0), PRIMARY KEY (N, [Date]));
+CREATE TABLE #NightPrices (N INT, [Date] DATE, DayType VARCHAR(10) COLLATE DATABASE_DEFAULT,
+    Price DECIMAL(18,0), PRIMARY KEY (N, [Date]));
 INSERT INTO #NightPrices
 SELECT p.N, d.StayDate, dt.DayType, price.Price
 FROM #Plan AS p JOIN #Rooms AS r ON r.HomestayN = p.HomestayN AND r.Slot = p.Slot
@@ -2456,8 +2465,9 @@ INSERT INTO dbo.Counters (CounterKey, LastValue)
 SELECT CounterKey, MAX(Seq) FROM #BookingCodes AS k
 WHERE NOT EXISTS (SELECT 1 FROM dbo.Counters AS c WHERE c.CounterKey = k.CounterKey) GROUP BY CounterKey;
 GO
-CREATE TABLE #Events (N INT, Seq INT, ToStatus VARCHAR(20), AtUtc DATETIME2(3), ActorType VARCHAR(10),
-    ActorUserId INT NULL, OnBehalf BIT, Note NVARCHAR(500), PRIMARY KEY (N, Seq));
+CREATE TABLE #Events (N INT, Seq INT, ToStatus VARCHAR(20) COLLATE DATABASE_DEFAULT,
+    AtUtc DATETIME2(3), ActorType VARCHAR(10) COLLATE DATABASE_DEFAULT,
+    ActorUserId INT NULL, OnBehalf BIT, Note NVARCHAR(500) COLLATE DATABASE_DEFAULT, PRIMARY KEY (N, Seq));
 INSERT INTO #Events
 SELECT p.N, 1, 'AwaitingPayment', p.CreatedAt, 'Employee', h.StaffUserId, 0, N'Tạo đơn mẫu'
 FROM #Plan AS p JOIN #Homestays AS h ON h.N = p.HomestayN;
@@ -2505,9 +2515,11 @@ FROM #Events AS e JOIN #Plan AS p ON p.N = e.N;
 GO
 CREATE TABLE #PaymentPlan
 (
-    N INT IDENTITY(1,1) PRIMARY KEY, BookingId INT, Direction VARCHAR(3), Type VARCHAR(20), Method VARCHAR(20),
-    Amount DECIMAL(18,0), Status VARCHAR(20), RecordedBy INT, RecordedAt DATETIME2(3), VerifiedBy INT,
-    VerifiedAt DATETIME2(3), BankRef VARCHAR(100), RejectReason NVARCHAR(500), VoucherNo VARCHAR(20), Id INT
+    N INT IDENTITY(1,1) PRIMARY KEY, BookingId INT, Direction VARCHAR(3) COLLATE DATABASE_DEFAULT,
+    Type VARCHAR(20) COLLATE DATABASE_DEFAULT, Method VARCHAR(20) COLLATE DATABASE_DEFAULT,
+    Amount DECIMAL(18,0), Status VARCHAR(20) COLLATE DATABASE_DEFAULT, RecordedBy INT,
+    RecordedAt DATETIME2(3), VerifiedBy INT, VerifiedAt DATETIME2(3), BankRef VARCHAR(100) COLLATE DATABASE_DEFAULT,
+    RejectReason NVARCHAR(500) COLLATE DATABASE_DEFAULT, VoucherNo VARCHAR(20) COLLATE DATABASE_DEFAULT, Id INT
 );
 INSERT INTO #PaymentPlan (BookingId, Direction, Type, Method, Amount, Status, RecordedBy, RecordedAt, VerifiedBy, VerifiedAt)
 SELECT b.Id, 'In', 'Deposit', CASE WHEN p.N % 2 = 0 OR p.N = 5 THEN 'BankTransfer' ELSE 'Cash' END,
@@ -2535,7 +2547,7 @@ SELECT b.Id, 'Out', 'Refund', 'BankTransfer', b.RefundAmount,
        CASE WHEN p.N NOT IN (17, 19) THEN 'SEED-REFUND-' + CONVERT(VARCHAR(2), p.N) END
 FROM #Plan AS p JOIN dbo.Bookings AS b ON b.Id = p.BookingId CROSS JOIN #Context AS c
 CROSS JOIN #Employees AS e WHERE b.RefundAmount > 0 AND e.Code = 'NV0007';
-CREATE TABLE #PaymentCodes (N INT PRIMARY KEY, CounterKey VARCHAR(30), Seq INT);
+CREATE TABLE #PaymentCodes (N INT PRIMARY KEY, CounterKey VARCHAR(30) COLLATE DATABASE_DEFAULT, Seq INT);
 INSERT INTO #PaymentCodes
 SELECT p.N, k.CounterKey, ISNULL(c.LastValue, 0) + CONVERT(INT, ROW_NUMBER() OVER (PARTITION BY k.CounterKey ORDER BY p.RecordedAt, p.N))
 FROM #PaymentPlan AS p
@@ -2627,7 +2639,8 @@ GO
 -- 7.6.6 đầy đủ: phần trăm hoàn làm tròn trước, phần giữ/hoa hồng lấy MIN, tổng bằng tổng dòng.
 CREATE TABLE #SettlementLines
 (
-    HomestayId INT, BookingId INT, ItemType VARCHAR(20), RoomAmount DECIMAL(18,0), DepositAmount DECIMAL(18,0),
+    HomestayId INT, BookingId INT, ItemType VARCHAR(20) COLLATE DATABASE_DEFAULT,
+    RoomAmount DECIMAL(18,0), DepositAmount DECIMAL(18,0),
     RefundAmount DECIMAL(18,0), RetainedAmount DECIMAL(18,0), CommissionAmount DECIMAL(18,0),
     DiscountAmount DECIMAL(18,0), PayoutAmount DECIMAL(18,0), CommissionRate DECIMAL(5,4)
 );

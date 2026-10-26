@@ -58,7 +58,10 @@ BEGIN
     DECLARE @Salt64 VARCHAR(24), @Hash64 VARCHAR(44);
     SELECT @Salt64 = CAST(N'' AS XML).value('xs:base64Binary(sql:variable("@Salt"))', 'varchar(24)'),
            @Hash64 = CAST(N'' AS XML).value('xs:base64Binary(sql:variable("@Result"))', 'varchar(44)');
-    SET @Encoded = 'PBKDF2-SHA256$1000$' + @Salt64 + '$' + @Hash64;
+    -- Thủ tục nằm ở tempdb: ghép ASCII bằng collation cố định, không theo server.
+    SET @Encoded = 'PBKDF2-SHA256$1000$' COLLATE Latin1_General_100_BIN2
+        + @Salt64 COLLATE Latin1_General_100_BIN2
+        + '$' COLLATE Latin1_General_100_BIN2 + @Hash64 COLLATE Latin1_General_100_BIN2;
 END;
 GO
 -- Vector đối chiếu hashlib.pbkdf2_hmac, có dấu và khóa UTF-8 dài hơn 64 byte.
