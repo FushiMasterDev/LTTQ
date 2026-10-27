@@ -16,6 +16,8 @@ public sealed record BookingSearchRequest
     public string? Phone { get; init; }
     public string? CustomerName { get; init; }
     public int? HomestayId { get; init; }
+    public int? AreaId { get; init; }
+    public int? AssignedEmployeeId { get; init; }
     public DateOnly? CheckInFrom { get; init; }
     public DateOnly? CheckInTo { get; init; }
     public BookingStatus? Status { get; init; }

@@ -61,7 +61,7 @@ public sealed class AuthorizationTests
     [Fact]
     public void EveryPermissionHasAnExplicitGrantAndUnknownValuesFailClosed()
     {
-        Assert.Equal(59, Enum.GetValues<Permission>().Length);
+        Assert.Equal(62, Enum.GetValues<Permission>().Length);
         Assert.All(Enum.GetValues<Permission>(), permission =>
             Assert.Contains(Enum.GetValues<Position>(), role => Authorizer.GetAccess(role, permission) != AccessLevel.None));
         Assert.Equal(AccessLevel.None, Authorizer.GetAccess((Position)999, Permission.BookingView));

@@ -83,12 +83,14 @@ public sealed partial class BookingRepository
     public async Task<PagedResult<BookingListItem>> ListAsync(DbSession db, BookingSearchRequest request, string scopeCondition,
         Action<SqlCommand> addScope, int employeeId, DateTime now, CancellationToken ct)
     {
-        var exact = !string.IsNullOrWhiteSpace(request.Code) || !string.IsNullOrWhiteSpace(request.Phone);
+        var exact = (!string.IsNullOrWhiteSpace(request.Code) || !string.IsNullOrWhiteSpace(request.Phone))
+            && request.AreaId is null && request.AssignedEmployeeId is null;
         var where = $"""
              WHERE {(exact ? "1=1" : $"({scopeCondition}) AND ({QueueCondition(request.Queue)})")}
              AND (@code='' OR REPLACE(b.Code,'-','')=@code) AND (@phone IS NULL OR c.Phone=@phone)
              AND (@name=N'' OR c.FullName COLLATE Vietnamese_CI_AI LIKE @name ESCAPE '~')
              AND (@home IS NULL OR b.HomestayId=@home) AND (@from IS NULL OR b.CheckIn>=@from) AND (@to IS NULL OR b.CheckIn<=@to)
+             AND (@area IS NULL OR h.AreaId=@area) AND (@assignee IS NULL OR b.AssignedEmployeeId=@assignee)
              AND (@status IS NULL OR b.Status=@status)
              AND (@search=N'' OR b.Code LIKE @search ESCAPE '~' OR c.Phone LIKE @search ESCAPE '~' OR c.FullName COLLATE Vietnamese_CI_AI LIKE @search ESCAPE '~' OR h.Name COLLATE Vietnamese_CI_AI LIKE @search ESCAPE '~')
              AND (@expiring=0 OR (b.Status='AwaitingPayment' AND b.HoldExpiresAt>=@now AND b.HoldExpiresAt<DATEADD(minute,5,@now)
@@ -106,6 +108,8 @@ public sealed partial class BookingRepository
             command.Parameters.AddVarChar("@phone", 16, request.Phone);
             command.Parameters.AddNVarChar("@name", 500, StaffReadSql.Like(request.CustomerName));
             command.Parameters.AddInt32("@home", request.HomestayId);
+            command.Parameters.AddInt32("@area", request.AreaId);
+            command.Parameters.AddInt32("@assignee", request.AssignedEmployeeId);
             command.Parameters.AddDate("@from", request.CheckInFrom);
             command.Parameters.AddDate("@to", request.CheckInTo);
             command.Parameters.AddEnum("@status", 20, request.Status);

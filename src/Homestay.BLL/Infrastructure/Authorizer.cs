@@ -11,6 +11,9 @@ public sealed class Authorizer(ICurrentSession currentSession)
     private static readonly FrozenDictionary<Permission, (AccessLevel Staff, AccessLevel Manager, AccessLevel Accountant)> Matrix =
         new Dictionary<Permission, (AccessLevel, AccessLevel, AccessLevel)>
         {
+            [Permission.HomestayView] = (AccessLevel.InScope, AccessLevel.InScope, AccessLevel.None),
+            [Permission.OwnerIdentityView] = (AccessLevel.None, AccessLevel.All, AccessLevel.None),
+            [Permission.RefundAccountEdit] = (AccessLevel.None, AccessLevel.None, AccessLevel.All),
             [Permission.AccountSelfManage] = (AccessLevel.All, AccessLevel.All, AccessLevel.All),
             // Service cấm tự hạ chức/tự cho nghỉ việc và phải giữ ít nhất một Quản lý hoạt động.
             [Permission.EmployeeManage] = (AccessLevel.None, AccessLevel.All, AccessLevel.None),

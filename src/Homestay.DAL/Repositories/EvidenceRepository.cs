@@ -30,4 +30,12 @@ public sealed class EvidenceRepository
         command.Parameters.AddGuid("@file", fileId);
         return (await db.QueryAsync(command, r => new EvidenceFile(r.GetGuid("Id"), r.GetString("FileName"), r.GetString("ContentType"), r.GetFieldValue<byte[]>(r.GetOrdinal("Content"))), ct).ConfigureAwait(false)).SingleOrDefault();
     }
+    public async Task<EvidenceFile?> GetHomestayFileAsync(DbSession db,int homestayId,Guid fileId,bool document,CancellationToken ct)
+    {
+        using var command=db.CreateCommand(document ?
+            "SELECT f.Id,f.FileName,f.ContentType,f.Content FROM dbo.StoredFiles f WHERE f.Id=@file AND f.Category='Document' AND EXISTS(SELECT 1 FROM dbo.VerificationDocuments d WHERE d.HomestayId=@home AND d.FileId=f.Id);" :
+            "SELECT f.Id,f.FileName,f.ContentType,f.Content FROM dbo.StoredFiles f WHERE f.Id=@file AND f.Category='HomestayImage' AND EXISTS(SELECT 1 FROM dbo.HomestayImages i WHERE i.HomestayId=@home AND i.FileId=f.Id);");
+        command.Parameters.AddInt32("@home",homestayId);command.Parameters.AddGuid("@file",fileId);
+        return (await db.QueryAsync(command,r=>new EvidenceFile(r.GetGuid("Id"),r.GetString("FileName"),r.GetString("ContentType"),r.GetFieldValue<byte[]>(r.GetOrdinal("Content"))),ct).ConfigureAwait(false)).SingleOrDefault();
+    }
 }

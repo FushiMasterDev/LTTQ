@@ -42,6 +42,30 @@ public sealed class DataScope(ICurrentSession currentSession)
         return new ScopeSql($"({areaSql} OR {bookingAlias}.CreatedByEmployeeId = {employee} OR {bookingAlias}.AssignedEmployeeId = {employee})", parameters.AsReadOnly());
     }
 
+    // Hồ sơ không có ngoại lệ "đơn mình tạo/phụ trách". KT chỉ có đường đọc tài chính được gọi rõ ràng.
+    public ScopeSql HomestayFilter(string alias = "h", bool financialRead = false) => AreaFilter(alias, "AreaId", financialRead);
+    public ScopeSql AreaFilter(string alias = "a", string column = "Id", bool financialRead = false)
+    {
+        foreach (var value in new[] { alias, column })
+            if (!Regex.IsMatch(value, "^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.CultureInvariant)) throw new ArgumentException("Invalid SQL identifier.");
+        var session = currentSession.RequireSession();
+        if (session.Position == Position.Manager && session.HasAllAreas || financialRead && session.Position == Position.Accountant)
+            return new("1=1", []);
+        if (session.Position is not (Position.Staff or Position.Manager)) return new("1=0", []);
+        using var holder = new SqlCommand();
+        var parameters = session.AreaIds.Distinct().Select((id,index) => holder.Parameters.AddInt32("@listingArea"+index,id)).ToArray();
+        return new(parameters.Length == 0 ? "1=0" : $"{alias}.{column} IN ({string.Join(",",parameters.Select(p=>p.ParameterName))})", parameters);
+    }
+    public ScopeSql OwnerFilter()
+    {
+        var session = currentSession.RequireSession();
+        var home = HomestayFilter(financialRead: true);
+        if (home.Condition == "1=1") return home;
+        using var holder = new SqlCommand();
+        var creator = holder.Parameters.AddInt32("@ownerCreator",session.EmployeeId);
+        return new($"(EXISTS(SELECT 1 FROM dbo.Homestays h WHERE h.OwnerId=o.Id AND ({home.Condition})) OR (o.Status='Pending' AND o.CreatedByEmployeeId=@ownerCreator))", home.Parameters.Concat(new[] { creator }).ToArray());
+    }
+
     public async Task EnsureBookingWritableAsync(UnitOfWork uow, int bookingId, CancellationToken cancellationToken)
     {
         var session = currentSession.RequireSession();

@@ -120,6 +120,12 @@ public enum Permission
     WorkTaskAssign,
     /// <summary>Xem / cập nhật việc được giao cho mình</summary>
     OwnWorkTaskManage,
+    /// <summary>Đọc hồ sơ homestay trong khu vực được giao</summary>
+    HomestayView,
+    /// <summary>Xem định danh đầy đủ của chủ</summary>
+    OwnerIdentityView,
+    /// <summary>Nhập tài khoản nhận hoàn cho phiếu Refund Pending</summary>
+    RefundAccountEdit,
 }
 
 public enum AccessLevel

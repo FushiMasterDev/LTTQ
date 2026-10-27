@@ -32,7 +32,7 @@ public sealed partial class BookingService(Authorizer authorizer, ICurrentSessio
         ArgumentNullException.ThrowIfNull(request);
         StaffInputRules.Page(request.Page, "Code", "CustomerName", "CustomerPhone", "HomestayName", "RoomTypeName", "RoomCode", "CheckIn", "CheckOut", "Status", "PaymentState", "AssignedEmployeeName", "DeadlineAtUtc");
         StaffInputRules.Text(request.Code, 20); StaffInputRules.Text(request.CustomerName, 200);
-        if (!Enum.IsDefined(request.Queue) || request.Status is { } status && !Enum.IsDefined(status) || request.CheckInFrom > request.CheckInTo || request.HomestayId is <= 0)
+        if (!Enum.IsDefined(request.Queue) || request.Status is { } status && !Enum.IsDefined(status) || request.CheckInFrom > request.CheckInTo || request.HomestayId is <= 0 || request.AreaId is <= 0 || request.AssignedEmployeeId is <= 0)
             throw new BusinessException("Bộ lọc đơn không hợp lệ. Vui lòng chọn lại.");
         var normalized = request with { Code = string.IsNullOrWhiteSpace(request.Code) ? null : request.Code.Trim(), Phone = string.IsNullOrWhiteSpace(request.Phone) ? null : PhoneNumber.Normalize(request.Phone) };
         // Cùng một ô tìm: mã đầy đủ/SĐT đầy đủ là tra chính xác toàn hệ thống (5.1), tên hoặc từ khóa khác vẫn lọc phạm vi.
