@@ -16,6 +16,9 @@ public sealed record ScopeSql(string Condition, IReadOnlyList<SqlParameter> Para
 
 public sealed class DataScope(ICurrentSession currentSession)
 {
+    // Preserve the M4.1 OwnerService constructor while sharing its authenticated session with the real write runner.
+    internal ICurrentSession CurrentSession => currentSession;
+
     public ScopeSql BookingFilter(string bookingAlias = "b", string homestayAlias = "h", string parameterPrefix = "scope") =>
         BuildBookingFilter(bookingAlias, homestayAlias, parameterPrefix, financialRead: true);
 

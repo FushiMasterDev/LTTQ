@@ -157,7 +157,7 @@ Mục tiêu: một đơn đi trọn tạo → cọc → xác minh → xác nhậ
 **MAC**
 
 - [x] **M4.1** ⛳ Hợp đồng: `OwnerService`, `HomestayService` (danh sách, hồ sơ, tạo nháp, sửa, tiện nghi, ảnh, giấy tờ, gửi duyệt, danh sách điều kiện, duyệt/trả về/tạm ngưng/mở lại/kết thúc), `RoomService` (loại phòng, phòng, phiên bản giá, khóa/mở khóa phòng), `ContractService`, chính sách hủy riêng.
-- [ ] **M4.2** Cài đặt + test: duyệt thiếu điều kiện hiện đúng danh sách thiếu; không có hợp đồng `Active` thứ hai; giá đã hiệu lực không sửa được; hoa hồng ngoài 10–15% bị chặn; NV không sửa homestay khác `Draft`; QL không duyệt nháp của mình; khóa trùng đơn bị chặn kèm mã đơn.
+- [ ] **M4.2** (lượt A xong: chủ + homestay; lượt B: phòng/giá/khóa/hợp đồng) Cài đặt + test: duyệt thiếu điều kiện hiện đúng danh sách thiếu; không có hợp đồng `Active` thứ hai; giá đã hiệu lực không sửa được; hoa hồng ngoài 10–15% bị chặn; NV không sửa homestay khác `Draft`; QL không duyệt nháp của mình; khóa trùng đơn bị chặn kèm mã đơn.
 
 **WIN** (vẽ form ngay; nối dữ liệu sau M4.1)
 

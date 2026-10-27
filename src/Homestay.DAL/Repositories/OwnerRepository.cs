@@ -5,7 +5,7 @@ using Homestay.DTO.Owners;
 using Microsoft.Data.SqlClient;
 namespace Homestay.DAL.Repositories;
 
-public sealed class OwnerRepository
+public sealed partial class OwnerRepository
 {
     // Hash the unmasked complete row; no bank/identity values are embedded in the token.
     private const string Columns = "o.*, HASHBYTES('SHA2_256',(SELECT o.* FOR JSON PATH,INCLUDE_NULL_VALUES,WITHOUT_ARRAY_WRAPPER)) AS RowVer";

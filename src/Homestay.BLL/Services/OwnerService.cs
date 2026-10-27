@@ -6,7 +6,7 @@ using Homestay.DTO.Common;
 using Homestay.DTO.Owners;
 namespace Homestay.BLL.Services;
 
-public sealed class OwnerService(Authorizer authorizer, DataScope dataScope, ConnectionFactory factory, OwnerRepository repository)
+public sealed partial class OwnerService(Authorizer authorizer, DataScope dataScope, ConnectionFactory factory, OwnerRepository repository)
 {
     public Task<PagedResult<OwnerItem>> ListAsync(OwnerSearchRequest request, CancellationToken cancellationToken = default)
     {
@@ -37,8 +37,4 @@ public sealed class OwnerService(Authorizer authorizer, DataScope dataScope, Con
         BankAccountNo = authorizer.Can(Permission.OwnerBankAccountChange) ? item.BankAccountNo : ReceiptRules.MaskAccount(item.BankAccountNo),
         IsSensitiveMasked = !authorizer.Can(Permission.OwnerIdentityView) || !authorizer.Can(Permission.OwnerBankAccountChange)
     };
-    public Task<OwnerItem> CreateAsync(CreateOwnerRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<OwnerItem> UpdateAsync(UpdateOwnerRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<OwnerItem> ChangeBankAsync(ChangeOwnerBankRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<OwnerItem> ChangeStatusAsync(OwnerStatusRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }

@@ -10,7 +10,7 @@ using Homestay.DTO.Enums;
 using Homestay.DTO.Homestays;
 namespace Homestay.BLL.Services;
 
-public sealed class HomestayService(Authorizer authorizer, ICurrentSession currentSession, DataScope dataScope,
+public sealed partial class HomestayService(Authorizer authorizer, ICurrentSession currentSession, DataScope dataScope,
     ConnectionFactory factory, HomestayRepository repository, DbClock clock)
 {
     public Task<PagedResult<HomestayItem>> ListAsync(HomestaySearchRequest request, CancellationToken cancellationToken = default)
@@ -36,34 +36,38 @@ public sealed class HomestayService(Authorizer authorizer, ICurrentSession curre
         authorizer.Require(Permission.HomestayView);
         return BusinessErrorTranslator.ExecuteAsync(ct => factory.ReadAsync(async (db, token) =>
         {
-            var head = await ReadHeadAsync(db, homestayId, token).ConfigureAwait(false);
-            var now = await clock.GetUtcNowAsync(db, token).ConfigureAwait(false);
-            var approval = await repository.ApprovalAsync(db, homestayId, now, token).ConfigureAwait(false);
-            var session = currentSession.RequireSession(); var rooms = new RoomRepository();
-            var owners = new OwnerRepository(); var ownerService = new OwnerService(authorizer, dataScope, factory, owners);
-            var canDocuments = CanViewDocuments(head); var canContracts = authorizer.Can(Permission.ContractManage);
-            var auditAccess = authorizer.GetAccess(Permission.AuditView);
-            var audit = auditAccess is AccessLevel.All or AccessLevel.Own
-                ? await repository.AuditAsync(db, homestayId, auditAccess == AccessLevel.Own ? session.UserId : null, token).ConfigureAwait(false) : [];
-            return new HomestayDetail
-            {
-                Homestay = Mask(head),
-                Owner = ownerService.Mask(await owners.GetAsync(db, head.OwnerId, "1=1", _ => { }, token).ConfigureAwait(false) ?? throw new NotFoundException()),
-                Amenities = await repository.AmenitiesAsync(db, homestayId, token).ConfigureAwait(false),
-                Images = await repository.ImagesAsync(db, homestayId, token).ConfigureAwait(false),
-                CanViewLegalDocuments = canDocuments,
-                Documents = canDocuments ? await repository.DocumentsAsync(db, homestayId, token).ConfigureAwait(false) : [],
-                RoomTypes = await rooms.ListTypesAsync(db, homestayId, token).ConfigureAwait(false),
-                Rooms = await rooms.ListRoomsAsync(db, homestayId, token).ConfigureAwait(false),
-                Prices = await rooms.ListPricesAsync(db, homestayId, now, token).ConfigureAwait(false),
-                CancellationPolicies = await repository.PoliciesAsync(db, homestayId, token).ConfigureAwait(false),
-                CanViewContracts = canContracts,
-                Contracts = canContracts ? await new ContractRepository().ListForHomestayAsync(db, homestayId, token).ConfigureAwait(false) : [],
-                Approval = approval,
-                Audit = audit.Select(a => a with { OldValues = SafeAudit(a.OldValues), NewValues = SafeAudit(a.NewValues) }).ToArray(),
-                AllowedActions = Actions(head, approval.CanApprove, await repository.CanEndAsync(db, homestayId, now, token).ConfigureAwait(false))
-            };
+            return await ReadDetailAsync(db, homestayId, token).ConfigureAwait(false);
         }, ct), cancellationToken);
+    }
+    internal async Task<HomestayDetail> ReadDetailAsync(DbSession db, int homestayId, CancellationToken ct)
+    {
+        var head = await ReadHeadAsync(db, homestayId, ct).ConfigureAwait(false);
+        var now = await clock.GetUtcNowAsync(db, ct).ConfigureAwait(false);
+        var approval = await repository.ApprovalAsync(db, homestayId, now, ct).ConfigureAwait(false);
+        var session = currentSession.RequireSession(); var rooms = new RoomRepository();
+        var owners = new OwnerRepository(); var ownerService = new OwnerService(authorizer, dataScope, factory, owners);
+        var canDocuments = CanViewDocuments(head); var canContracts = authorizer.Can(Permission.ContractManage);
+        var auditAccess = authorizer.GetAccess(Permission.AuditView);
+        var audit = auditAccess is AccessLevel.All or AccessLevel.Own
+            ? await repository.AuditAsync(db, homestayId, auditAccess == AccessLevel.Own ? session.UserId : null, ct).ConfigureAwait(false) : [];
+        return new HomestayDetail
+        {
+            Homestay = Mask(head),
+            Owner = ownerService.Mask(await owners.GetAsync(db, head.OwnerId, "1=1", _ => { }, ct).ConfigureAwait(false) ?? throw new NotFoundException()),
+            Amenities = await repository.AmenitiesAsync(db, homestayId, ct).ConfigureAwait(false),
+            Images = await repository.ImagesAsync(db, homestayId, ct).ConfigureAwait(false),
+            CanViewLegalDocuments = canDocuments,
+            Documents = canDocuments ? await repository.DocumentsAsync(db, homestayId, ct).ConfigureAwait(false) : [],
+            RoomTypes = await rooms.ListTypesAsync(db, homestayId, ct).ConfigureAwait(false),
+            Rooms = await rooms.ListRoomsAsync(db, homestayId, ct).ConfigureAwait(false),
+            Prices = await rooms.ListPricesAsync(db, homestayId, now, ct).ConfigureAwait(false),
+            CancellationPolicies = await repository.PoliciesAsync(db, homestayId, ct).ConfigureAwait(false),
+            CanViewContracts = canContracts,
+            Contracts = canContracts ? await new ContractRepository().ListForHomestayAsync(db, homestayId, ct).ConfigureAwait(false) : [],
+            Approval = approval,
+            Audit = audit.Select(a => a with { OldValues = SafeAudit(a.OldValues), NewValues = SafeAudit(a.NewValues) }).ToArray(),
+            AllowedActions = Actions(head, approval.CanApprove, await repository.CanEndAsync(db, homestayId, now, ct).ConfigureAwait(false))
+        };
     }
     public Task<HomestayApprovalChecklist> GetApprovalConditionsAsync(int homestayId, CancellationToken cancellationToken = default)
     {
@@ -137,20 +141,4 @@ public sealed class HomestayService(Authorizer authorizer, ICurrentSession curre
         }
         catch (JsonException) { return "[Nội dung đã ẩn]"; }
     }
-    public Task<HomestayDetail> CreateDraftAsync(CreateHomestayRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<HomestayDetail> UpdateAsync(UpdateHomestayRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<HomestayDetail> SetAmenitiesAsync(SetHomestayAmenitiesRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<HomestayDetail> AddImageAsync(AddHomestayImageRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<HomestayDetail> UpdateImageAsync(UpdateHomestayImageRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<HomestayDetail> RemoveImageAsync(RemoveHomestayImageRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<HomestayDetail> AddDocumentAsync(AddVerificationDocumentRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<HomestayDetail> RemoveDocumentAsync(RemoveVerificationDocumentRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<HomestayDetail> SubmitAsync(HomestayStatusRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<HomestayDetail> ApproveAsync(HomestayStatusRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<HomestayDetail> ReturnAsync(HomestayStatusRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<HomestayDetail> SuspendAsync(HomestayStatusRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<HomestayDetail> ReopenAsync(HomestayStatusRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<HomestayDetail> EndAsync(HomestayStatusRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<HomestayDetail> SetCancellationPolicyAsync(SetHomestayCancellationPolicyRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<HomestayDetail> DisableCancellationPolicyAsync(DisableHomestayCancellationPolicyRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }

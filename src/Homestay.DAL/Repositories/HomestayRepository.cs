@@ -7,7 +7,7 @@ using Homestay.DTO.Homestays;
 using Microsoft.Data.SqlClient;
 namespace Homestay.DAL.Repositories;
 
-public sealed class HomestayRepository
+public sealed partial class HomestayRepository
 {
     private const string From = "FROM dbo.Homestays h JOIN dbo.Owners o ON o.Id=h.OwnerId JOIN dbo.Areas a ON a.Id=h.AreaId ";
     private const string Columns = """

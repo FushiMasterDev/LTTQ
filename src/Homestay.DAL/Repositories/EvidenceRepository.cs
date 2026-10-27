@@ -6,11 +6,16 @@ namespace Homestay.DAL.Repositories;
 public sealed class EvidenceRepository
 {
     public async Task<Guid> InsertAsync(UnitOfWork db, string fileName, string contentType, byte[] content, byte[] sha256, int userId, CancellationToken ct)
+        => await InsertAsync(db, "Evidence", fileName, contentType, content, sha256, userId, ct).ConfigureAwait(false);
+
+    public async Task<Guid> InsertAsync(UnitOfWork db, string category, string fileName, string contentType, byte[] content, byte[] sha256, int userId, CancellationToken ct)
     {
+        if (category is not ("Evidence" or "HomestayImage" or "Document")) throw new ArgumentOutOfRangeException(nameof(category));
         using var command = db.CreateCommand("""
             INSERT dbo.StoredFiles(Category,FileName,ContentType,SizeBytes,Sha256,Content,UploadedByUserId)
-            OUTPUT inserted.Id VALUES('Evidence',@name,@type,@size,@sha,@bytes,@user);
+            OUTPUT inserted.Id VALUES(@category,@name,@type,@size,@sha,@bytes,@user);
             """);
+        command.Parameters.AddVarChar("@category", 20, category);
         command.Parameters.AddNVarChar("@name", 255, fileName);
         command.Parameters.AddVarChar("@type", 100, contentType);
         command.Parameters.AddInt32("@size", content.Length);
