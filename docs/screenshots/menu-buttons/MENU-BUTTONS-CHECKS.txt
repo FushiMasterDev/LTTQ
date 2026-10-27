@@ -1,0 +1,21 @@
+PASS Menu is a scrolling column of actual buttons
+PASS All 28 screen buttons exist in Designer
+PASS Buttons match authorized menu for Staff
+PASS Buttons have borders keyboard focus and full ampersand captions for Staff
+PASS Every visible button has a screen action and comfortable height for Staff
+PASS Click navigates and highlights active button for Staff
+PASS Repeated menu click reuses the existing tab for Staff
+PASS Buttons match authorized menu for Manager
+PASS Buttons have borders keyboard focus and full ampersand captions for Manager
+PASS Every visible button has a screen action and comfortable height for Manager
+PASS Click navigates and highlights active button for Manager
+PASS Repeated menu click reuses the existing tab for Manager
+PASS Deep-linked profile highlights its homestay menu
+PASS Buttons stay inside resized sidebar 1320
+PASS Buttons stay inside resized sidebar 900
+PASS Buttons match authorized menu for Accountant
+PASS Buttons have borders keyboard focus and full ampersand captions for Accountant
+PASS Every visible button has a screen action and comfortable height for Accountant
+PASS Click navigates and highlights active button for Accountant
+PASS Repeated menu click reuses the existing tab for Accountant
+RESULT PASS

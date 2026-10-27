@@ -29,15 +29,7 @@ public partial class FrmMain : ScreenForm
         InitializeComponent();
         heartbeatTimer = new System.Windows.Forms.Timer(components!) { Interval = 60_000 };
         idleTimer = new System.Windows.Forms.Timer(components!) { Interval = 5_000 };
-        navigation.DisplayMember = nameof(ScreenEntry.Title);
-        navigation.SelectedIndexChanged += (_, _) =>
-        {
-            if (!changingRole && navigation.SelectedItem is ScreenEntry screen)
-            {
-                try { OpenScreen(screen.Id, screen.Create); }
-                catch (Exception exception) { ErrorHandler.Show(exception, this); }
-            }
-        };
+        InitializeNavigation();
         roleBox.SelectedIndexChanged += (_, _) => { if (gateway is null) ChangePreviewRole(); };
         notificationsButton.Click += (_, _) => notificationSplit.Panel2Collapsed = !notificationSplit.Panel2Collapsed;
         closeTabButton.Click += (_, _) => CloseCurrentTab();
@@ -100,13 +92,6 @@ public partial class FrmMain : ScreenForm
             }
         }
     }
-    private void SetMenu(ScreenEntry[] entries)
-    {
-        changingRole = true;
-        navigation.DataSource = entries;
-        navigation.SelectedIndex = -1;
-        changingRole = false;
-    }
     private void ChangePreviewRole()
     {
         foreach(var page in tabs.Values.ToArray()) { workspaceTabs.TabPages.Remove(page); page.Dispose(); }
@@ -121,7 +106,7 @@ public partial class FrmMain : ScreenForm
             throw new ForbiddenException();
         if (tabs.TryGetValue(key, out var existing)) { workspaceTabs.SelectedTab = existing; return; }
         var form = create();
-        var page = new TabPage(form.Text);
+        var page = new TabPage(form.Text) { Tag = key };
         form.TopLevel = false; form.FormBorderStyle = FormBorderStyle.None;
         form.Dock = DockStyle.Fill; form.MinimumSize = Size.Empty;
         page.Controls.Add(form);
