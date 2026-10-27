@@ -23,11 +23,11 @@ public partial class FrmAvailability : ScreenForm
     }
     public FrmAvailability(AppServices services):this(){
         this.services=services;EmployeeUi.Activate(pendingNotice,searchButton,bookButton,priceButton,policyButton);
-        blockButton.Visible=false;
+        InitializeRoomBlocking();
         filterPanelField8Label.Text="Homestay trong lịch (trống: tất cả)";
         filterPanelField8.Enabled=false;filterPanelField8.Visible=filterPanelField8Label.Visible=filterPanelField9.Visible=filterPanelField9Label.Visible=false;
         bookButton.Enabled=priceButton.Enabled=policyButton.Enabled=false;
-        filterPanelField1.Value=EmployeeUi.Today.ToDateTime(TimeOnly.MinValue);filterPanelField2.Value=filterPanelField1.Value.AddDays(1);
+
         filterPanelField3.Minimum=1;filterPanelField3.Value=1;filterPanelField3.Maximum=1000;
         filterPanelField9.Items.Clear();filterPanelField9.Items.AddRange([14,31]);filterPanelField9.SelectedIndex=0;
         grid0.SetSortKeys(null,null,null,null,null,null,null,null,null);
@@ -51,7 +51,7 @@ public partial class FrmAvailability : ScreenForm
             MessageBox.Show(this,p.Name+"\n"+string.Join("\n",p.Rules.Select(r=>r.MinDaysBefore+" ngày: hoàn "+r.RefundPercent+"%")),"Chính sách hủy");
         }catch(Exception e){ErrorHandler.Show(e,this);}};
         viewTabs.SelectedIndexChanged+=async(_,_)=>{
-            var search=viewTabs.SelectedIndex==0;
+            var search=viewTabs.SelectedIndex==0;blockButton.Visible=unblockButton.Visible=!search&&services.Can(Permission.RoomBlockManage);
             bookButton.Visible=priceButton.Visible=policyButton.Visible=search;
             filterPanelField8.Visible=filterPanelField8Label.Visible=filterPanelField9.Visible=filterPanelField9Label.Visible=!search;
             foreach(var control in new Control[]{filterPanelField2,filterPanelField2Label,filterPanelField4,filterPanelField4Label,filterPanelField5,filterPanelField5Label,filterPanelField6,filterPanelField6Label,filterPanelField7,filterPanelField7Label})control.Visible=search;
@@ -60,7 +60,7 @@ public partial class FrmAvailability : ScreenForm
             await ReloadAsync();
         };
         filterPanelField0.SelectionChanged+=(_,_)=>{
-            MarkSearchDirty();loader.CancelPending();loadedCalendar=null;
+            MarkSearchDirty();InvalidateCalendar();
             changingHomestays=true;filterPanelField8.SetItems([]);changingHomestays=false;
             filterPanelField8.Enabled=false;
             calendar=[];EmployeeUi.Local(grid1,calendar,_=>[]);
@@ -74,7 +74,7 @@ public partial class FrmAvailability : ScreenForm
         filterPanelField8.SelectionChanged+=(_,_)=>{if(!changingHomestays&&loadedCalendar is not null)RenderCalendar();};
         grid1.Grid.CellDoubleClick+=(_,e)=>OpenCalendarCell(e.RowIndex,e.ColumnIndex);
         Shown+=async(_,_)=>await ErrorHandler.RunAsync(searchButton,async()=>{
-            filterPanelField0.SetItems((await services.Catalog.ListAreasAsync()).Where(x=>x.IsActive).Select(x=>new Lookup{Id=x.Id,Name=x.Name}));
+            var today=DateOnly.FromDateTime((await services.ServerNowAsync()).AddHours(7));filterPanelField1.Value=today.ToDateTime(TimeOnly.MinValue);filterPanelField2.Value=filterPanelField1.Value.AddDays(1);filterPanelField0.SetItems((await services.Catalog.ListAreasAsync()).Where(x=>x.IsActive).Select(x=>new Lookup{Id=x.Id,Name=x.Name}));
             filterPanelField6.SetItems((await services.Catalog.ListItemsAsync(CatalogKind.RoomCategory)).Where(x=>x.IsActive).Select(x=>new Lookup{Id=x.Id,Name=x.Name}));
             filterPanelField7.DisplayMember=nameof(Lookup.Name);
             filterPanelField7.Items.AddRange((await services.Catalog.ListItemsAsync(CatalogKind.Amenity)).Where(x=>x.IsActive).Select(x=>(object)new Lookup{Id=x.Id,Name=x.Name}).ToArray());
@@ -83,7 +83,7 @@ public partial class FrmAvailability : ScreenForm
     }
     private void MarkSearchDirty(){if(viewTabs.SelectedIndex==0)loader.CancelPending();bookButton.Enabled=priceButton.Enabled=policyButton.Enabled=false;}
     private void InvalidateCalendar(){
-        loader.CancelPending();loadedCalendar=null;calendar=[];filterPanelField8.Enabled=false;grid1.Enabled=false;
+        loader.CancelPending();loadedCalendar=null;calendar=[];filterPanelField8.Enabled=false;grid1.Enabled=false;blockButton.Enabled=unblockButton.Enabled=false;
         EmployeeUi.Local(grid1,calendar,_=>[]);
     }
     private AvailabilityItem Selected()=>results[(grid0.Query.PageNumber-1)*grid0.Query.PageSize+EmployeeUi.Selected(grid0)];
@@ -101,7 +101,7 @@ public partial class FrmAvailability : ScreenForm
         }catch(Exception e){ErrorHandler.Show(e,this);}
     }
     private async Task ReloadAsync(){
-        if(services is null)return;
+        if(services is null)return;blockButton.Enabled=unblockButton.Enabled=false;
         try{
             if(viewTabs.SelectedIndex==0){
                 var r=new AvailabilitySearchRequest{AreaId=filterPanelField0.SelectedItem?.Id,CategoryId=filterPanelField6.SelectedItem?.Id,
@@ -114,7 +114,7 @@ public partial class FrmAvailability : ScreenForm
             }else{
                 if(filterPanelField0.SelectedItem is not Lookup area)throw new BusinessException("Vui lòng chọn khu vực để xem lịch.");
                 var days=(int)filterPanelField9.SelectedItem!;
-                await loader.LoadAsync(ct=>services.Availability.GetCalendarAsync(new(null,area.Id,DateOnly.FromDateTime(filterPanelField1.Value),days),ct),r=>{
+                await loader.LoadAsync(ct=>services.Rooms.GetCalendarAsync(new(null,area.Id,DateOnly.FromDateTime(filterPanelField1.Value),days),ct),r=>{
                     var selected=filterPanelField8.SelectedItem?.Id;
                     loadedCalendar=r;changingHomestays=true;
                     try{
@@ -134,7 +134,7 @@ public partial class FrmAvailability : ScreenForm
         grid1.SetColumns(new[]{"Homestay / loại / phòng"}.Concat(Enumerable.Range(0,r.Days).Select(i=>r.FromDate.AddDays(i).ToString("dd/MM"))).ToArray());
         EmployeeUi.Local(grid1,calendar,x=>new object?[]{x.HomestayName+" / "+x.RoomTypeName+" / "+x.RoomCode}.Concat(x.Cells.Select(c=>(object?)State(c.State))).ToArray(),ColorCalendar);
         grid1.Grid.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.None;
-        foreach(DataGridViewColumn c in grid1.Grid.Columns)c.Width=c.Index==0?260:110;
+        foreach(DataGridViewColumn c in grid1.Grid.Columns)c.Width=c.Index==0?260:110;UpdateBlockButtons();
     }
     private void ColorCalendar(){
         foreach(DataGridViewRow row in grid1.Grid.Rows){

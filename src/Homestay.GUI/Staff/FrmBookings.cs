@@ -23,9 +23,9 @@ public partial class FrmBookings : ScreenForm
     private readonly BookingQueue[] queues=[BookingQueue.Mine,BookingQueue.Unassigned,BookingQueue.AwaitingPayment,BookingQueue.DepositVerification,BookingQueue.OwnerConfirmation,BookingQueue.ArrivalsToday,BookingQueue.DeparturesToday,BookingQueue.All,BookingQueue.Upcoming,BookingQueue.InHouse,BookingQueue.OpenChangeRequests];
     private readonly PagedGrid upcomingGrid=new(),inHouseGrid=new(),changesGrid=new();
     private PagedGrid[] Grids=>[grid0,grid1,grid2,grid3,grid4,grid5,grid6,grid7,upcomingGrid,inHouseGrid,changesGrid];
-    private PagedGrid Current=>Grids[viewTabs.SelectedIndex];
-    public FrmBookings(){InitializeComponent();HelpText="Tìm mã đơn hoặc SĐT đầy đủ để tra toàn hệ thống. Chi tiết ngoài phạm vi chỉ được xem. BLL kiểm lại quyền và phiên khi ghi.";Disposed+=(_,_)=>{loader.Dispose();actionLoader.Dispose();upcomingGrid.Dispose();inHouseGrid.Dispose();changesGrid.Dispose();};}
-    public FrmBookings(AppServices services,BookingSearchRequest? request=null):this(){
+    private PagedGrid Current=>IsExceptions?exceptionsGrid:Grids[viewTabs.SelectedIndex];
+    public FrmBookings(){InitializeComponent();HelpText="Tìm mã đơn hoặc SĐT đầy đủ để tra toàn hệ thống. Chi tiết ngoài phạm vi chỉ được xem. BLL kiểm lại quyền và phiên khi ghi.";Disposed+=(_,_)=>{loader.Dispose();actionLoader.Dispose();upcomingGrid.Dispose();inHouseGrid.Dispose();changesGrid.Dispose();exceptionsGrid.Dispose();exceptionsTab.Dispose();};}
+    public FrmBookings(AppServices services,BookingSearchRequest? request=null,BookingExceptionsSelection? exceptions=null):this(){
         this.services=services;basis=request??new();
         filterPanelField0.Text=basis.Code??basis.Phone??basis.Page.SearchText??basis.CustomerName??"";
         basis=basis with{Code=null,Phone=null,CustomerName=null};
@@ -41,7 +41,7 @@ public partial class FrmBookings : ScreenForm
         filterPanelField5.Items.AddRange(Enum.GetValues<BookingStatus>().Select(s=>new Choice(s,EmployeeUi.Status(s))).ToArray());filterPanelField5.SelectedIndex=0;
         viewTabs.SelectedIndex=Array.IndexOf(queues,basis.Queue) is var i&&i>=0?i:7;
         foreach(var g in Grids){
-            g.Grid.SelectionChanged+=async(_,_)=>{if(g==Current)await RefreshSelectionActionsAsync();};
+            g.Grid.SelectionChanged+=async(_,_)=>{if(g==Current){assignManyButton.Enabled=CanAssignMany();await RefreshSelectionActionsAsync();}};
             g.Grid.CellFormatting+=(_,e)=>{
                 if(g!=Current||e.ColumnIndex!=10||e.RowIndex<0||e.RowIndex>=rows.Count||serverAnchor==default)return;
                 var item=rows[e.RowIndex];
@@ -57,26 +57,26 @@ public partial class FrmBookings : ScreenForm
         filterPanelField1.SelectionChanged+=async(_,_)=>{if(!initializingFilters)await ReloadLookupsAndBookingsAsync(filterPanelField1.SelectedItem?.Id,null,null);};
         filterPanelField2.SelectionChanged+=async(_,_)=>{if(!initializingFilters)await ReloadLookupsAndBookingsAsync(filterPanelField1.SelectedItem?.Id,filterPanelField2.SelectedItem?.Id,null);};
         filterPanelField6.SelectionChanged+=async(_,_)=>{if(!initializingFilters)await LoadAsync(Current.Query with{PageNumber=1});};
-        viewTabs.SelectedIndexChanged+=async(_,_)=>{basis=basis with{OnlyExpiringHolds=false,OnlyOverdueConfirmation=false,AssignedToMeOnly=false};await LoadAsync(Current.Query with{PageNumber=1});};
-        detailButton.Click+=(_,_)=>{try{services.Navigate("F09",Selected().Id);}catch(Exception e){ErrorHandler.Show(e,this);}};
+        viewTabs.SelectedIndexChanged+=async(_,_)=>{if(initializingFilters)return;basis=basis with{OnlyExpiringHolds=false,OnlyOverdueConfirmation=false,AssignedToMeOnly=false};await LoadAsync(Current.Query with{PageNumber=1});};
+        detailButton.Click+=(_,_)=>{try{services.Navigate("F09",IsExceptions?exceptionsLive!.Selected.BookingId:Selected().Id);}catch(Exception e){ErrorHandler.Show(e,this);}};
         claimButton.Enabled=assignButton.Enabled=false;assignButton.Visible=services.Can(Permission.BookingAssign);
         clearFilters.Click+=async(_,_)=>{
-            basis=new(){Queue=queues[viewTabs.SelectedIndex]};filterPanelField0.Clear();
+            basis=new(){Queue=IsExceptions?BookingQueue.All:queues[viewTabs.SelectedIndex]};filterPanelField0.Clear();
             filterPanelField3.Checked=filterPanelField4.Checked=false;filterPanelField5.SelectedIndex=0;
             await ReloadLookupsAndBookingsAsync(null,null,null);
         };
         deadlineTimer=new(components!){Interval=1000};
-        deadlineTimer.Tick+=(_,_)=>{if(!IsDisposed&&Current.Grid.Columns.Count>10)Current.Grid.InvalidateColumn(10);};
+        deadlineTimer.Tick+=(_,_)=>{if(!IsDisposed&&!IsExceptions&&Current.Grid.Columns.Count>10)Current.Grid.InvalidateColumn(10);};
         deadlineTimer.Start();
         claimButton.Click+=async(_,_)=>await RunMutationAsync(claimButton,async()=>{var x=Selected();await services.Bookings.ClaimAsync(new(x.Id,x.RowVer));await ReloadAsync();},ReloadAsync,()=>selectionActions.Contains(BookingAction.Claim));
         assignButton.Click+=async(_,_)=>await RunMutationAsync(assignButton,async()=>{
             await EmployeeUi.ReassignAsync(services,Selected(),this);await ReloadAsync();
         },ReloadAsync,()=>selectionActions.Contains(BookingAction.Reassign)&&services.Can(Permission.BookingAssign));
-        Shown+=async(_,_)=>await ReloadLookupsAndBookingsAsync(basis.AreaId,basis.HomestayId,basis.AssignedEmployeeId);
+        InitializeManagerBookings(exceptions);initializingFilters=false;Shown+=async(_,_)=>await ReloadLookupsAndBookingsAsync(basis.AreaId,basis.HomestayId,basis.AssignedEmployeeId);
     }
     private async Task RefreshSelectionActionsAsync(){
         actionLoader.CancelPending();selectionActions=[];claimButton.Enabled=assignButton.Enabled=false;
-        if(services is null||Current.Grid.SelectedRows.Count!=1)return;
+        if(IsExceptions){RefreshExceptionActions();return;}if(services is null||Current.Grid.SelectedRows.Count!=1)return;
         var index=Current.Grid.SelectedRows[0].Index;if(index>=rows.Count)return;
         var id=rows[index].Id;
         try{await actionLoader.LoadAsync(ct=>services.Bookings.GetAsync(id,ct),detail=>{
@@ -102,10 +102,10 @@ public partial class FrmBookings : ScreenForm
         await LoadAsync(Current.Query with{PageNumber=1});
     }
     private async Task LoadAsync(PageRequest q){
-        var g=Current;var request=Search(q);actionLoader.CancelPending();selectionActions=[];claimButton.Enabled=assignButton.Enabled=false;
+        var g=Current;assignManyButton.Enabled=createTaskButton.Enabled=detailButton.Enabled=false;assignManyButton.Visible=IsExceptions&&services!.Can(Permission.BookingAssign);exceptionKind.Visible=IsExceptions;createTaskButton.Visible=IsExceptions;filterPanelField3.Enabled=filterPanelField4.Enabled=filterPanelField5.Enabled=filterPanelField6.Enabled=!IsExceptions;if(IsExceptions){loader.CancelPending();actionLoader.CancelPending();claimButton.Enabled=assignButton.Enabled=false;await exceptionsLive!.LoadAsync(q);return;}detailButton.Enabled=true;var request=Search(q);actionLoader.CancelPending();selectionActions=[];claimButton.Enabled=assignButton.Enabled=false;
         filterSummary.Text=request.OnlyExpiringHolds?"Giữ phòng sắp hết hạn":request.OnlyOverdueConfirmation?"Chờ chủ quá hạn":"";
         rows=[];g.SetPage(new Homestay.DTO.Common.PagedResult<BookingListItem>{Items=[],TotalCount=0,PageNumber=1,PageSize=q.PageSize},EmployeeUi.BookingRow);
-        try{await loader.LoadAsync(async ct=>{var result=await services!.Bookings.ListAsync(request,ct);var now=await services.ServerNowAsync(ct);return (Result:result,Now:now);},loaded=>{var p=loaded.Result;serverAnchor=loaded.Now;serverWatch.Restart();rows=p.Items;g.SetPage(p,EmployeeUi.BookingRow);foreach(DataGridViewRow row in g.Grid.Rows){var x=p.Items[row.Index];if(x.IsConfirmationOverdue)row.DefaultCellStyle.BackColor=Color.MistyRose;}});}
+        try{await loader.LoadAsync(async ct=>{var result=await services!.Bookings.ListAsync(request,ct);var now=await services.ServerNowAsync(ct);return (Result:result,Now:now);},loaded=>{var p=loaded.Result;serverAnchor=loaded.Now;serverWatch.Restart();rows=p.Items;g.SetPage(p,EmployeeUi.BookingRow);assignManyButton.Enabled=CanAssignMany();foreach(DataGridViewRow row in g.Grid.Rows){var x=p.Items[row.Index];if(x.IsConfirmationOverdue)row.DefaultCellStyle.BackColor=Color.MistyRose;}});}
         catch(Exception e){if(!IsDisposed)ErrorHandler.Show(e,this);}
     }
     protected override bool ProcessCmdKey(ref Message msg,Keys k){if(services is not null&&(k==Keys.F5||k==Keys.Enter&&filterPanelField0.Focused)){reloadButton.PerformClick();return true;}return base.ProcessCmdKey(ref msg,k);}

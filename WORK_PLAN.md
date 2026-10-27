@@ -11,6 +11,9 @@ Mac đã kiểm: .NET SDK 10.0.400, Docker, chip Intel (SQL Server 2022 chạy t
 
 ---
 
+> **Phạm vi mới theo `docs/HUONG_DAN_WIN_NOI_FORM_DOT4_5.md` (6c0d1bc):** đồ án dừng ở đợt 6. F25/F26/tab Hiệu suất và tính năng đợt 7–8 không phát triển trong lượt này; các mục cũ bên dưới giữ để tra lịch sử. Ảnh đợt 4–5 vẫn chuẩn bị theo Bước 5 của hướng dẫn.
+>
+> **WIN 28/10/2026:** đã nối thêm F06 khóa/mở ngay trên lịch; F08 tab Ngoại lệ, giao nhiều và mở F19 gắn đơn; F05 liên kết thẻ; F18 danh sách theo khu vực, lịch sử/mọi phiên, đổi chức vụ/tạm nghỉ/nghỉ việc; F16 thông tin ảnh, khóa sửa giá đã hiệu lực, quyền mở lại/ẩn tab và thông báo D11. Build 0 lỗi/0 cảnh báo, Rules 1230/1230, hồi quy 53/53, kiểm UI/menu 37/37. W4/W5 đã nối và kiểm luồng chính: 94 bước WIN/SQL, 231/231 BLL SQL không skip, RESULT PASS và Cleanup PASS; 20 ảnh dữ liệu mẫu đã chụp. Dấu x xác nhận nối service/luồng chính, không thay kiểm tay từng nút/DPI. Chi tiết: `docs/screenshots/win-dot45/STATUS.md`.
 ## 1. Quy tắc tránh xung đột
 
 ### 1.1. Mỗi thư mục một chủ
@@ -161,11 +164,11 @@ Mục tiêu: một đơn đi trọn tạo → cọc → xác minh → xác nhậ
 
 **WIN** (vẽ form ngay; nối dữ liệu sau M4.1)
 
-- [ ] **W4.1** **F22** Chủ homestay.
-- [ ] **W4.2** **F15** Danh sách homestay (tab Chờ duyệt cho QL).
-- [ ] **W4.3** **F16** Hồ sơ homestay (tab Thông tin, Tiện nghi, Ảnh, Giấy tờ, Loại phòng & phòng, Bảng giá, Chính sách hủy, Hợp đồng, Lịch sử) + nút duyệt.
-- [ ] **W4.4** **F23** Hợp đồng.
-- [ ] **W4.5** F06 tab Lịch: khóa/mở khóa phòng (QL).
+- [x] **W4.1** **F22** Chủ homestay.
+- [x] **W4.2** **F15** Danh sách homestay (tab Chờ duyệt cho QL).
+- [x] **W4.3** **F16** Hồ sơ homestay (tab Thông tin, Tiện nghi, Ảnh, Giấy tờ, Loại phòng & phòng, Bảng giá, Chính sách hủy, Hợp đồng, Lịch sử) + nút duyệt.
+- [x] **W4.4** **F23** Hợp đồng.
+- [x] **W4.5** F06 tab Lịch: khóa/mở khóa phòng (QL).
 
 ### Đợt 5 — Quản lý (spec G5)
 
@@ -175,9 +178,9 @@ Mục tiêu: một đơn đi trọn tạo → cọc → xác minh → xác nhậ
 
 **WIN** (vẽ form ngay; nối dữ liệu sau M5.1)
 
-- [ ] **W5.1** F05 thẻ Quản lý; F08 tab ngoại lệ + chọn nhiều đơn để giao.
-- [ ] **W5.2** F18 tab Khu vực, tab Phiên đăng nhập, đổi chức vụ/nghỉ việc.
-- [ ] **W5.3** **F19** Giao việc; **F14** tab Việc được giao.
+- [x] **W5.1** F05 thẻ Quản lý; F08 tab ngoại lệ + chọn nhiều đơn để giao.
+- [x] **W5.2** F18 tab Khu vực, tab Phiên đăng nhập, đổi chức vụ/nghỉ việc.
+- [x] **W5.3** **F19** Giao việc; **F14** tab Việc được giao.
 
 ### Đợt 6 — Kế toán (spec G6)
 
@@ -259,6 +262,16 @@ Không làm trong kế hoạch này. Giao diện xử lý như cột cuối; b�
 ---
 
 ## 6. Theo dõi form
+### Cập nhật WIN theo GitHub 8a12384
+
+Đã nối các màn chủ/homestay/phòng/giá/hợp đồng, việc giao và quản lý nhân viên mới;
+SQL 225/225 (0 Skip), Rules 1176/1176, hồi quy WIN 53/53, UI/menu 17/17 đạt.
+Luồng hủy/duyệt/từ chối/chi hoàn và đổi ngày tự tìm phòng đã đi qua SQL thật;
+đánh dấu W2.5/W3.3/W3.4. View/quyền D12 đã cập nhật riêng sau khi sửa tệp GO,
+RESULT PASS, không reset dữ liệu. Có 13 ảnh SQL mẫu; riêng ảnh F30 minh họa kỳ 0 dòng.
+W4/W5 được cập nhật theo kết quả mới ở đầu tài liệu; các ghi chú sau đây là lịch sử. Đợt 7–8 không phát triển theo phạm vi mới.
+Xem docs/screenshots/report-latest/HUONG_DAN_ANH_BAO_CAO.md và các log đi kèm.
+
 
 ### Chuẩn bị WIN đợt 4 và sửa thao tác chi hoàn
 
@@ -293,34 +306,34 @@ Không đổi ô MAC. Bảng form tính theo toàn bộ phạm vi, không tính 
 | F02 Đổi mật khẩu | 1 | W1.4 | Hoàn thành |
 | F03 Cửa sổ chính | 1, 2 | W1.4, W2.6 | Hoàn thành một phần |
 | F04 Cấu hình kết nối | 1 | W1.2 | Hoàn thành một phần |
-| F05 Tổng quan | 2, 5, 6 | W2.1, W5.1, W6.1 | Hoàn thành một phần |
-| F06 Tra phòng & lịch phòng | 2, 4 | W2.2, W4.5 | Hoàn thành một phần |
+| F05 Tổng quan | 2, 5, 6 | W2.1, W5.1, W6.1 | Đã nối; luồng chính đạt |
+| F06 Tra phòng & lịch phòng | 2, 4 | W2.2, W4.5 | Đã nối; luồng chính đạt |
 | F07 Tạo đơn | 2 | W2.4 | Hoàn thành |
-| F08 Danh sách đơn | 2, 3, 5 | W2.5, W3.2, W5.1 | Hoàn thành một phần |
+| F08 Danh sách đơn | 2, 3, 5 | W2.5, W3.2, W5.1 | Đã nối; luồng chính đạt |
 | F09 Chi tiết đơn | 2, 3 | W2.5, W3.2, W3.3 | Hoàn thành |
 | F10 Ghi nhận thu tiền | 2 | W2.5 | Hoàn thành |
 | F11 Yêu cầu đổi/hủy | 3 | W3.3 (chỉ hủy) | Hoàn thành |
 | F12 Xử lý trùng phòng | — | — | Tạm chưa làm |
 | F13 Khách hàng | 2 | W2.3 | Hoàn thành |
-| F14 Của tôi | 5, 7 | W5.3, W7.2 | Chưa làm |
-| F15 Danh sách homestay | 4 | W4.2 | Chưa làm |
-| F16 Hồ sơ homestay | 4 | W4.3 | Chưa làm |
+| F14 Của tôi | 5, 7 | W5.3, W7.2 | Đã nối; luồng chính đạt |
+| F15 Danh sách homestay | 4 | W4.2 | Đã nối; luồng chính đạt |
+| F16 Hồ sơ homestay | 4 | W4.3 | Đã nối; luồng chính đạt |
 | F17 | — | — | Bỏ (D9) |
-| F18 Nhân viên & tài khoản | 1, 5 | W1.5, W5.2 | Hoàn thành một phần |
-| F19 Giao việc | 5 | W5.3 | Chưa làm |
+| F18 Nhân viên & tài khoản | 1, 5 | W1.5, W5.2 | Đã nối; luồng chính đạt |
+| F19 Giao việc | 5 | W5.3 | Đã nối; luồng chính đạt |
 | F20 Duyệt đổi/hủy | 3 | W3.3 (chỉ hủy) | Hoàn thành |
 | F21 Voucher | — | — | Tạm chưa làm |
-| F22 Chủ homestay | 4 | W4.1 | Chưa làm |
-| F23 Hợp đồng | 4 | W4.4 | Chưa làm |
+| F22 Chủ homestay | 4 | W4.1 | Đã nối; luồng chính đạt |
+| F23 Hợp đồng | 4 | W4.4 | Đã nối; luồng chính đạt |
 | F24 Danh mục & cấu hình | 1 | W1.5 | Hoàn thành một phần |
 | F25 Báo cáo | 7 | W7.1 | Chưa làm |
 | F26 Nhật ký hệ thống | 7 | W7.2 | Chưa làm |
 | F27 Xác minh thu cọc | 3 | W3.1 | Hoàn thành |
-| F28 Sao kê ngân hàng | 6 | W6.2 (nhập tay) | Chưa làm |
+| F28 Sao kê ngân hàng | 6 | W6.2 (nhập tay) | Hoàn thành một phần |
 | F29 Hàng chờ chi & cọc bổ sung | 3 | W3.4 (tab Hoàn tiền) | Hoàn thành |
-| F30 Danh sách đối soát | 6 | W6.3 | Chưa làm |
-| F31 Chi tiết đối soát | 6 | W6.3 | Chưa làm |
-| F32 Sổ thu chi & công nợ | 6 | W6.4 | Chưa làm |
+| F30 Danh sách đối soát | 6 | W6.3 | Hoàn thành một phần |
+| F31 Chi tiết đối soát | 6 | W6.3 | Hoàn thành một phần |
+| F32 Sổ thu chi & công nợ | 6 | W6.4 | Hoàn thành một phần |
 
 Tình trạng dùng đúng ba nhãn của báo cáo: **Hoàn thành / Hoàn thành một phần / Chưa làm** (cộng "Tạm chưa làm", "Bỏ" cho hai loại ở mục 5).
 

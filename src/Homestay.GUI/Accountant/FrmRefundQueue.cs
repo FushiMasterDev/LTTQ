@@ -11,6 +11,7 @@ namespace Homestay.GUI.Accountant;
 public partial class FrmRefundQueue : ScreenForm
 {
     private AppServices? services;
+    private readonly Button accountButton=new(){Text="Thông tin nhận hoàn",AutoSize=true};
     private readonly AsyncLoader loader=new();
     private IReadOnlyList<PaymentQueueItem> rows=[];
     private readonly Label selectionStatus=new(){AutoSize=true,MaximumSize=new Size(700,0),Padding=new Padding(4,8,4,4)};
@@ -41,6 +42,14 @@ public partial class FrmRefundQueue : ScreenForm
             var file=await services.Files.GetEvidenceAsync(item.BookingId,id);if(!IsDisposed)EvidencePresentation.Show(this,file,"Chứng từ hoàn tiền");
         },enabledAfter:()=>SelectedOrNull()?.EvidenceFileId is not null);
         payButton.Click+=async(_,_)=>await RunMutationAsync(payButton,PayAsync,()=>LoadAsync(grid0.Query),CanPaySelected);
+        toolbar.Controls.Add(accountButton);accountButton.Enabled=false;
+        grid0.Grid.SelectionChanged+=(_,_)=>accountButton.Enabled=SelectedOrNull() is not null;
+        accountButton.Click+=async(_,_)=>await RunMutationAsync(accountButton,async()=>{
+            var item=SelectedOrNull()??throw new BusinessException("Vui lòng chọn phiếu.");
+            using var d=new FieldsDialog("Thông tin nhận hoàn "+item.VoucherNo,new("name","Tên người nhận",Initial:item.PayerOrPayeeName??item.CustomerName,MaxLength:100),new("account","Tài khoản nhận",MaxLength:30));
+            d.SetSummary("Đối chiếu tài khoản với khách trước khi lưu. Lưu tài khoản chưa ghi nhận đã chi.");
+            if(d.ShowDialog(this)==DialogResult.OK){await services.Payments.UpdateRefundAccountAsync(new(item.Id,LiveUi.Text(d,"account"),LiveUi.Text(d,"name"),item.RowVer));await LoadAsync(grid0.Query);}
+        },()=>LoadAsync(grid0.Query),()=>SelectedOrNull() is not null);
         grid0.ExportFilteredAsync=async ct=>{
             var all=new List<PaymentQueueItem>();var q=Query(grid0.Query with{PageNumber=1,PageSize=100});
             while(true){var p=await services.Payments.ListPendingRefundsAsync(q,ct);all.AddRange(p.Items);if(p.Items.Count==0||all.Count>=p.TotalCount)break;q=q with{Page=q.Page with{PageNumber=q.Page.PageNumber+1}};}
@@ -56,7 +65,7 @@ public partial class FrmRefundQueue : ScreenForm
     private PaymentQueueItem? SelectedOrNull()=>grid0.Grid.SelectedRows.Count==1&&grid0.Grid.SelectedRows[0].Index<rows.Count?rows[grid0.Grid.SelectedRows[0].Index]:null;
     private static object?[] Map(PaymentQueueItem r)=>[r.VoucherNo,r.BookingCode,r.CustomerName,r.HomestayName,EmployeeUi.Money(r.Amount),r.PayerOrPayeeName,r.RefundAccount??"Chưa có tài khoản nhận",r.CancelReason,EmployeeUi.Time(r.RecordedAtUtc)];
     private async Task LoadAsync(PageRequest q){
-        rows=[];payButton.Enabled=proofButton.Enabled=false;selectionStatus.Text="Đang tải phiếu hoàn…";
+        rows=[];accountButton.Enabled=payButton.Enabled=proofButton.Enabled=false;selectionStatus.Text="Đang tải phiếu hoàn…";
         try{await loader.LoadAsync(ct=>services!.Payments.ListPendingRefundsAsync(Query(q),ct),p=>{rows=p.Items;grid0.SetPage(p,Map);if(rows.Count==0)selectionStatus.Text="Không có phiếu chờ chi phù hợp.";});}
         catch(Exception e){if(!IsDisposed)ErrorHandler.Show(e,this);}
     }

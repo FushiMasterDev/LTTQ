@@ -1,0 +1,3 @@
+PASS Updated approved vw_Payables and SettlementItems permission only
+PASS No seed reset or business-data DML executed; passwords unchanged
+RESULT PASS

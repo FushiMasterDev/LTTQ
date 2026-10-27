@@ -1,0 +1,38 @@
+PASS UI automation bindings match FrmBookings
+PASS UI automation bindings match FrmBookingCreate
+PASS UI automation bindings match FrmHomestayProfile
+PASS UI automation bindings match FrmOwners
+PASS UI automation bindings match FrmHomestays
+PASS UI automation bindings match FrmContracts
+PASS UI automation bindings match FrmRefundQueue
+PASS UI automation bindings match FrmStaff
+PASS Own tasks and owner read menu for Staff
+PASS Listing contract and manager task menus respect role Staff
+PASS Accountant cannot navigate into homestay-only owner tab: Staff
+PASS Own tasks and owner read menu for Manager
+PASS Listing contract and manager task menus respect role Manager
+PASS Accountant cannot navigate into homestay-only owner tab: Manager
+PASS Own tasks and owner read menu for Accountant
+PASS Listing contract and manager task menus respect role Accountant
+PASS Accountant cannot navigate into homestay-only owner tab: Accountant
+PASS Exception grid is restricted to manager: Manager
+PASS Batch write starts disabled: Manager
+PASS Exception grid is restricted to manager: Staff
+PASS Batch write starts disabled: Staff
+PASS Exception grid is restricted to manager: Accountant
+PASS Batch write starts disabled: Accountant
+PASS Dashboard exception navigation selects separate queue
+PASS Dashboard preserves exact exception kind
+PASS Batch de-duplicates booking IDs and preserves displayed code
+PASS Batch copies RowVer before async lookups
+PASS Mixed versions across exceptions require reload without sending
+PASS F15 navigation preserves known approved owner independent of current lookup
+PASS Calendar writes disabled before calendar load
+PASS Staff calendar has no blocking controls
+PASS Manager cannot change own position or employment from UI
+PASS Selected other employee enables staff management
+PASS Force logout needs a selected open session
+PASS Open-session list defaults to all employees
+PASS Suspended profile follows Reopen allowed action
+PASS Reload clears profile write permissions immediately
+RESULT PASS

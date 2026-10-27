@@ -1,9 +1,29 @@
-# Tiến độ WIN — 27/10/2026
+# Tiến độ WIN — 28/10/2026
 
 Mở HomestayDesktop.sln bằng Visual Studio Community 2026, chọn Homestay.GUI làm Startup Project.
 Hồ sơ **Xem bố cục (không dữ liệu)** hoặc tham số --preview mở bản xem 29 màn hình.
 Chế độ này không tạo phiên, không kết nối SQL và không ghi nghiệp vụ.
 
+## Lượt mới nhất — hướng dẫn đợt 4–5, nền 6c0d1bc
+
+Đã đọc và thực hiện lộ trình `docs/HUONG_DAN_WIN_NOI_FORM_DOT4_5.md`, bổ sung
+khóa/mở ngay lịch F06, Ngoại lệ/giao nhiều F08, liên kết thẻ F05, phiên lịch sử/toàn bộ
+và khu vực/chức vụ F18, công việc gắn đơn F19/F14, sửa thông tin ảnh và quyền F16.
+Build 0 lỗi/0 cảnh báo; Rules 1230/1230; hồi quy WIN 53/53; kiểm UI/menu 37/37.
+**Lượt cuối v4: 94 bước WIN/SQL và 231/231 BLL SQL đạt, không skip; RESULT PASS, Cleanup PASS. Đã cập nhật W4/W5 và chụp 20 ảnh dữ liệu mẫu.**
+Xem [trạng thái và cách kiểm](../../docs/screenshots/win-dot45/STATUS.md).
+Dừng tính năng ở đợt 6; không làm F25/F26/Hiệu suất.
+Các phần dưới là kết quả lịch sử ở phiên bản ghi trong tiêu đề.
+## Bản giao diện trước — theo 8a12384
+
+Đã nối F22/F15/F16/F23, giao việc F19/việc cá nhân F14, các thao tác quản lý F18,
+số liệu Quản lý và thông tin nhận hoàn. Bộ lọc F08 và các màn kế toán từ code mới
+đã được cập nhật, F30 dùng homestay lookup và kỳ theo giờ SQL.
+225 SQL, 1176 Rules, 53 hồi quy WIN và 17 kiểm UI/menu đạt. D12 đã cập nhật riêng
+RESULT PASS sau khi sửa lỗi ghép GO trong tệp cập nhật; không reset dữ liệu.
+Có 13 ảnh SQL mẫu tại docs/screenshots/report-latest/sql-demo.
+Xem [hướng dẫn ảnh và giới hạn](../../docs/screenshots/report-latest/HUONG_DAN_ANH_BAO_CAO.md).
+Các phần phía dưới là lịch sử trước lượt này; không dùng để suy trạng thái mới nhất.
 ## Trạng thái gói WIN hiện tại
 
 Đã tích hợp hợp đồng MAC tới e875b03: tra phòng/lịch, khách, tạo đơn/thu cọc,

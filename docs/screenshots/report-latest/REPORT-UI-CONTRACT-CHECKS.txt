@@ -1,0 +1,18 @@
+PASS UI automation bindings match FrmBookings
+PASS UI automation bindings match FrmBookingCreate
+PASS UI automation bindings match FrmHomestayProfile
+PASS UI automation bindings match FrmOwners
+PASS UI automation bindings match FrmHomestays
+PASS UI automation bindings match FrmContracts
+PASS UI automation bindings match FrmRefundQueue
+PASS UI automation bindings match FrmStaff
+PASS Own tasks and owner read menu for Staff
+PASS Listing contract and manager task menus respect role Staff
+PASS Accountant cannot navigate into homestay-only owner tab: Staff
+PASS Own tasks and owner read menu for Manager
+PASS Listing contract and manager task menus respect role Manager
+PASS Accountant cannot navigate into homestay-only owner tab: Manager
+PASS Own tasks and owner read menu for Accountant
+PASS Listing contract and manager task menus respect role Accountant
+PASS Accountant cannot navigate into homestay-only owner tab: Accountant
+RESULT PASS

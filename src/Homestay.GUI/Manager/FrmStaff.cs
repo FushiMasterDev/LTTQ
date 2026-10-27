@@ -16,7 +16,7 @@ public partial class FrmStaff : ScreenForm
     public FrmStaff()
     {
         InitializeComponent();
-        HelpText = "Chọn bộ lọc rồi Tải lại. Bấm đúp để xem hồ sơ. Mật khẩu tạm chỉ hiện một lần; bàn giao riêng cho người nhận. Đổi chức vụ, khu vực và quản lý phiên làm ở đợt 5.";
+        HelpText = "Chọn bộ lọc rồi Tải lại. Bấm đúp để xem hồ sơ. Mật khẩu tạm chỉ hiện một lần; bàn giao riêng cho người nhận. Tab Khu vực lọc nhân viên theo khu vực. Chọn nhân viên trước để xem lịch sử phiên hoặc đổi phạm vi.";
         Disposed += (_,_) => loader.Dispose();
     }
     public FrmStaff(AppServices services) : this()
@@ -25,8 +25,9 @@ public partial class FrmStaff : ScreenForm
         this.services = services;
         pendingNotice.Visible = false;
         foreach(var button in new[]{reloadButton,addButton,lockButton,resetButton}) button.Tag = null;
-        roleButton.Visible = resignButton.Visible = endSessionButton.Visible = false;
-        viewTabs.TabPages.Remove(tab1); viewTabs.TabPages.Remove(tab2);
+        roleButton.Visible = resignButton.Visible = endSessionButton.Visible = true;
+        roleButton.Tag=resignButton.Tag=endSessionButton.Tag=null;
+
         filterPanelField3.Visible = filterPanelField3Label.Visible = false;
         filterPanelField1.Items.Clear();
         filterPanelField1.Items.Add(new Choice(null,"Tất cả"));
@@ -40,11 +41,12 @@ public partial class FrmStaff : ScreenForm
         grid0.QueryRequested += async (_,e)=>await LoadAsync(e.Request);
         grid0.DetailRequested += async (_,_)=>await ErrorHandler.RunAsync(reloadButton,DetailAsync);
         grid0.ExportFilteredAsync = ExportAsync;
-        reloadButton.Click += async (_,_)=>await LoadAsync(grid0.Query with{PageNumber=1});
+        reloadButton.Click += async (_,_)=>{if(viewTabs.SelectedTab==tab0)await LoadAsync(grid0.Query with{PageNumber=1});else await ReloadManagerTabAsync();};
         addButton.Click += async (_,_)=>await RunMutationAsync(addButton,CreateAsync,ReloadAsync);
         lockButton.Click += async (_,_)=>await RunMutationAsync(lockButton,ToggleLockAsync,ReloadAsync);
         resetButton.Click += async (_,_)=>await RunMutationAsync(resetButton,ResetAsync,ReloadAsync);
         filterPanelField0.KeyDown += (_,e)=>{if(e.KeyCode==Keys.Enter){e.SuppressKeyPress=true;reloadButton.PerformClick();}};
+        InitializeManagerFeatures();
         Shown += async (_,_)=>await ReloadAsync();
     }
     private EmployeeSearchRequest Search(PageRequest page) => new() {
@@ -55,11 +57,11 @@ public partial class FrmStaff : ScreenForm
     private async Task LoadAsync(PageRequest page)
     {
         if(services is null)return;
-        var request=Search(page);
+        rows=[];targetEmployee=null;RefreshManagerButtons();roleButton.Enabled=resignButton.Enabled=areasButton.Enabled=lockButton.Enabled=resetButton.Enabled=false;var request=Search(page);
         try {
             await loader.LoadAsync(ct=>services.Staff.ListAsync(request,ct),result=>{
                 rows=result.Items;
-                grid0.SetPage(result,Map);
+                grid0.SetPage(result,Map);lockButton.Enabled=resetButton.Enabled=result.Items.Count>0;
             });
         } catch(Exception exception){if(!IsDisposed)ErrorHandler.Show(exception,this);}
     }

@@ -79,7 +79,7 @@ public partial class FrmMain : ScreenForm
         if (gateway is null) roleBox.SelectedIndex = 0;
         else
         {
-            SetMenu(ScreenRegistry.Production(gateway, services).Where(e=>e.Id is not ("F09" or "F10" or "F11")).ToArray());
+            SetMenu(ScreenRegistry.Production(gateway, services).Where(e=>e.Id is not ("F09" or "F10" or "F11" or "F16")).ToArray());
             var welcome = new TabPage("Trang chủ");
             welcome.Controls.Add(new Label
             {
@@ -263,18 +263,19 @@ public partial class FrmMain : ScreenForm
     private async void OpenRequested(string id,object? argument) {
         if(services is null||ending||IsDisposed)return;
         try {
-            var key=id+(id is "F09" or "F10" or "F11" or "F20" or "F31"?":"+argument:argument is BookingSearchRequest q?":"+q.Queue+":"+q.OnlyExpiringHolds+":"+q.OnlyOverdueConfirmation+":"+q.AssignedToMeOnly:"");
+            var key=id+(id is "F09" or "F10" or "F11" or "F16" or "F20" or "F31"?":"+argument:argument is BookingSearchRequest q?":"+q.Queue+":"+q.OnlyExpiringHolds+":"+q.OnlyOverdueConfirmation+":"+q.AssignedToMeOnly:"");
             if(id=="F13"&&argument is Homestay.DTO.Customers.CustomerItem c)key+=":"+c.Id;
             if(id=="F07"&&argument is Homestay.DTO.Availability.QuoteRequest r)key+=":"+r.RoomTypeId+":"+r.CheckIn+":"+r.CheckOut+":"+r.Guests;
             if(id=="F07"&&argument is BookingDraftSelection draft)key+=":calendar:"+draft.Quote.RoomTypeId+":"+draft.Quote.CheckIn+":"+draft.Quote.CheckOut+":"+draft.Quote.Guests+":"+draft.PreferredRoomId;
             if(id=="F07"&&argument is Homestay.DTO.Customers.CustomerItem customer)key+=":customer:"+customer.Id;
-            var alreadyOpen=tabs.ContainsKey(key);
+            if(argument is Homestay.GUI.Manager.ListingOwnerSelection owner)key+=":owner:"+owner.OwnerId;if(argument is BookingExceptionsSelection ex)key+=":exceptions:"+ex.Kind;if(argument is TaskBoardSelection task)key+=":tasks:"+task.BookingId+":"+task.OnlyOverdue;var alreadyOpen=tabs.ContainsKey(key);
             OpenScreen(key,()=>id switch {
                 "F07"=>new FrmBookingCreate(services,argument),
-                "F08"=>new FrmBookings(services,argument as BookingSearchRequest),
-                "F09"=>new FrmBookingDetail(services,(int)argument!),
+                "F08"=>new FrmBookings(services,argument as BookingSearchRequest,argument as BookingExceptionsSelection),
+                "F15"=>new Homestay.GUI.Manager.FrmHomestays(services,argument as Homestay.GUI.Manager.ListingOwnerSelection),"F19"=>new Homestay.GUI.Manager.FrmTasks(services,argument as TaskBoardSelection),"F27"=>new Homestay.GUI.Accountant.FrmDepositVerification(services),"F09"=>new FrmBookingDetail(services,(int)argument!),
                 "F10"=>new FrmReceipt(services,(int)argument!),
                 "F11"=>new FrmCancellation(services,(int)argument!),
+                "F16"=>new Homestay.GUI.Manager.FrmHomestayProfile(services,(int)argument!),
                 "F13"=>new FrmCustomers(services,argument as Homestay.DTO.Customers.CustomerItem),
                 "F20"=>new Homestay.GUI.Manager.FrmCancellationApproval(services,argument as int?),
                 "F29"=>new Homestay.GUI.Accountant.FrmRefundQueue(services),
@@ -285,6 +286,7 @@ public partial class FrmMain : ScreenForm
             });
             if(id=="F09"&&alreadyOpen&&tabs.TryGetValue(key,out var page)&&page.Controls.OfType<FrmBookingDetail>().FirstOrDefault() is {} detail)await detail.RefreshFromServerAsync();
             if(alreadyOpen&&tabs.TryGetValue(key,out var existing)){
+                if(existing.Controls.OfType<Homestay.GUI.Manager.FrmHomestayProfile>().FirstOrDefault() is {} profile)await profile.RefreshFromServerAsync();
                 if(existing.Controls.OfType<Homestay.GUI.Manager.FrmCancellationApproval>().FirstOrDefault() is {} approval)await approval.RefreshFromServerAsync();
                 if(existing.Controls.OfType<Homestay.GUI.Accountant.FrmRefundQueue>().FirstOrDefault() is {} refunds)await refunds.RefreshFromServerAsync();
                 if(existing.Controls.OfType<Homestay.GUI.Accountant.FrmSettlementDetail>().FirstOrDefault() is {} settlement)await settlement.RefreshFromServerAsync();
