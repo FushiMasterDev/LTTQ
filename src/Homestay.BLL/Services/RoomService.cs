@@ -5,7 +5,7 @@ using Homestay.DTO.Availability;
 using Homestay.DTO.Rooms;
 namespace Homestay.BLL.Services;
 
-public sealed class RoomService(Authorizer authorizer, DataScope dataScope, ConnectionFactory factory, RoomRepository repository, DbClock clock,
+public sealed partial class RoomService(Authorizer authorizer, DataScope dataScope, ConnectionFactory factory, RoomRepository repository, DbClock clock,
     AvailabilityService availability)
 {
     private async Task EnsureAsync(DbSession db, int home, CancellationToken ct)
@@ -40,14 +40,4 @@ public sealed class RoomService(Authorizer authorizer, DataScope dataScope, Conn
     }
     // F06 occupancy, expired holds and change requests use the existing calendar without a second predicate.
     public Task<RoomCalendar> GetCalendarAsync(RoomCalendarRequest request, CancellationToken cancellationToken = default) => availability.GetCalendarAsync(request, cancellationToken);
-    public Task<RoomTypeItem> CreateTypeAsync(CreateRoomTypeRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<RoomTypeItem> UpdateTypeAsync(UpdateRoomTypeRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<RoomTypeItem> SetTypeActiveAsync(SetRoomTypeActiveRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<RoomItem> CreateRoomAsync(CreateRoomRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<RoomItem> UpdateRoomAsync(UpdateRoomRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<RoomItem> SetRoomActiveAsync(SetRoomActiveRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<RoomPriceList> AddPriceAsync(AddRoomPriceRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<RoomPriceList> UpdatePriceAsync(UpdateRoomPriceRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<RoomBlockItem> BlockAsync(BlockRoomRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<RoomBlockChangeResult> UnblockAsync(UnblockRoomRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }

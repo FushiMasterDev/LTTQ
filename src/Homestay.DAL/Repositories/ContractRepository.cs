@@ -5,7 +5,7 @@ using Homestay.DTO.Enums;
 using Microsoft.Data.SqlClient;
 namespace Homestay.DAL.Repositories;
 
-public sealed class ContractRepository
+public sealed partial class ContractRepository
 {
     private const string Columns = "c.*,h.Name AS HomestayName,h.RowVer";
     private const string From = "FROM dbo.Contracts c JOIN dbo.Homestays h ON h.Id=c.HomestayId ";

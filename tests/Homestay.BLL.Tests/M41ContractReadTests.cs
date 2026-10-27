@@ -291,10 +291,30 @@ public sealed class M41ContractReadTests
         Assert.Equal(await accountant.Base.ScalarAsync<int>("SELECT COUNT(*) FROM dbo.Bookings b JOIN dbo.Homestays h ON h.Id=b.HomestayId WHERE h.AreaId=@area;", cmd => cmd.Parameters.AddInt32("@area", own.AreaId)), (await accountant.Base.Bookings.ListAsync(new() { Queue = BookingQueue.All, AreaId = own.AreaId })).TotalCount);
     }
     [SqlFact]
-    public async Task RemainingFifteenRoundBWritesAreExplicitNotImplementedContracts()
+    public async Task NoM4WriteRemainsNotImplemented()
     {
         var c = new M41TestClient(); await c.Base.LoginNewAsync();
         var writes = new Func<Task>[] {
+            ()=>c.Owners.CreateAsync(null!),
+            ()=>c.Owners.UpdateAsync(null!),
+            ()=>c.Owners.ChangeBankAsync(null!),
+            ()=>c.Owners.ChangeStatusAsync(null!),
+            ()=>c.Homes.CreateDraftAsync(null!),
+            ()=>c.Homes.UpdateAsync(null!),
+            ()=>c.Homes.SetAmenitiesAsync(null!),
+            ()=>c.Homes.AddImageAsync(null!),
+            ()=>c.Homes.UpdateImageAsync(null!),
+            ()=>c.Homes.RemoveImageAsync(null!),
+            ()=>c.Homes.AddDocumentAsync(null!),
+            ()=>c.Homes.RemoveDocumentAsync(null!),
+            ()=>c.Homes.SubmitAsync(null!),
+            ()=>c.Homes.ApproveAsync(null!),
+            ()=>c.Homes.ReturnAsync(null!),
+            ()=>c.Homes.SuspendAsync(null!),
+            ()=>c.Homes.ReopenAsync(null!),
+            ()=>c.Homes.EndAsync(null!),
+            ()=>c.Homes.SetCancellationPolicyAsync(null!),
+            ()=>c.Homes.DisableCancellationPolicyAsync(null!),
             ()=>c.Rooms.CreateTypeAsync(null!),
             ()=>c.Rooms.UpdateTypeAsync(null!),
             ()=>c.Rooms.SetTypeActiveAsync(null!),
@@ -311,7 +331,13 @@ public sealed class M41ContractReadTests
             ()=>c.Contracts.ExtendAsync(null!),
             ()=>c.Base.Payments.UpdateRefundAccountAsync(null!),
         };
-        Assert.Equal(15, writes.Length);
-        foreach (var write in writes) await Assert.ThrowsAsync<NotImplementedException>(write);
+        Assert.Equal(35, writes.Length);
+        foreach (var write in writes)
+        {
+            var error = await Record.ExceptionAsync(write);
+            Assert.NotNull(error);
+            Assert.IsNotType<NotImplementedException>(error);
+            Assert.True(error is ArgumentNullException or ForbiddenException, error.ToString());
+        }
     }
 }

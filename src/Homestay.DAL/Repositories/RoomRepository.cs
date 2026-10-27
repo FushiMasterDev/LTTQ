@@ -3,7 +3,7 @@ using Homestay.DTO.Enums;
 using Homestay.DTO.Rooms;
 namespace Homestay.DAL.Repositories;
 
-public sealed class RoomRepository
+public sealed partial class RoomRepository
 {
     public async Task<IReadOnlyList<RoomTypeItem>> ListTypesAsync(DbSession db, int home, CancellationToken ct)
     {

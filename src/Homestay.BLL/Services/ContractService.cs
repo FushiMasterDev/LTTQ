@@ -6,7 +6,7 @@ using Homestay.DTO.Common;
 using Homestay.DTO.Contracts;
 namespace Homestay.BLL.Services;
 
-public sealed class ContractService(Authorizer authorizer, DataScope dataScope, ConnectionFactory factory, ContractRepository repository)
+public sealed partial class ContractService(Authorizer authorizer, DataScope dataScope, ConnectionFactory factory, ContractRepository repository)
 {
     public Task<PagedResult<ContractItem>> ListAsync(ContractSearchRequest request, CancellationToken cancellationToken = default)
     {
@@ -27,8 +27,4 @@ public sealed class ContractService(Authorizer authorizer, DataScope dataScope, 
         authorizer.Require(Permission.ContractManage); var scope = dataScope.HomestayFilter(financialRead: true);
         return BusinessErrorTranslator.ExecuteAsync(ct => factory.ReadAsync((db, token) => new HomestayRepository().LookupAsync(db, scope.Condition, scope.AddParametersTo, token), ct), cancellationToken);
     }
-    public Task<ContractItem> CreateAsync(CreateContractRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<ContractItem> ActivateAsync(ActivateContractRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<ContractItem> TerminateAsync(TerminateContractRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<ContractItem> ExtendAsync(ExtendContractRequest request, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }
