@@ -17,7 +17,7 @@ Mac đã kiểm: .NET SDK 10.0.400, Docker, chip Intel (SQL Server 2022 chạy t
 
 | Đường dẫn | Chủ | Máy kia |
 |---|---|---|
-| `HomestayDesktop.sln` và 6 `.csproj` | WIN **tạo** ở W1.1; sau đó `.sln` và `.csproj` trừ GUI thuộc MAC | Sau W1.1 không sửa |
+| `HomestayDesktop.sln`, 5 `.csproj` không phải GUI | MAC (tạo ở M1.3) | WIN chỉ thêm project GUI vào `.sln` ở W1.1, ngoài ra không sửa |
 | `.gitattributes`, `.gitignore` | MAC (đã có sẵn) | Không ghi đè khi VS đề nghị tạo `.gitignore` |
 | `database/` | MAC | Chỉ chạy script, không sửa |
 | `src/Homestay.DTO/`, `src/Homestay.DAL/`, `src/Homestay.BLL/` | MAC | Không sửa; cần thêm trường/hàm → tạo GitHub Issue nhãn `contract` |
@@ -40,7 +40,7 @@ Mac đã kiểm: .NET SDK 10.0.400, Docker, chip Intel (SQL Server 2022 chạy t
 
 - Toàn bộ bảng có từ đợt 1 (spec mục 11). Chỉ MAC sửa script; mỗi lần sửa chạy lại `database/build_install.sh` để sinh `install_demo.sql`, commit bắt đầu bằng `db:`.
 - Thấy commit `db:` mới → WIN chạy lại `install_demo.sql` (tạo lại database, mất dữ liệu thử trên máy WIN — chấp nhận).
-- Mật khẩu SQL của ứng dụng và mật khẩu tài khoản mẫu **không có trong Git**: truyền bằng biến SQLCMD `AppSqlPassword`, `DemoPassword` khi chạy script.
+- Mật khẩu SQL của ứng dụng và mật khẩu tài khoản mẫu **không có trong Git**: truyền bằng biến SQLCMD `AppSqlPassword`, `FirstManagerPassword` (Quản lý đầu tiên, seed 010), `DemoPassword` (tài khoản mẫu, seed 020) khi chạy script. Seed băm bằng PBKDF2 1.000 vòng trong T-SQL; BLL băm lại 600.000 vòng ở lần đăng nhập đầu (spec 3.10).
 
 ### 1.4. Git
 
@@ -63,18 +63,21 @@ Mac đã kiểm: .NET SDK 10.0.400, Docker, chip Intel (SQL Server 2022 chạy t
 
 ```bash
 # SQL Server trong Docker; mật khẩu sa đặt qua biến môi trường, không ghi vào repo
-docker run -d --name homestay-sql -p 1433:1433 \
-  -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD="$SA_PASSWORD" -e MSSQL_COLLATION=Vietnamese_CI_AS \
-  mcr.microsoft.com/mssql/server:2022-latest
+# KHÔNG đặt MSSQL_COLLATION: collation server Vietnamese_CI_AS làm sp_getapplock hỏng trên Linux (xp_userlock);
+# database vẫn là Vietnamese_CI_AS vì install_demo.sql tự đặt. Chỉ mở cổng ở 127.0.0.1.
+docker run -d --name homestay-desktop-sql -p 127.0.0.1:14330:1433 \
+  -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD="$SA_PASSWORD" \
+  mcr.microsoft.com/mssql/server:2022-CU27-ubuntu-22.04
 dotnet build HomestayDesktop.sln     # GUI có EnableWindowsTargeting nên build được trên Mac
-dotnet test
+HOMESTAY_TEST_CONNECTION="Server=127.0.0.1,14330;Database=HomestayDesktop_Dev;User ID=homestay_app;Password=…;Encrypt=True;TrustServerCertificate=True" \
+  dotnet test                        # thiếu biến này thì test SQL tự Skip
 ```
 
 **WIN**
 
 1. Visual Studio 2026, workload ".NET desktop development".
-2. SQL Server 2022 Developer hoặc Express, collation `Vietnamese_CI_AS`, bật TCP/IP; SQL Server Management Studio.
-3. Mở `database/install_demo.sql` trong SSMS, bật **Query → SQLCMD Mode**, đặt `:setvar AppSqlPassword …` và `:setvar DemoPassword …`, chạy.
+2. SQL Server 2022 Developer hoặc Express **bản cập nhật (CU) mới nhất**, collation server để mặc định (database tự được tạo `Vietnamese_CI_AS` bởi script), bật TCP/IP; SQL Server Management Studio.
+3. Mở `database/install_demo.sql` trong SSMS, bật **Query → SQLCMD Mode**, đặt `:setvar DbName HomestayDesktop`, `:setvar AppSqlPassword …`, `:setvar FirstManagerPassword …`, `:setvar DemoPassword …`, chạy.
 4. Chạy ứng dụng lần đầu → màn F04 Cấu hình kết nối → lưu `connection.dat` (DPAPI). Môi trường phát triển được `TrustServerCertificate=true`.
 
 ---
@@ -87,27 +90,24 @@ Mục tiêu: đăng nhập được bằng tài khoản mẫu của 3 vai trò, 
 
 **WIN**
 
-- [ ] **W1.0** Cài môi trường (mục 2) — làm ngay, không phụ thuộc.
-- [ ] **W1.1** ⛳ **Tạo solution trong Visual Studio 2026** — việc đầu tiên, trước mọi dòng code của cả hai máy (trừ `database/`):
-  - `HomestayDesktop.sln` ở **gốc repo** (cạnh `HOMESTAY_DESKTOP_SPEC.md`).
-  - `src/Homestay.DTO`, `src/Homestay.DAL`, `src/Homestay.BLL`: mẫu **Class Library**, `net10.0`.
-  - `src/Homestay.GUI`: mẫu **Windows Forms App**, `net10.0-windows`; thêm `<EnableWindowsTargeting>true</EnableWindowsTargeting>` vào `Homestay.GUI.csproj` để MAC build được.
-  - `tests/Homestay.Rules.Tests`, `tests/Homestay.BLL.Tests`: mẫu **xUnit Test Project**, `net10.0`.
-  - Tham chiếu project đúng bảng spec 3.2: DAL → DTO; BLL → DAL, DTO; GUI → BLL, DTO (**không** tham chiếu DAL); `Rules.Tests` → BLL; `BLL.Tests` → BLL, DAL, DTO.
-  - NuGet `Microsoft.Data.SqlClient` 6.x vào **DAL**. Không thêm gói nào khác.
-  - Xóa `Class1.cs`, `UnitTest1.cs` mẫu; giữ `Form1` tạm để chạy thử. Giữ nguyên `.gitignore`, `.gitattributes` có sẵn.
+- [x] **W1.0** Cài môi trường (mục 2) — làm ngay, không phụ thuộc.
+- [ ] **W1.1** ⛳ (sau M1.3 bước tạo solution) **Thêm project GUI trong Visual Studio 2026** vào `HomestayDesktop.sln` có sẵn (MAC đã tạo DTO, DAL, BLL và 2 project test):
+  - Mở `HomestayDesktop.sln` → Add → New Project → mẫu **Windows Forms App**, tên `Homestay.GUI`, đặt tại `src/Homestay.GUI`, `net10.0-windows`.
+  - Thêm `<EnableWindowsTargeting>true</EnableWindowsTargeting>` vào `Homestay.GUI.csproj` để MAC build được.
+  - Tham chiếu GUI → BLL, DTO (**không** tham chiếu DAL). Không thêm gói NuGet.
+  - Giữ `Form1` tạm để chạy thử. Giữ nguyên `.gitignore`, `.gitattributes` có sẵn.
   - Xong khi: VS build xanh, ứng dụng mở được `Form1`; push lên `dev`; MAC chạy `dotnet build` xanh trên Mac.
 - [ ] **W1.2** (sau W1.1) `Program.cs`: `AppServices`, đọc `appsettings.json`, bắt lỗi toàn cục (gồm `NotImplementedException` → "Chức năng đang làm"), `FileLogger`, kiểm `SchemaVersions` lúc khởi động. **F04** Cấu hình kết nối (DPAPI).
-- [ ] **W1.3** (sau M1.3) Control dùng chung trong `Common/`: lưới có phân trang 10/20/50/100 + **Hiện cột** + **Xuất CSV** UTF-8 BOM; ô chọn có tìm kiếm không dấu; định dạng tiền `1.234.000 ₫`, ngày `dd/MM/yyyy`; hộp thoại lỗi; nút "?"; `AsyncLoader` (bỏ kết quả tải cũ).
+- [x] **W1.3** (sau M1.3) Control dùng chung trong `Common/`: lưới có phân trang 10/20/50/100 + **Hiện cột** + **Xuất CSV** UTF-8 BOM; ô chọn có tìm kiếm không dấu; định dạng tiền `1.234.000 ₫`, ngày `dd/MM/yyyy`; hộp thoại lỗi; nút "?"; `AsyncLoader` (bỏ kết quả tải cũ).
 - [ ] **W1.4** (vẽ form sau W1.1; nối dữ liệu sau M1.1, M1.4) **F01** Đăng nhập, **F02** Đổi mật khẩu, **F03** Cửa sổ chính: menu 3 vai trò theo `Authorizer.Can`, tab (mở lại tab đang có), thanh trạng thái; mục menu của đợt sau tạm ẩn qua **một danh sách duy nhất**. Xóa `Form1`.
 - [ ] **W1.5** (vẽ form sau W1.1; nối dữ liệu sau M1.4) **F18** tab Nhân viên, **F24** Danh mục & cấu hình.
 
 **MAC**
 
-- [ ] **M1.1** ⛳ (làm ngay, chỉ đụng `database/`) `001_schema.sql` (mọi bảng mục 6.3 trừ module H), `002_indexes.sql`, `003_views.sql`, `004_security.sql`, `build_install.sh` → `install_demo.sql`. Xong khi: chạy sạch trên database trống, chạy lại không lỗi.
-- [ ] **M1.2** ⛳ `010_seed_reference.sql`, `020_seed_demo.sql` theo **mục 4** (dữ liệu đủ cho mọi màn, kể cả màn làm ở đợt sau).
-- [ ] **M1.3** ⛳ (sau W1.1) DTO chung `PagedResult<T>`, `PageRequest`, `Lookup` (push riêng trước để WIN làm W1.3); hạ tầng DAL `ConnectionFactory`, `UnitOfWork`, `DbClock`, `SqlErrorTranslator`, hàm đọc dòng dùng chung; BLL các exception, `ICurrentSession`, enum `Permission` đủ mục 5.2, `Authorizer`, `DataScope`, `AuditWriter`, `SettingsProvider`; `PasswordHasher` + test.
-- [ ] **M1.4** ⛳ Hợp đồng + cài đặt: `AuthService`, `SessionService` (đăng nhập, khóa tạm 5 lần sai, đổi mật khẩu bắt buộc, một phiên mỗi tài khoản, kiểm phiên trước thao tác ghi), `StaffService` (tạo nhân viên, khóa/mở, đặt lại mật khẩu), `CatalogService` (khu vực, tiện nghi, danh mục phòng, ngày lễ, chính sách hủy chung, tham số).
+- [x] **M1.1** ⛳ (làm ngay, chỉ đụng `database/`) `001_schema.sql` (mọi bảng mục 6.3 trừ module H), `002_indexes.sql`, `003_views.sql`, `004_security.sql`, `build_install.sh` → `install_demo.sql`. Xong khi: chạy sạch trên database trống, chạy lại không lỗi.
+- [x] **M1.2** ⛳ `010_seed_reference.sql`, `020_seed_demo.sql` theo **mục 4** (dữ liệu đủ cho mọi màn, kể cả màn làm ở đợt sau).
+- [x] **M1.3** ⛳ (không chờ WIN) Tạo `HomestayDesktop.sln` + `src/Homestay.DTO|DAL|BLL` (Class Library `net10.0`) + `tests/Homestay.Rules.Tests`, `tests/Homestay.BLL.Tests` (xUnit), tham chiếu đúng spec 3.2, gói `Microsoft.Data.SqlClient` 6.x vào DAL. Sau đó DTO chung `PagedResult<T>`, `PageRequest`, `Lookup` (push riêng trước để WIN làm W1.3); hạ tầng DAL `ConnectionFactory`, `UnitOfWork`, `DbClock`, `SqlErrorTranslator`, hàm đọc dòng dùng chung; BLL các exception, `ICurrentSession`, enum `Permission` đủ mục 5.2, `Authorizer`, `DataScope`, `AuditWriter`, `SettingsProvider`; `PasswordHasher` + test.
+- [x] **M1.4** ⛳ Hợp đồng + cài đặt: `AuthService`, `SessionService` (đăng nhập, khóa tạm 5 lần sai, đổi mật khẩu bắt buộc, một phiên mỗi tài khoản, kiểm phiên trước thao tác ghi), `StaffService` (tạo nhân viên, khóa/mở, đặt lại mật khẩu), `CatalogService` (khu vực, tiện nghi, danh mục phòng, ngày lễ, chính sách hủy chung, tham số).
 
 Xong đợt khi: trên máy WIN đăng nhập được NV/QL/KT mẫu; sai 5 lần bị khóa; QL tạo nhân viên mới, nhân viên đổi mật khẩu tạm; QL sửa danh mục và tham số.
 
@@ -117,19 +117,19 @@ Mục tiêu: tra phòng → tạo đơn → ghi nhận thu cọc chạy trọn. 
 
 **MAC**
 
-- [ ] **M2.1** ⛳ Hợp đồng: `AvailabilityService` (tra phòng trống, lưới lịch phòng), `CustomerService`, `BookingService` (báo giá, tạo đơn, danh sách theo tab hàng đợi, chi tiết, nhận phụ trách, giao lại, hủy đơn chưa có tiền, tìm nhanh), `PaymentService.RecordReceipt`, `NotificationService` (số chưa đọc, danh sách, đánh dấu đã đọc), `FileService` (tải/mở ảnh chứng từ). Hàm đọc chạy thật trên seed.
-- [ ] **M2.2** `PricingCalculator`, chọn chính sách hủy + test (ngày thường/cuối tuần/lễ, đổi giá giữa kỳ ở, làm tròn cọc).
-- [ ] **M2.3** Tạo đơn đầy đủ (khóa `RoomType:{id}`, `RoomNights`, `Counters`, giữ 15 phút), nhả giữ phòng quá hạn tại chỗ, `JobRunner` chỉ với tác vụ hết hạn giữ phòng; **test 10 luồng** cùng đặt.
-- [ ] **M2.4** Ghi nhận thu cọc, nhận phụ trách/giao lại, hủy đơn chưa có tiền, thông báo; test khách thứ 4 đơn chờ bị chặn.
+- [x] **M2.1** ⛳ Hợp đồng: `AvailabilityService` (tra phòng trống, lưới lịch phòng), `CustomerService`, `BookingService` (báo giá, tạo đơn, danh sách theo tab hàng đợi, chi tiết, nhận phụ trách, giao lại, hủy đơn chưa có tiền, tìm nhanh), `PaymentService.RecordReceipt`, `NotificationService` (số chưa đọc, danh sách, đánh dấu đã đọc), `FileService` (tải/mở ảnh chứng từ). Hàm đọc chạy thật trên seed.
+- [x] **M2.2** `PricingCalculator`, chọn chính sách hủy + test (ngày thường/cuối tuần/lễ, đổi giá giữa kỳ ở, làm tròn cọc).
+- [x] **M2.3** Tạo đơn đầy đủ (khóa `RoomType:{id}`, `RoomNights`, `Counters`, giữ 15 phút), nhả giữ phòng quá hạn tại chỗ, `JobRunner` chỉ với tác vụ hết hạn giữ phòng; **test 10 luồng** cùng đặt.
+- [x] **M2.4** Ghi nhận thu cọc, nhận phụ trách/giao lại, hủy đơn chưa có tiền, thông báo; test khách thứ 4 đơn chờ bị chặn.
 
 **WIN** (vẽ form ngay; nối dữ liệu sau M2.1)
 
-- [ ] **W2.1** **F05** Tổng quan — thẻ của Nhân viên (thẻ QL/KT làm ở đợt 5, 6).
-- [ ] **W2.2** **F06** tab Tra phòng, tab Lịch (khóa phòng làm ở đợt 4).
-- [ ] **W2.3** **F13** Khách hàng.
-- [ ] **W2.4** **F07** Tạo đơn (chưa có chọn voucher); sau khi tạo hiện mã đơn, số tiền, thông tin chuyển khoản, đồng hồ 15 phút.
-- [ ] **W2.5** **F08** Danh sách đơn (các tab của Nhân viên), **F09** Chi tiết đơn (tab Thông tin, Giá, Thu chi, Lịch sử), **F10** Ghi nhận thu tiền.
-- [ ] **W2.6** F03: ô tìm nhanh `Ctrl+K`, chuông và khung thông báo.
+- [x] **W2.1** **F05** Tổng quan — thẻ của Nhân viên (thẻ QL/KT làm ở đợt 5, 6).
+- [x] **W2.2** **F06** tab Tra phòng, tab Lịch (khóa phòng làm ở đợt 4).
+- [x] **W2.3** **F13** Khách hàng.
+- [x] **W2.4** **F07** Tạo đơn (chưa có chọn voucher); sau khi tạo hiện mã đơn, số tiền, thông tin chuyển khoản, đồng hồ 15 phút.
+- [x] **W2.5** **F08** Danh sách đơn (các tab của Nhân viên), **F09** Chi tiết đơn (tab Thông tin, Giá, Thu chi, Lịch sử), **F10** Ghi nhận thu tiền; F08 có lọc khu vực/homestay/người phụ trách ở SQL trong phạm vi quyền.
+- [x] **W2.6** F03: ô tìm nhanh `Ctrl+K`, chuông và khung thông báo.
 
 Xong đợt khi: từ S02 bấm Đặt → tạo đơn → ghi nhận thu → đơn "Chờ xác minh cọc"; đơn không ghi nhận quá 15 phút thành "Hết hạn" và phòng trống lại.
 
@@ -139,16 +139,16 @@ Mục tiêu: một đơn đi trọn tạo → cọc → xác minh → xác nhậ
 
 **MAC**
 
-- [ ] **M3.1** ⛳ Hợp đồng: `PaymentService` (hàng chờ, xác minh, từ chối, ghi nhận đã chi hoàn), `BookingService` (xác nhận/từ chối thay chủ, đổi phòng cùng loại, nhận phòng, trả phòng, không đến, danh sách đến/đi hôm nay, QL hủy do homestay không phục vụ được), `ChangeRequestService` **chỉ loại Hủy** (báo trước tiền hoàn, gửi, duyệt, từ chối).
-- [ ] **M3.2** `BookingStateMachine`, `RefundCalculator` + test bảng chuyển trạng thái và bảng ví dụ mục 7.6.3.
-- [ ] **M3.3** Cài đặt đủ M3.1; test: người ghi nhận không tự xác minh, hai người cùng xác nhận một đơn → một thành công, hai kế toán cùng chi hoàn → một thành công.
+- [x] **M3.1** ⛳ Hợp đồng: `PaymentService` (hàng chờ, xác minh, từ chối, ghi nhận đã chi hoàn), `BookingService` (xác nhận/từ chối thay chủ, đổi phòng cùng loại, nhận phòng, trả phòng, không đến, danh sách đến/đi hôm nay, QL hủy do homestay không phục vụ được), `ChangeRequestService` **chỉ loại Hủy** (báo trước tiền hoàn, gửi, duyệt, từ chối).
+- [x] **M3.2** `BookingStateMachine`, `RefundCalculator` + test bảng chuyển trạng thái và bảng ví dụ mục 7.6.3.
+- [x] **M3.3** Cài đặt đủ M3.1; test: người ghi nhận không tự xác minh, hai người cùng xác nhận một đơn → một thành công, hai kế toán cùng chi hoàn → một thành công.
 
 **WIN** (vẽ form ngay; nối dữ liệu sau M3.1)
 
-- [ ] **W3.1** **F27** Xác minh thu cọc (trái hàng chờ, phải ảnh chứng từ + thông tin đơn).
-- [ ] **W3.2** F09 các nút theo trạng thái: xác nhận/từ chối thay chủ (ghi chú bắt buộc), đổi phòng, nhận/trả phòng, không đến; F08 tab Chờ chủ xác nhận (đếm ngược, quá hạn tô đỏ) và tab Nhận/trả hôm nay.
-- [ ] **W3.3** **F11** Yêu cầu hủy (chỉ loại Hủy), **F20** Duyệt hủy, F09 tab Đổi/hủy; nút QL "Hủy — homestay không phục vụ được".
-- [ ] **W3.4** **F29** tab Hoàn tiền.
+- [x] **W3.1** **F27** Xác minh thu cọc (trái hàng chờ, phải ảnh chứng từ + thông tin đơn).
+- [x] **W3.2** F09 các nút theo trạng thái: xác nhận/từ chối thay chủ (ghi chú bắt buộc), đổi phòng, nhận/trả phòng, không đến; F08 tab Chờ chủ xác nhận (đếm ngược, quá hạn tô đỏ) và tab Nhận/trả hôm nay.
+- [x] **W3.3** **F11** Yêu cầu hủy (chỉ loại Hủy), **F20** Duyệt hủy, F09 tab Đổi/hủy; nút QL "Hủy — homestay không phục vụ được".
+- [x] **W3.4** **F29** tab Hoàn tiền.
 
 ### Đợt 4 — Hồ sơ homestay (spec G1 + G4)
 
@@ -156,8 +156,8 @@ Mục tiêu: một đơn đi trọn tạo → cọc → xác minh → xác nhậ
 
 **MAC**
 
-- [ ] **M4.1** ⛳ Hợp đồng: `OwnerService`, `HomestayService` (danh sách, hồ sơ, tạo nháp, sửa, tiện nghi, ảnh, giấy tờ, gửi duyệt, danh sách điều kiện, duyệt/trả về/tạm ngưng/mở lại/kết thúc), `RoomService` (loại phòng, phòng, phiên bản giá, khóa/mở khóa phòng), `ContractService`, chính sách hủy riêng.
-- [ ] **M4.2** Cài đặt + test: duyệt thiếu điều kiện hiện đúng danh sách thiếu; không có hợp đồng `Active` thứ hai; giá đã hiệu lực không sửa được; hoa hồng ngoài 10–15% bị chặn; NV không sửa homestay khác `Draft`; QL không duyệt nháp của mình; khóa trùng đơn bị chặn kèm mã đơn.
+- [x] **M4.1** ⛳ Hợp đồng: `OwnerService`, `HomestayService` (danh sách, hồ sơ, tạo nháp, sửa, tiện nghi, ảnh, giấy tờ, gửi duyệt, danh sách điều kiện, duyệt/trả về/tạm ngưng/mở lại/kết thúc), `RoomService` (loại phòng, phòng, phiên bản giá, khóa/mở khóa phòng), `ContractService`, chính sách hủy riêng.
+- [x] **M4.2** Cài đặt + test: duyệt thiếu điều kiện hiện đúng danh sách thiếu; không có hợp đồng `Active` thứ hai; giá đã hiệu lực không sửa được; hoa hồng ngoài 10–15% bị chặn; NV không sửa homestay khác `Draft`; QL không duyệt nháp của mình; khóa trùng đơn bị chặn kèm mã đơn.
 
 **WIN** (vẽ form ngay; nối dữ liệu sau M4.1)
 
@@ -260,39 +260,72 @@ Không làm trong kế hoạch này. Giao diện xử lý như cột cuối; b�
 
 ## 6. Theo dõi form
 
+### Chuẩn bị WIN đợt 4 và sửa thao tác chi hoàn
+
+[Báo cáo WIN tiếp tục](docs/screenshots/win-next/WIN_NEXT_2026-10-27.md).
+Đã có bảy biểu mẫu nhập đợt 4, kiểm đầu vào và preview không lưu;
+chưa có M4.1 nên W4 vẫn chưa hoàn thành nghiệp vụ và menu thật tiếp tục ẩn.
+F29 đã dùng checkbox rõ ràng, giữ nội dung khi nhập thiếu/sai; 19 ca WIN mới đạt.
+Build WinNext 0 lỗi/0 cảnh báo, hồi quy trước 47/47. SQL M33B vẫn chờ chạy.
+Không đổi ô MAC hoặc đánh dấu xong W4 chỉ vì biểu mẫu mở được.
+
+### Cập nhật WIN sau M3.3B — 27/10/2026
+
+Đã lấy hợp đồng MAC e875b03, nối đủ các thao tác đợt 3. W2.5 bổ sung lookup
+khu vực/homestay/người phụ trách theo BookingView và lọc ở SQL; không lọc một trang
+ở client.
+[Báo cáo M33B](docs/screenshots/win-completion/WIN_M33B_2026-10-27.md).
+Các báo cáo M33A/logic-audit là lịch sử, không phải tình trạng mới nhất.
+
+Build Release 0 lỗi/0 cảnh báo; Rules 310/310; hồi quy WIN trước thay đổi lọc F08
+53/53; GUI smoke 74/74. SQL M33B vẫn chờ bộ thử Windows Administrator trên database tạm;
+bản chạy hiện tại không có HOMESTAY_TEST_CONNECTION và script Administrator không có
+trong repository, nên chưa xác nhận SQL end-to-end sau sửa giao diện.
+Lượt M33A trước đó có SQL WIN 63 PASS, xUnit SQL 111/111 và Cleanup PASS.
+
+Chưa hoàn thành toàn bộ WORK_PLAN: đợt 4–7 còn
+thiếu dịch vụ MAC; W1 còn bằng chứng kiểm tay; W7.3/W8 còn DPI/Designer và ảnh.
+Không đổi ô MAC. Bảng form tính theo toàn bộ phạm vi, không tính preview là hoàn thành.
+
 | Form | Đợt | Việc WIN | Tình trạng |
 |---|---|---|---|
-| F01 Đăng nhập | 1 | W1.4 | Chưa làm |
-| F02 Đổi mật khẩu | 1 | W1.4 | Chưa làm |
-| F03 Cửa sổ chính | 1, 2 | W1.4, W2.6 | Chưa làm |
-| F04 Cấu hình kết nối | 1 | W1.2 | Chưa làm |
-| F05 Tổng quan | 2, 5, 6 | W2.1, W5.1, W6.1 | Chưa làm |
-| F06 Tra phòng & lịch phòng | 2, 4 | W2.2, W4.5 | Chưa làm |
-| F07 Tạo đơn | 2 | W2.4 | Chưa làm |
-| F08 Danh sách đơn | 2, 3, 5 | W2.5, W3.2, W5.1 | Chưa làm |
-| F09 Chi tiết đơn | 2, 3 | W2.5, W3.2, W3.3 | Chưa làm |
-| F10 Ghi nhận thu tiền | 2 | W2.5 | Chưa làm |
-| F11 Yêu cầu đổi/hủy | 3 | W3.3 (chỉ hủy) | Chưa làm |
+| F01 Đăng nhập | 1 | W1.4 | Hoàn thành |
+| F02 Đổi mật khẩu | 1 | W1.4 | Hoàn thành |
+| F03 Cửa sổ chính | 1, 2 | W1.4, W2.6 | Hoàn thành một phần |
+| F04 Cấu hình kết nối | 1 | W1.2 | Hoàn thành một phần |
+| F05 Tổng quan | 2, 5, 6 | W2.1, W5.1, W6.1 | Hoàn thành một phần |
+| F06 Tra phòng & lịch phòng | 2, 4 | W2.2, W4.5 | Hoàn thành một phần |
+| F07 Tạo đơn | 2 | W2.4 | Hoàn thành |
+| F08 Danh sách đơn | 2, 3, 5 | W2.5, W3.2, W5.1 | Hoàn thành một phần |
+| F09 Chi tiết đơn | 2, 3 | W2.5, W3.2, W3.3 | Hoàn thành |
+| F10 Ghi nhận thu tiền | 2 | W2.5 | Hoàn thành |
+| F11 Yêu cầu đổi/hủy | 3 | W3.3 (chỉ hủy) | Hoàn thành |
 | F12 Xử lý trùng phòng | — | — | Tạm chưa làm |
-| F13 Khách hàng | 2 | W2.3 | Chưa làm |
+| F13 Khách hàng | 2 | W2.3 | Hoàn thành |
 | F14 Của tôi | 5, 7 | W5.3, W7.2 | Chưa làm |
 | F15 Danh sách homestay | 4 | W4.2 | Chưa làm |
 | F16 Hồ sơ homestay | 4 | W4.3 | Chưa làm |
 | F17 | — | — | Bỏ (D9) |
-| F18 Nhân viên & tài khoản | 1, 5 | W1.5, W5.2 | Chưa làm |
+| F18 Nhân viên & tài khoản | 1, 5 | W1.5, W5.2 | Hoàn thành một phần |
 | F19 Giao việc | 5 | W5.3 | Chưa làm |
-| F20 Duyệt đổi/hủy | 3 | W3.3 (chỉ hủy) | Chưa làm |
+| F20 Duyệt đổi/hủy | 3 | W3.3 (chỉ hủy) | Hoàn thành |
 | F21 Voucher | — | — | Tạm chưa làm |
 | F22 Chủ homestay | 4 | W4.1 | Chưa làm |
 | F23 Hợp đồng | 4 | W4.4 | Chưa làm |
-| F24 Danh mục & cấu hình | 1 | W1.5 | Chưa làm |
+| F24 Danh mục & cấu hình | 1 | W1.5 | Hoàn thành một phần |
 | F25 Báo cáo | 7 | W7.1 | Chưa làm |
 | F26 Nhật ký hệ thống | 7 | W7.2 | Chưa làm |
-| F27 Xác minh thu cọc | 3 | W3.1 | Chưa làm |
+| F27 Xác minh thu cọc | 3 | W3.1 | Hoàn thành |
 | F28 Sao kê ngân hàng | 6 | W6.2 (nhập tay) | Chưa làm |
-| F29 Hàng chờ chi & cọc bổ sung | 3 | W3.4 (tab Hoàn tiền) | Chưa làm |
+| F29 Hàng chờ chi & cọc bổ sung | 3 | W3.4 (tab Hoàn tiền) | Hoàn thành |
 | F30 Danh sách đối soát | 6 | W6.3 | Chưa làm |
 | F31 Chi tiết đối soát | 6 | W6.3 | Chưa làm |
 | F32 Sổ thu chi & công nợ | 6 | W6.4 | Chưa làm |
 
 Tình trạng dùng đúng ba nhãn của báo cáo: **Hoàn thành / Hoàn thành một phần / Chưa làm** (cộng "Tạm chưa làm", "Bỏ" cho hai loại ở mục 5).
+
+
+WIN — lượt trước đã đạt 67 bước rồi dừng ở thao tác hủy homestay; database tạm đã
+được dọn. Đã sửa trạng thái Enabled ban đầu ở F09; hồi quy sau sửa 53/53.
+W2.5/W3.3/W3.4 đã được nối và hoàn thành ở mã; nghiệm thu SQL M33B trên Windows
+Administrator vẫn đang chờ. Chi tiết: docs/screenshots/win-next/F09_LOADING_FIX.md.

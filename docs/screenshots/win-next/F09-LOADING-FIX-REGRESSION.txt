@@ -1,0 +1,54 @@
+PASS Missing deadline stays empty
+PASS Deadline countdown handles minute boundary
+PASS Countdown displays days without wrapping to zero
+PASS Deadline at server time is shown overdue
+PASS Evidence uses file signature rather than renamed extension
+PASS WEBP evidence accepted by existing BLL validation
+PASS Invalid evidence rejected before saving receipt
+PASS Evidence over 5 MB rejected
+PASS Calendar draft selects the clicked room instead of automatic assignment
+PASS Sold-out preferred room cannot silently fall back to another room
+PASS Editing search filters cancels a pending old search result
+PASS Calendar homestay filter preserves correct room rows
+PASS Clearing calendar homestay filter restores all rooms; selected= rows=2
+PASS A stale automatic-room choice cannot enable saving when quote has no available rooms
+PASS Changing booking dates immediately invalidates old rooms and saving
+PASS Editing both booking dates coalesces into one automatic search for final dates
+PASS Automatic refresh retains previous room type only when still available
+PASS Late search cannot restore old room types or silently replace selected type
+PASS Sold-out previous type explains that another type must be selected
+PASS No availability has an explicit message and prevents quote or saving
+PASS Invalid date range shows inline correction without querying or leaving unexplained blank picker
+PASS Automatic availability error remains visible with saving disabled
+PASS Closing booking form safely cancels automatic room refresh
+PASS Notification inbox shows unread count and first server page
+PASS Rapid paging cannot skip an unrequested notification page
+PASS Queued refresh preserves requested notification page
+PASS Opening booking notification marks only selected message read and navigates
+PASS Read all updates counter and keeps read-all button disabled
+PASS Refund notification opens payment workflow instead of only showing text
+PASS Failed inbox read offers retry without clearing existing data
+PASS Shrinking notification results clamp to first valid page
+PASS Lifecycle buttons start disabled until booking detail is loaded
+PASS Slow initial detail read cannot expose an actionable cancellation button
+PASS Cancellation button becomes actionable only after loaded BLL actions permit it
+PASS Reload clears old booking snapshot and disables stale mutation buttons
+PASS Reload does not retain a cancellation action removed by the BLL
+PASS Closing detail during reload safely discards its delayed actions
+PASS M31 read menus respect role Staff
+PASS Integrated booking buttons do not retain placeholder message handlers
+PASS M31 read menus respect role Manager
+PASS Cancellation review requires loaded eligible request
+PASS Cancellation request stays disabled before a current quote is loaded
+PASS Own cancellation request explains why another manager must review
+PASS Eligible pending cancellation enables review and displays server quote
+PASS M31 read menus respect role Accountant
+PASS Receipt actions require a loaded eligible selection
+PASS Refund payment requires a selected pending refund
+PASS Actual refund can be recorded when legacy destination account is not stored
+PASS Refund creator cannot record their own refund payment
+PASS Already paid refund cannot be submitted again
+PASS M33A implemented booking actions are available
+PASS M33B implemented cancellation actions are available
+PASS Closing notification inbox discards pending results safely
+RESULT PASS

@@ -1028,6 +1028,7 @@ Ràng buộc chéo không làm được bằng FK, kiểm ở BLL: `RoomTypes.Ho
 | Type | varchar(20) | CHECK IN (`Deposit`, `AdditionalDeposit`, `Refund`, `Compensation`); CHECK Deposit/AdditionalDeposit ⇒ `In`, Refund/Compensation ⇒ `Out` |
 | Method | varchar(20) | CHECK IN (`BankTransfer`, `Cash`) — nhận tiền mặt tại văn phòng, kế toán vẫn xác minh [ĐÃ CHỐT] Q10 |
 | Amount | decimal(18,0) | CHECK > 0 |
+| TransferredAt | datetime2(3) | NULL, UTC — thời điểm khách chuyển tiền (khách báo/chứng từ); CHECK `CK_Payments_TransferredAt`: `TransferredAt IS NULL OR Direction = 'In'` (chỉ phiếu thu) |
 | BankTransactionId | int | FK → BankTransactions, NULL; UNIQUE (lọc khác NULL) — một dòng sao kê thành tối đa một phiếu |
 | EvidenceFileId | uniqueidentifier | FK → StoredFiles, NULL — ảnh chứng từ |
 | PayerOrPayeeName | nvarchar(100) | NULL — tên người chuyển / người nhận |
@@ -2137,6 +2138,8 @@ Sau khi đối chiếu báo cáo một đồ án WinForms cùng khóa (quản l�
 | # | Quyết định |
 |---|---|
 | D9 | **Không làm vai trò Chủ homestay.** Chủ là đối tác có hồ sơ (`Owners`), không có tài khoản đăng nhập; ứng dụng còn ba vai trò: Nhân viên, Kế toán, Quản lý. Việc của chủ chuyển sang: xác nhận/từ chối đơn, nhận/trả phòng, không đến, báo trùng phòng → Nhân viên/Quản lý ghi nhận thay chủ (bắt buộc ghi chú); nhập homestay → Nhân viên khi `Draft`, Quản lý ở mọi trạng thái (mục 4.2); khóa phòng → Quản lý; đối soát bỏ bước chủ xác nhận (`Draft → Sent → Paid`), gửi chủ bằng bản in/CSV, Kế toán ghi phản hồi. Bỏ `Users.UserType`, `Owners.UserId`, `Settlements.ConfirmedAt`, trạng thái `Settlements.Confirmed`, `ActorType = Owner`. Bỏ Tailscale (chỉ LAN). Còn 31 form (bỏ F17). Quyền của Nhân viên trên hồ sơ nháp là [ĐỀ XUẤT] |
+| D10 | Thêm `Payments.TransferredAt` — thời điểm khách chuyển tiền (khách báo/chứng từ), UTC, chỉ phiếu thu; Kế toán dùng để đối chiếu sao kê (27/10/2026) |
+| D11 | Hồ sơ homestay (27/10/2026, chốt đề xuất M4.1): (1) Nhân viên sửa **mọi** homestay `Draft` trong khu vực được giao, không chỉ nháp mình tạo; Quản lý vẫn không duyệt nháp do mình tạo. (2) Ngừng chủ **không** tự tạm ngưng homestay của chủ; homestay chỉ mất điều kiện duyệt khi duyệt lại/mở lại. (3) Gỡ hoặc tải lại giấy phép kinh doanh/PCCC, đổi địa chỉ/khu vực của homestay `Active` → `PendingReview` trong cùng transaction, giữ các đơn đã có, chặn bán mới |
 
 ## 13. Thuật ngữ
 

@@ -1,0 +1,19 @@
+PASS Business eligibility stays disabled after asynchronous operation
+PASS Ordinary asynchronous trigger is restored
+PASS Cannot close a form while its write is unfinished
+PASS Concurrent mutation in the same form is rejected
+PASS Mutation completion preserves current allowed action
+PASS Form can close after write completion
+PASS Successful receipt-style operation can close intentionally
+PASS Changing booking input invalidates an old quote even when cancellation is ignored
+PASS Newest search wins over a slower old response
+PASS Closing form discards pending results and repeated dispose is safe
+PASS Saving requires a current quote
+PASS Old assigned room is cleared with invalid quote
+PASS Old quote totals disappear after input changes
+PASS Invalidation clears quote and its input snapshot
+PASS Committed booking cannot be reset as a fresh quote
+PASS F2 opens the selected row using the existing detail action
+PASS Ctrl+F focuses the visible filter
+PASS F07 Close then repeated Dispose regression
+RESULT PASS

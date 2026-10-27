@@ -1,0 +1,1 @@
+Ảnh kết xuất bố cục trống, DPI 144. Không phải ảnh luồng nghiệp vụ trên dữ liệu mẫu, không nghiệm thu W8.1/W8.2.

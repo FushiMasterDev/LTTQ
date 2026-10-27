@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Homestay.GUI": {
+      "commandName": "Project"
+    },
+    "Xem bố cục (không dữ liệu)": {
+      "commandName": "Project",
+      "commandLineArgs": "--preview"
+    }
+  }
+}

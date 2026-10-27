@@ -1,0 +1,20 @@
+PASS Unconfirmed refund stays open with inline explanation
+PASS Unconfirmed refund preserves already entered transaction reference
+PASS Invalid reference is corrected in the same refund dialog
+PASS Confirmed refund returns preserved inputs and Vietnam local time
+PASS Contract rejects end before start without closing inputs
+PASS Contract editor presents commission in percent with explicit 10 to 15 bounds
+PASS Contract returns selected lookup ID and decimal percentage without a database write
+PASS Homestay editor keeps check-in and checkout as typed times
+PASS Draft preview validates without reporting a saved homestay
+PASS Long draft forms wrap guidance and avoid horizontal scrolling
+PASS Draft editor remains usable at its minimum window size
+PASS Room type rejects zero capacity before returning form values
+PASS Optional room area can stay empty while capacity is typed integer
+PASS Room price requires all three positive price levels
+PASS Room price preserves whole VND amounts without parsing thousands separators
+PASS Room block explains exclusive end date and rejects empty interval
+PASS Owner email error keeps owner draft open
+PASS Pending owner draft does not fabricate bank details or an approved status
+PASS Room code respects schema input length
+RESULT PASS
