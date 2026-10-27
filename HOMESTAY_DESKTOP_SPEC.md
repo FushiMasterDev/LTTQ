@@ -633,7 +633,7 @@ Ký hiệu: ✔ được phép trên toàn bộ dữ liệu · **PV** trong ph�
 | Chuỗi tiếng Việt | `nvarchar`; mã, SĐT, trạng thái dùng `varchar` |
 | SĐT | Chuẩn hóa E.164 (`+84912345678`) trước khi lưu |
 | Cột chung | `CreatedAt datetime2(3) NOT NULL DEFAULT SYSUTCDATETIME()`; `UpdatedAt` ở bảng được sửa; `RowVer rowversion` ở bảng có cập nhật đồng thời |
-| Xóa | **Không xóa cứng** đơn, tiền, đối soát, hợp đồng, khách, chủ, nhân viên, homestay, phòng; dùng trạng thái/cờ. Xóa cứng chỉ: `RoomNights`, `RoomBlocks`, `HomestayAmenities`, `HomestayImages`, `EmployeeAreas`, `Notifications` cũ |
+| Xóa | **Không xóa cứng** đơn, tiền, đối soát, hợp đồng, khách, chủ, nhân viên, homestay, phòng; dùng trạng thái/cờ. Xóa cứng chỉ: `RoomNights`, `RoomBlocks`, `HomestayAmenities`, `HomestayImages`, `EmployeeAreas`, `Notifications` cũ, `SettlementItems` của bảng đối soát `Draft` khi lập lại (D12) |
 | Xóa dây chuyền | Chỉ bảng con thuần túy (`RoomBlocks → RoomNights`, `CancellationPolicies → CancellationRules`, `Settlements → SettlementItems`); còn lại `NO ACTION` |
 | Cuối tuần | Đêm **thứ Sáu và thứ Bảy** tính giá cuối tuần [KẾ THỪA] |
 
@@ -1854,7 +1854,7 @@ KT chuyển khoản cho chủ ngoài hệ thống ─► ghi nhận Paid (mã gi
 |---|---|---|
 | Mật khẩu người dùng | PBKDF2-SHA256 600.000 vòng + salt; khóa tạm sau 5 lần sai; bắt đổi mật khẩu tạm | [ĐỀ XUẤT] |
 | Quyền nghiệp vụ | Kiểm ở mọi hàm public của BLL; lọc phạm vi trong SQL; ngoài phạm vi trả "không tìm thấy" | [ĐÃ CHỐT] (kiểm ở BLL) |
-| Tài khoản SQL của ứng dụng | Không dùng `sa`, không `db_owner`. Role `app_homestay`: `SELECT/INSERT/UPDATE` trên bảng nghiệp vụ; `DELETE` chỉ trên `RoomNights`, `RoomBlocks`, `HomestayAmenities`, `HomestayImages`, `EmployeeAreas`, `Notifications`; `DENY UPDATE, DELETE` trên `AuditLogs`, `BookingStatusHistories`; không có quyền DDL | [ĐỀ XUẤT] |
+| Tài khoản SQL của ứng dụng | Không dùng `sa`, không `db_owner`. Role `app_homestay`: `SELECT/INSERT/UPDATE` trên bảng nghiệp vụ; `DELETE` chỉ trên `RoomNights`, `RoomBlocks`, `HomestayAmenities`, `HomestayImages`, `EmployeeAreas`, `Notifications`, `SettlementItems` (BLL chỉ xóa dòng của bảng `Draft`, D12); `DENY UPDATE, DELETE` trên `AuditLogs`, `BookingStatusHistories`; không có quyền DDL | [ĐỀ XUẤT] |
 | Tài khoản quản trị database | Tách riêng, chỉ dùng chạy script, không cài trên máy trạm | [ĐỀ XUẤT] |
 | Chuỗi kết nối | DPAPI phạm vi máy; không trong Git; `Encrypt=True` | [ĐỀ XUẤT] |
 | Mạng | SQL Server chỉ mở trong LAN văn phòng; không mở cổng 1433 ra Internet | [ĐÃ CHỐT] Q03, D9 |
@@ -2140,6 +2140,7 @@ Sau khi đối chiếu báo cáo một đồ án WinForms cùng khóa (quản l�
 | D9 | **Không làm vai trò Chủ homestay.** Chủ là đối tác có hồ sơ (`Owners`), không có tài khoản đăng nhập; ứng dụng còn ba vai trò: Nhân viên, Kế toán, Quản lý. Việc của chủ chuyển sang: xác nhận/từ chối đơn, nhận/trả phòng, không đến, báo trùng phòng → Nhân viên/Quản lý ghi nhận thay chủ (bắt buộc ghi chú); nhập homestay → Nhân viên khi `Draft`, Quản lý ở mọi trạng thái (mục 4.2); khóa phòng → Quản lý; đối soát bỏ bước chủ xác nhận (`Draft → Sent → Paid`), gửi chủ bằng bản in/CSV, Kế toán ghi phản hồi. Bỏ `Users.UserType`, `Owners.UserId`, `Settlements.ConfirmedAt`, trạng thái `Settlements.Confirmed`, `ActorType = Owner`. Bỏ Tailscale (chỉ LAN). Còn 31 form (bỏ F17). Quyền của Nhân viên trên hồ sơ nháp là [ĐỀ XUẤT] |
 | D10 | Thêm `Payments.TransferredAt` — thời điểm khách chuyển tiền (khách báo/chứng từ), UTC, chỉ phiếu thu; Kế toán dùng để đối chiếu sao kê (27/10/2026) |
 | D11 | Hồ sơ homestay (27/10/2026, chốt đề xuất M4.1): (1) Nhân viên sửa **mọi** homestay `Draft` trong khu vực được giao, không chỉ nháp mình tạo; Quản lý vẫn không duyệt nháp do mình tạo. (2) Ngừng chủ **không** tự tạm ngưng homestay của chủ; homestay chỉ mất điều kiện duyệt khi duyệt lại/mở lại. (3) Gỡ hoặc tải lại giấy phép kinh doanh/PCCC, đổi địa chỉ/khu vực của homestay `Active` → `PendingReview` trong cùng transaction, giữ các đơn đã có, chặn bán mới |
+| D12 | Đối soát (27/10/2026): bảng `Draft` được lập lại bằng cách xóa rồi ghi lại toàn bộ `SettlementItems` của bảng đó trong cùng transaction (khóa `Settlement:{HomestayId}`); role `app_homestay` được `DELETE` trên `SettlementItems`, BLL chỉ xóa khi bảng còn `Draft`. Bảng `Sent`/`Paid` giữ nguyên bản chụp, không xóa |
 
 ## 13. Thuật ngữ
 

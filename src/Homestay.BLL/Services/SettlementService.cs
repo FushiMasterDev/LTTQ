@@ -29,7 +29,12 @@ public sealed class SettlementService(Authorizer authorizer,ICurrentSession curr
             if(head is null&&lines.Length==0)throw new BusinessException("Kỳ này không có đơn để đối soát.");
             int id;
             if(head is null)id=await repository.InsertAsync(db,homestayId,year,month,period,totals,t).ConfigureAwait(false);
-            else {if(head.Status!=SettlementStatus.Draft)throw new BusinessException("Bảng đã gửi hoặc đã trả, không thể tính lại.");if(await repository.UpdateDraftAsync(db,head.Id,head.RowVer,totals,t).ConfigureAwait(false)==0)throw new ConcurrencyException();id=head.Id;}
+            else
+            {
+                if(head.Status!=SettlementStatus.Draft)throw new BusinessException("Bảng đã gửi hoặc đã trả, không thể tính lại.");
+                if(await repository.UpdateDraftAsync(db,head.Id,head.RowVer,totals,t).ConfigureAwait(false)==0)throw new ConcurrencyException();
+                id=head.Id;
+            }
             await repository.InsertItemsAsync(db,id,lines,t).ConfigureAwait(false);
             await audit.WriteAsync(db,new(session.UserId,head is null?"Settlement.Create":"Settlement.Recreate","Settlements",id.ToString(CultureInfo.InvariantCulture),head is null?null:new{head.Status,head.PayoutAmount},new{homestayId,year,month,period,Totals=totals,ItemCount=lines.Length,BlockedBookingCodes=pending},null,machineName),t).ConfigureAwait(false);
             var actual=await repository.GetByIdAsync(db,id,false,t).ConfigureAwait(false)??throw new InvalidOperationException();return new SettlementDraftResult(id,homestayId,year,month,period,actual.Status,totals,lines,pending,actual.RowVer){HomestayName=actual.HomestayName,OwnerName=actual.OwnerName,OwnerFeedback=actual.OwnerFeedback,OwnerBankName=actual.OwnerBankName,OwnerBankAccountNo=actual.OwnerBankAccountNo,OwnerBankAccountName=actual.OwnerBankAccountName,History=await repository.GetHistoryAsync(db,id,t).ConfigureAwait(false)};

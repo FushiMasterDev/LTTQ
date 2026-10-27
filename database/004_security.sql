@@ -221,11 +221,9 @@ GO
 DENY DELETE ON OBJECT::dbo.Settlements TO app_homestay;
 GO
 
-GRANT SELECT, INSERT, UPDATE ON OBJECT::dbo.SettlementItems TO app_homestay;
+GRANT SELECT, INSERT, UPDATE, DELETE ON OBJECT::dbo.SettlementItems TO app_homestay;
 GO
 
-DENY DELETE ON OBJECT::dbo.SettlementItems TO app_homestay;
-GO
 
 GRANT SELECT, INSERT, UPDATE ON OBJECT::dbo.Notifications TO app_homestay;
 GO

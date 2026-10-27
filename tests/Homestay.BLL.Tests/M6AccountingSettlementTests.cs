@@ -240,6 +240,142 @@ public sealed class M6AccountingSettlementTests
         Assert.Equal(SettlementStatus.Draft, (await Settlements(accountant).CreateOrRecreateDraftAsync(data.HomestayId, 2025, 1, 1)).Status);
     }
 
+    private static Task<string> SettlementItemsSnapshot(M21TestClient c, int id) => c.ScalarAsync<string>(
+        "SELECT * FROM dbo.SettlementItems WHERE SettlementId=@id ORDER BY BookingId FOR JSON PATH;",
+        cmd => cmd.Parameters.AddInt32("@id", id));
+
+    [SqlFact]
+    public async Task RecreatingDraftRefreshesChangedBookingsAndSentItemsStayUnchanged()
+    {
+        var manager = new M21TestClient(); await manager.LoginNewAsync();
+        var data = await M21Data.CreateAsync(manager, 2);
+        var completedId = await data.BookingAsync(manager, 0, BookingStatus.Completed,
+            checkIn: new(2025, 1, 5), checkOut: new(2025, 1, 7));
+        var checkedInId = await data.BookingAsync(manager, 1, BookingStatus.CheckedIn,
+            checkIn: new(2025, 1, 8), checkOut: new(2025, 1, 10));
+        var accountant = new M21TestClient(); await accountant.LoginNewAsync(Position.Accountant);
+        var service = Settlements(accountant);
+        var draft = await service.CreateOrRecreateDraftAsync(data.HomestayId, 2025, 1, 1);
+        Assert.Equal(completedId, Assert.Single(draft.Items).BookingId);
+        Assert.Equal(new SettlementTotals(2_000_000m, 600_000m, 240_000m, 0m, 360_000m), draft.Totals);
+
+        await manager.MutateAsync("UPDATE dbo.Bookings SET Status='Completed',CompletedAt=SYSUTCDATETIME() WHERE Id=@id;",
+            cmd => cmd.Parameters.AddInt32("@id", checkedInId));
+        var rebuilt = await service.CreateOrRecreateDraftAsync(data.HomestayId, 2025, 1, 1);
+
+        Assert.Equal(draft.Id, rebuilt.Id);
+        Assert.False(draft.RowVer.SequenceEqual(rebuilt.RowVer));
+        Assert.Equal(new[] { completedId, checkedInId }.Order(), rebuilt.Items.Select(x => x.BookingId).Order());
+        Assert.Equal(new SettlementTotals(4_000_000m, 1_200_000m, 480_000m, 0m, 720_000m), rebuilt.Totals);
+        Assert.Empty(rebuilt.UnfinalizedBookingCodes);
+        var stored = await service.GetAsync(rebuilt.Id);
+        Assert.Equal(rebuilt.Items.ToArray(), stored.Items.ToArray());
+        Assert.Equal(rebuilt.Totals, stored.Totals);
+        Assert.Equal(2, await manager.ScalarAsync<int>(
+            "SELECT COUNT(*) FROM dbo.SettlementItems WHERE SettlementId=@id;", cmd => cmd.Parameters.AddInt32("@id", rebuilt.Id)));
+        Assert.Equal(0, await manager.ScalarAsync<int>(
+            "SELECT COUNT(*) FROM (SELECT BookingId FROM dbo.SettlementItems WHERE SettlementId=@id GROUP BY BookingId HAVING COUNT(*)>1) duplicates;",
+            cmd => cmd.Parameters.AddInt32("@id", rebuilt.Id)));
+        var listed = Assert.Single(await service.ListAsync(2025, 1, 1), x => x.Id == rebuilt.Id);
+        Assert.Equal((2025, 1, 1), (listed.Year, listed.Month, listed.PeriodNo));
+
+        var sent = await service.SendAsync(new(rebuilt.Id, rebuilt.RowVer, ""));
+        var snapshot = await SettlementItemsSnapshot(manager, sent.Id);
+        await manager.MutateAsync("UPDATE dbo.Bookings SET TotalAmount=TotalAmount+100000 WHERE Id=@id;",
+            cmd => cmd.Parameters.AddInt32("@id", completedId));
+
+        var error = await Assert.ThrowsAsync<BusinessException>(() =>
+            service.CreateOrRecreateDraftAsync(data.HomestayId, 2025, 1, 1));
+
+        Assert.Equal("Bảng đã gửi hoặc đã trả, không thể tính lại.", error.Message);
+        var unchanged = await service.GetAsync(sent.Id);
+        Assert.Equal(SettlementStatus.Sent, unchanged.Status);
+        Assert.Equal(sent.RowVer, unchanged.RowVer);
+        Assert.Equal(sent.Totals, unchanged.Totals);
+        Assert.Equal(snapshot, await SettlementItemsSnapshot(manager, sent.Id));
+    }
+
+    private static Task AsApplicationUserAsync(M21TestClient client, Func<UnitOfWork, CancellationToken, Task> operation) =>
+        Writes(client).ExecuteAsync(async (db, ct) =>
+        {
+            using var identity = db.CreateCommand("SELECT USER_NAME();");
+            var impersonate = !string.Equals((string?)await db.ScalarAsync(identity, ct), "homestay_app", StringComparison.OrdinalIgnoreCase);
+            if (impersonate)
+            {
+                using var assume = db.CreateCommand("EXECUTE AS USER = 'homestay_app';");
+                await db.ExecuteAsync(assume, ct);
+            }
+            try
+            {
+                using var permissions = db.CreateCommand("SELECT USER_NAME() AS Username,HAS_PERMS_BY_NAME('dbo.SettlementItems','OBJECT','DELETE') AS ItemsDelete,HAS_PERMS_BY_NAME('dbo.Settlements','OBJECT','DELETE') AS HeaderDelete;");
+                var grants = Assert.Single(await db.QueryAsync(permissions,
+                    r => (r.GetString("Username"), r.GetInt32("ItemsDelete"), r.GetInt32("HeaderDelete")), ct));
+                Assert.Equal(("homestay_app", 1, 0), grants);
+                await operation(db, ct);
+            }
+            finally
+            {
+                if (impersonate)
+                {
+                    using var revert = db.CreateCommand("REVERT;");
+                    await db.ExecuteAsync(revert, ct);
+                }
+            }
+        }, CancellationToken.None);
+
+    [SqlFact]
+    public async Task ApplicationUserCanReplaceDraftItemsButSentAndPaidItemsCannotBeDeletedThroughWritePath()
+    {
+        var manager = new M21TestClient(); await manager.LoginNewAsync();
+        var data = await M21Data.CreateAsync(manager);
+        await data.BookingAsync(manager, 0, BookingStatus.Completed, checkIn: new(2025, 1, 5), checkOut: new(2025, 1, 7));
+        var accountant = new M21TestClient(); await accountant.LoginNewAsync(Position.Accountant);
+        var service = Settlements(accountant);
+        var draft = await service.CreateOrRecreateDraftAsync(data.HomestayId, 2025, 1, 1);
+        var repository = new SettlementRepository();
+
+        // Dùng validator phiên thật của BLL, chạy SQL repository dưới đúng user ứng dụng.
+        await AsApplicationUserAsync(accountant, async (db, ct) =>
+        {
+            await db.AcquireAppLockAsync($"Settlement:{data.HomestayId}", 10000, ct);
+            var head = await repository.GetByIdAsync(db, draft.Id, true, ct);
+            Assert.NotNull(head);
+            Assert.Equal(1, await repository.UpdateDraftAsync(db, head.Id, head.RowVer, draft.Totals, ct));
+            Assert.Empty(await repository.GetItemsAsync(db, head.Id, ct));
+            await repository.InsertItemsAsync(db, head.Id, draft.Items, ct);
+            // RowVer cũ không được xóa dòng, kể cả khi caller commit thay vì rollback.
+            Assert.Equal(0, await repository.UpdateDraftAsync(db, head.Id, head.RowVer, draft.Totals, ct));
+            Assert.Equal(draft.Items.ToArray(), (await repository.GetItemsAsync(db, head.Id, ct)).ToArray());
+        });
+
+        var rebuilt = await service.GetAsync(draft.Id);
+        await service.SendAsync(new(rebuilt.Id, rebuilt.RowVer, ""));
+        foreach (var status in new[] { SettlementStatus.Sent, SettlementStatus.Paid })
+        {
+            if (status == SettlementStatus.Paid)
+                await manager.MutateAsync("UPDATE dbo.Settlements SET Status='Paid',PaidAt=SYSUTCDATETIME(),PaidByUserId=@user,PaidBankRef='M6-PAID' WHERE Id=@id;", cmd =>
+                { cmd.Parameters.AddInt32("@user", accountant.Current.RequireSession().UserId); cmd.Parameters.AddInt32("@id", draft.Id); });
+            var before = await service.GetAsync(draft.Id);
+            var snapshot = await SettlementItemsSnapshot(manager, draft.Id);
+
+            await Assert.ThrowsAsync<BusinessException>(() => service.CreateOrRecreateDraftAsync(data.HomestayId, 2025, 1, 1));
+            await AsApplicationUserAsync(accountant, async (db, ct) =>
+            {
+                await db.AcquireAppLockAsync($"Settlement:{data.HomestayId}", 10000, ct);
+                var head = await repository.GetByIdAsync(db, draft.Id, true, ct);
+                Assert.NotNull(head);
+                Assert.Equal(status, head.Status);
+                Assert.Equal(0, await repository.UpdateDraftAsync(db, head.Id, head.RowVer, new(0m, 0m, 0m, 0m, 0m), ct));
+            });
+
+            var unchanged = await service.GetAsync(draft.Id);
+            Assert.Equal(status, unchanged.Status);
+            Assert.Equal(before.RowVer, unchanged.RowVer);
+            Assert.Equal(before.Totals, unchanged.Totals);
+            Assert.Equal(snapshot, await SettlementItemsSnapshot(manager, draft.Id));
+        }
+    }
+
     private static Task<string> SettlementStamps(M21TestClient c, int id) => c.ScalarAsync<string>(
         "SELECT Status,SentAt,SentByUserId,PaidAt,PaidByUserId,PaidBankRef FROM dbo.Settlements WHERE Id=@id FOR JSON PATH,WITHOUT_ARRAY_WRAPPER;", p => p.Parameters.AddInt32("@id", id));
 
