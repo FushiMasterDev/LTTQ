@@ -42,6 +42,8 @@ public sealed class FinanceRepository
         c.Parameters.AddInt32("@id",id);c.Parameters.AddRowVersion("@version",version);c.Parameters.AddEnum("@status",20,(MatchStatus?)status);c.Parameters.AddInt32("@booking",bookingId);c.Parameters.AddInt32("@user",user);c.Parameters.AddUtcDateTime("@at",at);c.Parameters.AddNVarChar("@note",500,note);c.Parameters.AddVarChar("@refund",100,refundRef);c.Parameters.AddUtcDateTime("@refunded",refundedAt);
         return await db.ExecuteAsync(c,ct).ConfigureAwait(false);
     }
+    public async Task<(DateTime? RefundedAt,decimal? ExcessAmount)> GetBankRefundInfoAsync(DbSession db,int id,CancellationToken ct)
+    { using var c=db.CreateCommand("SELECT bt.RefundedAt,p.Amount ExcessAmount FROM dbo.BankTransactions bt LEFT JOIN dbo.vw_Payables p ON p.SourceType='BankTransaction' AND p.SourceId=bt.Id AND p.PayableType='ExcessTransfer' WHERE bt.Id=@id;");c.Parameters.AddInt32("@id",id);return (await db.QueryAsync(c,r=>(r.GetNullableUtcDateTime("RefundedAt"),r.GetNullableDecimal("ExcessAmount")),ct).ConfigureAwait(false)).Single(); }
     public async Task<decimal> GetAmountDueAsync(DbSession db,int bookingId,CancellationToken ct)
     { using var c=db.CreateCommand("SELECT DepositAmount-DiscountAmount FROM dbo.Bookings WHERE Id=@id;");c.Parameters.AddInt32("@id",bookingId);return Convert.ToDecimal(await db.ScalarAsync(c,ct).ConfigureAwait(false),System.Globalization.CultureInfo.InvariantCulture); }
     public async Task<int?> GetExistingDepositAsync(DbSession db,int bookingId,CancellationToken ct)

@@ -152,6 +152,7 @@ CROSS APPLY
         ELSE b.DepositAmount - b.DiscountAmount END AS ExpectedAmount
 ) AS due
 WHERE bt.MatchStatus IN ('Matched', 'ManuallyMatched')
+    AND bt.RefundedAt IS NULL
     AND p.Direction = 'In' AND p.Status = 'Verified'
     AND bt.Note IS NOT NULL AND LEN(LTRIM(RTRIM(bt.Note))) > 0
     AND due.ExpectedAmount IS NOT NULL AND bt.Amount > due.ExpectedAmount;
