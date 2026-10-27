@@ -232,6 +232,13 @@ public sealed class M24PaymentAssignCancelTests
         var id = await d.BookingAsync(setup, 0); var original = await setup.Bookings.GetAsync(id);
         var manager = new M21TestClient(); var target = await manager.LoginNewAsync(Position.Manager, allAreas: false);
         await Assert.ThrowsAsync<NotFoundException>(() => manager.Bookings.ReassignAsync(new(id, target.EmployeeId, original.Booking.RowVer)));
+        // A recipient must cover the booking area even if assignment would itself grant booking scope.
+        await Assert.ThrowsAsync<BusinessException>(() => setup.Bookings.ReassignAsync(new(id, target.EmployeeId, original.Booking.RowVer)));
+        await setup.MutateAsync("INSERT dbo.EmployeeAreas(EmployeeId,AreaId,AssignedByEmployeeId,AssignedAt) VALUES(@employee,@area,@by,SYSUTCDATETIME());", cmd =>
+        {
+            cmd.Parameters.AddInt32("@employee", target.EmployeeId); cmd.Parameters.AddInt32("@area", d.AreaId);
+            cmd.Parameters.AddInt32("@by", setup.Current.RequireSession().EmployeeId);
+        });
         var result = await setup.Bookings.ReassignAsync(new(id, target.EmployeeId, original.Booking.RowVer));
         Assert.Equal(target.EmployeeId, result.Booking.AssignedEmployeeId); Assert.Equal(original.Booking.CreatedByEmployeeId, result.Booking.CreatedByEmployeeId);
         // Being assigned grants scope even without an area.
@@ -324,8 +331,8 @@ public sealed class M24PaymentAssignCancelTests
             var expected = BookingStateMachine.IsTerminal(state) ? Array.Empty<BookingAction>() : state == BookingStatus.AwaitingPayment
                 ? new[] { BookingAction.Claim, BookingAction.Reassign, BookingAction.RecordDeposit, BookingAction.CancelUnpaid }
                 : new[] { BookingAction.Claim, BookingAction.Reassign };
-            Assert.Equal(expected, (await setup.Bookings.GetAsync(id)).AllowedActions);
-            Assert.Equal(expected.Where(a => a != BookingAction.Reassign), (await staff.Bookings.GetAsync(id)).AllowedActions);
+            Assert.Equal(expected, (await setup.Bookings.GetAsync(id)).AllowedActions.Where(a => (int)a <= (int)BookingAction.Reassign));
+            Assert.Equal(expected.Where(a => a != BookingAction.Reassign), (await staff.Bookings.GetAsync(id)).AllowedActions.Where(a => (int)a <= (int)BookingAction.Reassign));
             Assert.Equal(state == BookingStatus.AwaitingPayment ? new[] { BookingAction.RecordDeposit } : Array.Empty<BookingAction>(),
                 (await accountant.Bookings.GetAsync(id)).AllowedActions);
         }

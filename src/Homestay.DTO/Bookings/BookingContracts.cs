@@ -6,8 +6,8 @@ using Homestay.DTO.Enums;
 namespace Homestay.DTO.Bookings;
 
 public enum BookingQueue { Mine, Unassigned, AwaitingPayment, DepositVerification, OwnerConfirmation, Upcoming, InHouse, ArrivalsToday, DeparturesToday, OpenChangeRequests, All }
-// Các thao tác thuộc Đợt 2; vòng đời Đợt 3 sẽ bổ sung action và quy tắc riêng.
-public enum BookingAction { RecordDeposit, CancelUnpaid, Claim, Reassign }
+// Append-only: preserve the numeric values used by the existing GUI.
+public enum BookingAction { RecordDeposit, CancelUnpaid, Claim, Reassign, ConfirmOnBehalf, RejectOnBehalf, CheckIn, CheckOut, MarkNoShow, CancelHomestayUnavailable, SubmitCancel }
 public sealed record BookingSearchRequest
 {
     public PageRequest Page { get; init; } = new();
@@ -47,6 +47,7 @@ public sealed record BookingListItem
     public int? AssignedEmployeeId { get; init; }
     public string? AssignedEmployeeName { get; init; }
     public DateTime? DeadlineAtUtc { get; init; }
+    public DateTime? ConfirmDeadlineAtUtc { get; init; }
     public bool IsConfirmationOverdue { get; init; }
     public string ContactName { get; init; } = "";
     public string ContactPhone { get; init; } = "";

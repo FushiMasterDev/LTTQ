@@ -25,7 +25,7 @@ public sealed partial class BookingRepository
         CASE WHEN b.Status='AwaitingPayment' AND NOT EXISTS(SELECT 1 FROM dbo.Payments p WHERE p.BookingId=b.Id AND p.Type='Deposit' AND p.Status='Pending') THEN b.HoldExpiresAt
             WHEN b.Status='Deposited' THEN b.ConfirmDeadlineAt END AS DeadlineAt,
         CAST(CASE WHEN b.Status='Deposited' AND b.ConfirmDeadlineAt<@now THEN 1 ELSE 0 END AS bit) AS IsConfirmationOverdue,
-        b.ContactName,b.ContactPhone,h.ContactPhone AS HomestayPhone,o.Phone AS OwnerPhone,b.RowVer
+        b.ConfirmDeadlineAt,b.ContactName,b.ContactPhone,h.ContactPhone AS HomestayPhone,o.Phone AS OwnerPhone,b.RowVer
         """;
     private static BookingListItem Map(SqlDataReader r) => new()
     {
@@ -51,6 +51,7 @@ public sealed partial class BookingRepository
         AssignedEmployeeId = r.GetNullableInt32("AssignedEmployeeId"),
         AssignedEmployeeName = r.GetNullableString("AssignedEmployeeName"),
         DeadlineAtUtc = r.GetNullableUtcDateTime("DeadlineAt"),
+        ConfirmDeadlineAtUtc = r.GetNullableUtcDateTime("ConfirmDeadlineAt"),
         IsConfirmationOverdue = r.GetBoolean("IsConfirmationOverdue"),
         ContactName = r.GetString("ContactName"),
         ContactPhone = r.GetString("ContactPhone"),
@@ -143,7 +144,7 @@ public sealed partial class BookingRepository
         using var head = db.CreateCommand($"""
             SELECT {Columns},CAST(CASE WHEN {scopeCondition} THEN 1 ELSE 0 END AS bit) AS InScope,
                 b.Guests,b.SourceChannel,b.SpecialRequests,h.Address,h.CheckinGuide,h.CheckinTime,h.CheckoutTime,
-                b.HoldExpiresAt,b.ConfirmDeadlineAt,b.TotalAmount,b.DepositRate,b.DepositAmount,b.DiscountAmount,ps.AmountDue,b.CommissionRate,b.CancellationPolicyId,
+                b.HoldExpiresAt,b.TotalAmount,b.DepositRate,b.DepositAmount,b.DiscountAmount,ps.AmountDue,b.CommissionRate,b.CancellationPolicyId,
                 b.VoucherId,(SELECT v.Code FROM dbo.Vouchers v WHERE v.Id=b.VoucherId) AS VoucherCode
             {From} WHERE (@id IS NOT NULL AND b.Id=@id) OR (@id IS NULL AND REPLACE(b.Code,'-','')=@code);
             """);

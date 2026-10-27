@@ -139,8 +139,8 @@ Mục tiêu: một đơn đi trọn tạo → cọc → xác minh → xác nhậ
 
 **MAC**
 
-- [ ] **M3.1** ⛳ Hợp đồng: `PaymentService` (hàng chờ, xác minh, từ chối, ghi nhận đã chi hoàn), `BookingService` (xác nhận/từ chối thay chủ, đổi phòng cùng loại, nhận phòng, trả phòng, không đến, danh sách đến/đi hôm nay, QL hủy do homestay không phục vụ được), `ChangeRequestService` **chỉ loại Hủy** (báo trước tiền hoàn, gửi, duyệt, từ chối).
-- [ ] **M3.2** `BookingStateMachine`, `RefundCalculator` + test bảng chuyển trạng thái và bảng ví dụ mục 7.6.3.
+- [x] **M3.1** ⛳ Hợp đồng: `PaymentService` (hàng chờ, xác minh, từ chối, ghi nhận đã chi hoàn), `BookingService` (xác nhận/từ chối thay chủ, đổi phòng cùng loại, nhận phòng, trả phòng, không đến, danh sách đến/đi hôm nay, QL hủy do homestay không phục vụ được), `ChangeRequestService` **chỉ loại Hủy** (báo trước tiền hoàn, gửi, duyệt, từ chối).
+- [x] **M3.2** `BookingStateMachine`, `RefundCalculator` + test bảng chuyển trạng thái và bảng ví dụ mục 7.6.3.
 - [ ] **M3.3** Cài đặt đủ M3.1; test: người ghi nhận không tự xác minh, hai người cùng xác nhận một đơn → một thành công, hai kế toán cùng chi hoàn → một thành công.
 
 **WIN** (vẽ form ngay; nối dữ liệu sau M3.1)

@@ -3,7 +3,7 @@ using Homestay.DTO.Payments;
 
 namespace Homestay.DAL.Repositories;
 
-public sealed class PaymentRepository
+public sealed partial class PaymentRepository
 {
     public async Task<int> InsertReceiptAsync(UnitOfWork db, RecordReceiptRequest request, string voucherNo,
         DateTime transferredAt, int userId, DateTime now, Guid? fileId, CancellationToken ct)

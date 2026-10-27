@@ -8,7 +8,7 @@ using Homestay.DTO.Payments;
 
 namespace Homestay.BLL.Services;
 
-public sealed class PaymentService(Authorizer authorizer, ICurrentSession currentSession, DataScope dataScope,
+public sealed partial class PaymentService(Authorizer authorizer, ICurrentSession currentSession, DataScope dataScope,
     WriteOperationRunner writes, BookingRepository bookings, PaymentRepository payments, EvidenceRepository files,
     NotificationRepository notifications, DbClock clock, BookingService bookingService, AuditWriter audit, string machineName)
 {

@@ -20,6 +20,7 @@ internal sealed class M21TestClient
     public NotificationService Notifications { get; }
     public FileService Files { get; }
     public PaymentService Payments { get; }
+    public ChangeRequestService Changes { get; }
     public M21TestClient()
     {
         var auth = new Authorizer(Current);
@@ -30,6 +31,7 @@ internal sealed class M21TestClient
         Availability = new(auth, Current, Factory, new AvailabilityRepository(), clock, settings);
         Customers = new(auth, Current, Factory, writes, customers, clock, new AuditWriter(), Login.Machine);
         Bookings = new(auth, Current, new DataScope(Current), Factory, new BookingRepository(), customers, clock, settings, Availability, writes, new AuditWriter(), Login.Machine);
+        Changes = new(auth, Current, new DataScope(Current), Factory, new ChangeRequestRepository(), Bookings);
         Notifications = new(Current, Factory, writes, new NotificationRepository(), clock);
         Files = new(auth, Factory, new EvidenceRepository());
         Payments = new(auth, Current, new DataScope(Current), writes, new BookingRepository(), new PaymentRepository(),

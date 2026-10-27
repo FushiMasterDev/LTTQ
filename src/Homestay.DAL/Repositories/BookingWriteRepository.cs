@@ -45,13 +45,14 @@ public sealed partial class BookingRepository
         return await db.ExecuteAsync(command, ct).ConfigureAwait(false);
     }
 
-    public async Task<int?> GetAssignableUserAsync(UnitOfWork db, int employeeId, CancellationToken ct)
+    public async Task<int?> GetAssignableUserAsync(UnitOfWork db, int employeeId, int bookingId, CancellationToken ct)
     {
-        using var command = db.CreateCommand("""
+        using var command = db.CreateCommand($"""
             SELECT e.UserId FROM dbo.Employees e WITH (UPDLOCK) JOIN dbo.Users u WITH (UPDLOCK) ON u.Id=e.UserId
-            WHERE e.Id=@id AND e.EmploymentStatus='Active' AND u.Status='Active' AND e.Position IN ('Staff','Manager');
+            WHERE e.Id=@id AND {AssignableEmployee} AND {AssignableArea};
             """);
         command.Parameters.AddInt32("@id", employeeId);
+        command.Parameters.AddInt32("@booking", bookingId);
         return await db.ScalarAsync(command, ct).ConfigureAwait(false) as int?;
     }
 

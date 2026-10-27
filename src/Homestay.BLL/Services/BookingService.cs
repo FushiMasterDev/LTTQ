@@ -13,7 +13,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Services;
 
-public sealed class BookingService(Authorizer authorizer, ICurrentSession currentSession, DataScope dataScope, ConnectionFactory factory,
+public sealed partial class BookingService(Authorizer authorizer, ICurrentSession currentSession, DataScope dataScope, ConnectionFactory factory,
     BookingRepository repository, CustomerRepository customers, DbClock clock, SettingsProvider settings, AvailabilityService availability,
     WriteOperationRunner writes, AuditWriter audit, string machineName)
 {
@@ -238,8 +238,8 @@ public sealed class BookingService(Authorizer authorizer, ICurrentSession curren
             CheckVersion(old, version);
             if (BookingStateMachine.IsTerminal(old.Status)) throw new BusinessException("Đơn đã kết thúc. Vui lòng tải lại đơn.");
             if (old.AssignedEmployeeId == request.AssignedEmployeeId) throw new BusinessException("Vui lòng chọn người phụ trách khác người hiện tại.");
-            var userId = await repository.GetAssignableUserAsync(db, request.AssignedEmployeeId, ct).ConfigureAwait(false)
-                ?? throw new BusinessException("Người nhận phải là Nhân viên hoặc Quản lý đang làm việc và có tài khoản hoạt động. Vui lòng chọn lại.");
+            var userId = await repository.GetAssignableUserAsync(db, request.AssignedEmployeeId, old.Id, ct).ConfigureAwait(false)
+                ?? throw new BusinessException("Người nhận phải là Nhân viên hoặc Quản lý đang làm việc, có tài khoản hoạt động và phụ trách được khu vực của đơn. Vui lòng chọn lại.");
             var now = await clock.GetUtcNowAsync(db, ct).ConfigureAwait(false);
             if (await repository.AssignAsync(db, old.Id, request.AssignedEmployeeId, version, false, now, ct).ConfigureAwait(false) == 0)
                 throw new ConcurrencyException();
@@ -302,6 +302,17 @@ public sealed class BookingService(Authorizer authorizer, ICurrentSession curren
         Add(BookingAction.Reassign, Permission.BookingAssign, !terminal && (authorizer.GetAccess(Permission.BookingAssign) != AccessLevel.Own || b.AssignedEmployeeId == session.EmployeeId));
         Add(BookingAction.RecordDeposit, Permission.PaymentRecord, b.Status == BookingStatus.AwaitingPayment && detail.HoldExpiresAtUtc > now && !pending && !money);
         Add(BookingAction.CancelUnpaid, Permission.BookingCancelUnpaid, b.Status == BookingStatus.AwaitingPayment && !pending && !money);
+        var actor = BookingStateMachine.Actor(session.Position);
+        var today = DateOnly.FromDateTime(now.AddHours(7));
+        bool To(BookingStatus status) => BookingStateMachine.CanTransition(b.Status, status, actor, inScope);
+        var openCancel = detail.ChangeRequests.Any(r => r.Status is ChangeRequestStatus.Pending or ChangeRequestStatus.AwaitingPayment);
+        Add(BookingAction.ConfirmOnBehalf, Permission.BookingConfirm, To(BookingStatus.Confirmed));
+        Add(BookingAction.RejectOnBehalf, Permission.BookingConfirm, To(BookingStatus.Rejected));
+        Add(BookingAction.CheckIn, Permission.BookingStayManage, To(BookingStatus.CheckedIn) && today >= b.CheckIn);
+        Add(BookingAction.CheckOut, Permission.BookingStayManage, To(BookingStatus.Completed));
+        Add(BookingAction.MarkNoShow, Permission.BookingStayManage, To(BookingStatus.NoShow) && today > b.CheckIn);
+        Add(BookingAction.CancelHomestayUnavailable, Permission.BookingChangeReview, session.Position == Position.Manager && To(BookingStatus.Cancelled) && (b.Status is BookingStatus.Deposited or BookingStatus.Confirmed));
+        Add(BookingAction.SubmitCancel, Permission.BookingCancellationRequest, (b.Status is BookingStatus.Deposited or BookingStatus.Confirmed) && !openCancel);
         return result;
     }
     private CustomerItem Mask(CustomerItem item) => authorizer.Can(Permission.CustomerIdentityView) ? item : item with { IdNumber = StaffInputRules.MaskIdentity(item.IdNumber), IsIdentityMasked = true };
