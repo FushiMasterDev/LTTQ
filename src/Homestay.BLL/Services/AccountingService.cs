@@ -63,6 +63,10 @@ public sealed class AccountingService(Authorizer authorizer, ICurrentSession cur
             if(booking.Status==BookingStatus.AwaitingPayment && booking.HoldExpiresAtUtc<=now)throw new BusinessException("Đơn đã hết thời gian giữ phòng. Hãy xử lý khoản chuyển muộn.");
             var pending=await finance.GetExistingDepositAsync(db,booking.Id,t).ConfigureAwait(false);
             if(pending is null && await bookings.HasActiveDepositAsync(db,booking.Id,t))throw new BusinessException("Đơn đã có khoản cọc được xác minh hoặc đang chờ xử lý.");
+            // Keep the original amount under a payment lock until the existing receipt is verified.
+            decimal? oldPaymentAmount = pending is { } pendingId
+                ? await finance.GetPendingDepositAmountForUpdateAsync(db,pendingId,t).ConfigureAwait(false) ?? throw new ConcurrencyException()
+                : null;
             var status=automatic?MatchStatus.Matched:MatchStatus.ManuallyMatched;
             var note=tx.Amount>due?$"Chuyển dư {tx.Amount-due:0} VND; xử lý hoàn khi khách yêu cầu.":null;
             if(await finance.SetBankStatusAsync(db,tx.Id,tx.RowVer,status,booking.Id,session.UserId,now,note,null,null,t).ConfigureAwait(false)==0)throw new ConcurrencyException();
@@ -71,7 +75,7 @@ public sealed class AccountingService(Authorizer authorizer, ICurrentSession cur
             var target=BookingStatus.Deposited;var actor=BookingTransitionActor.Accountant;
             await new BookingStatusWriter(bookings,audit).ChangeStatusAsync(db,booking.Id,booking.Status,target,booking.RowVer,actor,now,
                 new(session.UserId,automatic?"BankTransaction.AutoMatch":"BankTransaction.ManualMatch","BankTransactions",tx.Id.ToString(CultureInfo.InvariantCulture),
-                    new{Status=tx.MatchStatus.ToString()},new{Status=status.ToString(),BookingId=booking.Id,BookingCode=booking.Code,Amount=tx.Amount},null,machineName),
+                    new{Status=tx.MatchStatus.ToString(),PaymentId=pending,PaymentAmount=oldPaymentAmount},new{Status=status.ToString(),BookingId=booking.Id,BookingCode=booking.Code,Amount=tx.Amount,PaymentId=pending,PaymentAmount=tx.Amount},null,machineName),
                 new(){ConfirmDeadlineAtUtc=now.AddMinutes(await settings.GetBookingConfirmMinutesAsync(t,db).ConfigureAwait(false))},t).ConfigureAwait(false);
             if(tx.Amount>due)await audit.WriteAsync(db,new(session.UserId,"BankTransaction.Excess","BankTransactions",tx.Id.ToString(CultureInfo.InvariantCulture),null,new{Excess=tx.Amount-due},note,machineName),t).ConfigureAwait(false);
             return tx with{MatchStatus=status,MatchedBookingId=booking.Id,BookingCode=booking.Code,Note=note};
@@ -91,7 +95,7 @@ public sealed class AccountingService(Authorizer authorizer, ICurrentSession cur
 
     public Task<BankTransactionItem> RecordUnmatchedRefundAsync(RefundBankTransactionRequest request,CancellationToken ct=default)
     {
-        authorizer.Require(Permission.UnmatchedPaymentRefund);StaffInputRules.RowVer(request.RowVer);
+        authorizer.Require(Permission.UnmatchedPaymentRefund);ArgumentNullException.ThrowIfNull(request);StaffInputRules.RowVer(request.RowVer);
         if(string.IsNullOrWhiteSpace(request.RefundBankRef)||request.RefundBankRef.Trim().Length>100||request.RefundBankRef.Any(char.IsControl)||request.RefundedAtUtc.Kind!=DateTimeKind.Utc)throw new BusinessException("Thông tin hoàn giao dịch không hợp lệ.");
         return writes.ExecuteAsync(async(db,t)=>{var session=current.RequireSession();var tx=await finance.GetBankTransactionForUpdateAsync(db,request.TransactionId,request.RowVer,t).ConfigureAwait(false)??throw new ConcurrencyException();var refund=await finance.GetBankRefundInfoAsync(db,tx.Id,t).ConfigureAwait(false);if(refund.RefundedAt.HasValue)throw new BusinessException("Giao dịch đã được hoàn trả.");var excess=tx.MatchStatus is MatchStatus.Matched or MatchStatus.ManuallyMatched;if(excess?refund.ExcessAmount is not >0:tx.MatchStatus is not (MatchStatus.Unmatched or MatchStatus.Underpaid or MatchStatus.LatePayment))throw new BusinessException("Chỉ được hoàn giao dịch chưa khớp, thiếu tiền, chuyển muộn hoặc phần chuyển dư.");var status=excess?tx.MatchStatus:MatchStatus.Refunded;var amount=excess?refund.ExcessAmount!.Value:tx.Amount;var now=await clock.GetUtcNowAsync(db,t).ConfigureAwait(false);if(request.RefundedAtUtc>now.AddMinutes(5))throw new BusinessException("Thời điểm hoàn không thể ở tương lai.");var note=string.IsNullOrWhiteSpace(request.Note)?tx.Note:request.Note.Trim();
             if(await finance.SetBankStatusAsync(db,tx.Id,tx.RowVer,status,tx.MatchedBookingId,session.UserId,now,note,request.RefundBankRef.Trim(),request.RefundedAtUtc,t).ConfigureAwait(false)==0)throw new ConcurrencyException();

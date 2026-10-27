@@ -71,7 +71,8 @@ public sealed class M51ScopeAssignmentTests
         await c.Base.Login.ExecuteAsync("UPDATE dbo.Areas SET IsActive=1 WHERE Id=@id;", d.AreaId);
         await c.Staff.SetAreasAsync(new(staff.EmployeeId, [d.AreaId], false, v));
         var detail = await c.Staff.GetAreasAsync(staff.EmployeeId); Assert.Equal(d.AreaId, Assert.Single(detail.Areas).Id);
-        Assert.Contains((await c.Staff.ListByAreaAsync(new() { AreaId = d.AreaId })).Items, e => e.EmployeeId == staff.EmployeeId);
+        // Lọc theo mã: trang đầu còn có mọi QL toàn khu vực do các test chạy song song tạo ra.
+        Assert.Contains((await c.Staff.ListByAreaAsync(new() { AreaId = d.AreaId, Page = new() { SearchText = staff.Code } })).Items, e => e.EmployeeId == staff.EmployeeId);
         Assert.Equal(1, await c.CountAsync("SELECT COUNT(*) FROM dbo.AuditLogs WHERE TableName='Employees' AND ActionCode='Staff.SetAreas' AND RecordId=CONVERT(varchar(50),@id) AND OldValues IS NOT NULL AND NewValues IS NOT NULL;", staff.EmployeeId));
     }
     private static async Task<BookingAssignmentItem> Item(M51TestClient c, int id)
