@@ -393,14 +393,21 @@ public sealed class M31ContractReadTests
     }
 
     [SqlFact]
-    public async Task FiveRoundThreeWritesRemainNotImplemented()
+    public async Task AllTwelveRoundThreeWritesHaveRealImplementations()
     {
         var c = new M21TestClient(); await c.LoginNewAsync();
-        await Assert.ThrowsAsync<NotImplementedException>(() => c.Bookings.CancelHomestayUnavailableAsync(new(1, "Không phục vụ được", new byte[8])));
-        await Assert.ThrowsAsync<NotImplementedException>(() => c.Changes.SubmitCancelAsync(new(1, "Khách hủy", new byte[8])));
-        await Assert.ThrowsAsync<NotImplementedException>(() => c.Changes.ApproveAsync(new(1, new byte[8], new byte[8])));
-        await Assert.ThrowsAsync<NotImplementedException>(() => c.Changes.RejectAsync(new(1, "Không đồng ý", new byte[8], new byte[8])));
+        await Assert.ThrowsAsync<NotFoundException>(() => c.Bookings.CancelHomestayUnavailableAsync(new(int.MaxValue, "Không phục vụ được", new byte[8])));
+        await Assert.ThrowsAsync<NotFoundException>(() => c.Changes.SubmitCancelAsync(new(int.MaxValue, "Khách hủy", new byte[8])));
+        await Assert.ThrowsAsync<NotFoundException>(() => c.Changes.ApproveAsync(new(int.MaxValue, new byte[8], new byte[8])));
+        await Assert.ThrowsAsync<NotFoundException>(() => c.Changes.RejectAsync(new(int.MaxValue, "Không đồng ý", new byte[8], new byte[8])));
+        await Assert.ThrowsAsync<NotFoundException>(() => c.Bookings.ConfirmOnBehalfAsync(new(int.MaxValue, "Test", new byte[8])));
+        await Assert.ThrowsAsync<NotFoundException>(() => c.Bookings.RejectOnBehalfAsync(new(int.MaxValue, "Test", new byte[8])));
+        await Assert.ThrowsAsync<NotFoundException>(() => c.Bookings.CheckInAsync(new(int.MaxValue, "Test", new byte[8])));
+        await Assert.ThrowsAsync<NotFoundException>(() => c.Bookings.CheckOutAsync(new(int.MaxValue, "Test", new byte[8])));
+        await Assert.ThrowsAsync<NotFoundException>(() => c.Bookings.MarkNoShowAsync(new(int.MaxValue, "Test", new byte[8])));
         var accountant = new M21TestClient(); await accountant.LoginNewAsync(Position.Accountant);
-        await Assert.ThrowsAsync<NotImplementedException>(() => accountant.Payments.RecordRefundPaidAsync(new() { PaymentId = 1, RowVer = new byte[8], BankRef = "TEST", PaidAtUtc = DateTime.UtcNow }));
+        await Assert.ThrowsAsync<NotFoundException>(() => accountant.Payments.VerifyReceiptAsync(new(int.MaxValue, new byte[8], new byte[8])));
+        await Assert.ThrowsAsync<NotFoundException>(() => accountant.Payments.RejectReceiptAsync(new(int.MaxValue, "Test", new byte[8], new byte[8])));
+        await Assert.ThrowsAsync<NotFoundException>(() => accountant.Payments.RecordRefundPaidAsync(new() { PaymentId = int.MaxValue, RowVer = new byte[8], BankRef = "TEST", PaidAtUtc = DateTime.UtcNow }));
     }
 }

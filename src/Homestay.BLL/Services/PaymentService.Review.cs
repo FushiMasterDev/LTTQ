@@ -124,5 +124,48 @@ public sealed partial class PaymentService
         }, cancellationToken);
     }
     public Task<PaymentQueueItem> RecordRefundPaidAsync(RecordRefundPaidRequest request, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
+    {
+        authorizer.Require(Permission.BookingRefundRecord);
+        ArgumentNullException.ThrowIfNull(request);
+        StaffInputRules.RowVer(request.RowVer);
+        var version = request.RowVer.ToArray();
+        var bankRef = request.BankRef?.Trim() ?? "";
+        if (bankRef.Length is < 1 or > 100 || bankRef.Any(c => c > 127 || char.IsControl(c)))
+            throw new BusinessException("Mã giao dịch cần từ 1 đến 100 ký tự ASCII hợp lệ. Vui lòng nhập lại.");
+        if (request.PaidAtUtc == default || request.PaidAtUtc.Kind != DateTimeKind.Utc)
+            throw new BusinessException("Thời điểm chi hoàn phải là UTC. Vui lòng kiểm tra lại.");
+        var evidence = ReceiptRules.ValidateEvidence(request.EvidenceBytes, request.EvidenceFileName);
+        return writes.ExecuteAsync(async (db, ct) =>
+        {
+            var session = currentSession.RequireSession();
+            var scope = dataScope.BookingFilter();
+            var initial = await payments.GetRefundAsync(db, request.PaymentId, session.UserId, scope.Condition, scope.AddParametersTo, ct).ConfigureAwait(false)
+                ?? throw new NotFoundException();
+            _ = await bookings.GetForUpdateAsync(db, initial.BookingId, scope.Condition, scope.AddParametersTo, ct).ConfigureAwait(false)
+                ?? throw new NotFoundException();
+            var refund = await payments.GetRefundAsync(db, request.PaymentId, session.UserId, scope.Condition, scope.AddParametersTo, ct).ConfigureAwait(false)
+                ?? throw new NotFoundException();
+            if (!refund.RowVer.AsSpan().SequenceEqual(version)) throw new ConcurrencyException();
+            if (refund.Status != PaymentStatus.Pending)
+                throw new BusinessException("Chỉ được ghi nhận chi hoàn cho phiếu chi đang Chờ chi. Vui lòng tải lại phiếu.");
+            if (refund.RecordedByUserId == session.UserId || await new ChangeRequestRepository()
+                .IsCancellationActorAsync(db, refund.BookingId, session.UserId, ct).ConfigureAwait(false))
+                throw new ForbiddenException("Người chi hoàn phải khác người gửi yêu cầu hủy và người duyệt hoặc lập phiếu hoàn. Vui lòng nhờ Kế toán khác chi.");
+            var now = await clock.GetUtcNowAsync(db, ct).ConfigureAwait(false);
+            if (request.PaidAtUtc > now.AddMinutes(5))
+                throw new BusinessException("Thời điểm chi hoàn ở tương lai quá 5 phút. Vui lòng kiểm tra lại.");
+            Guid? fileId = evidence is null ? null : await files.InsertAsync(db, evidence.FileName, evidence.ContentType,
+                evidence.Content, evidence.Sha256, session.UserId, ct).ConfigureAwait(false);
+            if (await payments.RecordRefundPaidAsync(db, refund.Id, version, bankRef, request.PaidAtUtc, session.UserId, now, fileId, ct).ConfigureAwait(false) == 0)
+                throw new ConcurrencyException();
+            await audit.WriteAsync(db, new(session.UserId, "Payment.RefundPaid", "Payments", refund.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                new { Status = "Pending" }, new { refund.BookingId, Status = "Verified", BankRef = bankRef, VerifiedByUserId = session.UserId,
+                    VerifiedAtUtc = request.PaidAtUtc, refund.Amount, RefundAccount = ReceiptRules.MaskAccount(refund.RefundAccount),
+                    EvidenceFileId = fileId ?? refund.EvidenceFileId }, null, machineName), ct).ConfigureAwait(false);
+            await notifications.NotifyBookingOperatorsAsync(db, refund.BookingId,
+                $"Phiếu chi hoàn {refund.VoucherNo} đơn {refund.BookingCode} đã chi", now, ct).ConfigureAwait(false);
+            return await payments.GetRefundAsync(db, refund.Id, session.UserId, scope.Condition, scope.AddParametersTo, ct).ConfigureAwait(false)
+                ?? throw new NotFoundException();
+        }, cancellationToken);
+    }
 }

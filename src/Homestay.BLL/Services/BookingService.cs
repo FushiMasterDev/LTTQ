@@ -275,7 +275,7 @@ public sealed partial class BookingService(Authorizer authorizer, ICurrentSessio
         }, cancellationToken);
     }
 
-    private async Task<BookingWriteSnapshot> WritableAsync(UnitOfWork db, int id, CancellationToken ct)
+    internal async Task<BookingWriteSnapshot> WritableAsync(UnitOfWork db, int id, CancellationToken ct)
     {
         await dataScope.EnsureBookingWritableAsync(db, id, ct).ConfigureAwait(false);
         var scope = dataScope.BookingFilter();

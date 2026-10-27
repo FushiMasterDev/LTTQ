@@ -74,6 +74,13 @@ public sealed partial class PaymentRepository
         command.Parameters.AddInt32("@id", paymentId); addScope(command);
         return (await db.QueryAsync(command, r => MapReview(r, userId), ct).ConfigureAwait(false)).SingleOrDefault();
     }
+    public async Task<PaymentQueueItem?> GetRefundAsync(DbSession db, int paymentId, int userId,
+        string condition, Action<SqlCommand> addScope, CancellationToken ct)
+    {
+        using var command = db.CreateCommand($"SELECT {ReviewColumns}{ReviewFrom} WHERE p.Id=@id AND p.Direction='Out' AND p.Type='Refund' AND ({condition});");
+        command.Parameters.AddInt32("@id", paymentId); addScope(command);
+        return (await db.QueryAsync(command, r => MapReview(r, userId), ct).ConfigureAwait(false)).SingleOrDefault();
+    }
     public async Task<int> GetReceiptRejectCountAsync(DbSession db, int bookingId, CancellationToken ct)
     {
         using var command = db.CreateCommand("SELECT ReceiptRejectCount FROM dbo.Bookings WHERE Id=@id;");

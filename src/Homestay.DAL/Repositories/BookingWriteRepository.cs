@@ -77,7 +77,7 @@ public sealed partial class BookingRepository
         var fields = to switch
         {
             BookingStatus.PaymentSubmitted => ",PaymentSubmittedAt=@now",
-            BookingStatus.Cancelled => ",CancelledAt=@now,CancelReason=@note,RefundAmount=NULL",
+            BookingStatus.Cancelled => ",CancelledAt=@now,CancelReason=@note,RefundAmount=@refund",
             BookingStatus.AwaitingPayment when metadata.HoldExpiresAtUtc is not null => ",HoldExpiresAt=@hold",
             BookingStatus.Deposited when metadata.ConfirmDeadlineAtUtc is not null => ",DepositedAt=@now,ConfirmDeadlineAt=@deadline,ConfirmedAt=NULL,ConfirmAlertSentAt=NULL",
             BookingStatus.Confirmed => ",ConfirmedAt=@now",

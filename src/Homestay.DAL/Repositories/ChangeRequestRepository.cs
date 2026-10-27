@@ -8,6 +8,63 @@ namespace Homestay.DAL.Repositories;
 
 public sealed class ChangeRequestRepository
 {
+    // Callers lock the scoped booking first, shared with all booking/payment writers.
+    public async Task<bool> HasOpenAsync(DbSession db, int bookingId, CancellationToken ct)
+    {
+        using var command = db.CreateCommand("SELECT COUNT(*) FROM dbo.BookingChangeRequests WHERE BookingId=@booking AND Status IN ('Pending','AwaitingPayment');");
+        command.Parameters.AddInt32("@booking", bookingId);
+        return (int)(await db.ScalarAsync(command, ct).ConfigureAwait(false))! > 0;
+    }
+
+    public async Task<int> InsertCancelAsync(UnitOfWork db, int bookingId, string reason, decimal quote,
+        int userId, DateTime now, CancellationToken ct)
+    {
+        using var command = db.CreateCommand("""
+            INSERT dbo.BookingChangeRequests(BookingId,RequestType,Reason,QuotedRefundAmount,Status,RequestedByUserId,RequestedAt)
+            VALUES(@booking,'Cancel',@reason,@quote,'Pending',@user,@now);
+            SELECT CONVERT(int,SCOPE_IDENTITY());
+            """);
+        command.Parameters.AddInt32("@booking", bookingId); command.Parameters.AddNVarChar("@reason", 500, reason);
+        command.Parameters.AddMoney("@quote", quote); command.Parameters.AddInt32("@user", userId);
+        command.Parameters.AddUtcDateTime("@now", now);
+        return (int)(await db.ScalarAsync(command, ct).ConfigureAwait(false))!;
+    }
+
+    public async Task<CancelRequestItem?> GetOpenCancelAsync(DbSession db, int bookingId, CancellationToken ct)
+    {
+        using var command = db.CreateCommand($"SELECT {Columns}{From} WHERE cr.BookingId=@booking AND cr.RequestType='Cancel' AND cr.Status IN ('Pending','AwaitingPayment');");
+        command.Parameters.AddInt32("@booking", bookingId);
+        return (await db.QueryAsync(command, r => Map(r, 0, false), ct).ConfigureAwait(false)).SingleOrDefault();
+    }
+
+    public async Task<int> DecideAsync(UnitOfWork db, CancelRequestItem old, ChangeRequestStatus target,
+        int userId, string? note, DateTime now, CancellationToken ct)
+    {
+        // Expiry of AwaitingPayment keeps its original approval; Pending gets the current manager's decision.
+        using var command = db.CreateCommand("""
+            UPDATE dbo.BookingChangeRequests SET Status=@target,
+                DecidedByUserId=CASE WHEN Status='Pending' THEN @user ELSE DecidedByUserId END,
+                DecidedAt=CASE WHEN Status='Pending' THEN @now ELSE DecidedAt END,DecisionNote=@note,UpdatedAt=@now
+            WHERE Id=@id AND RequestType='Cancel' AND RowVer=@version AND Status=@from;
+            """);
+        command.Parameters.AddInt32("@id", old.Id); command.Parameters.AddRowVersion("@version", old.RowVer);
+        command.Parameters.AddEnum("@from", 20, (ChangeRequestStatus?)old.Status);
+        command.Parameters.AddEnum("@target", 20, (ChangeRequestStatus?)target);
+        command.Parameters.AddInt32("@user", userId); command.Parameters.AddNVarChar("@note", 500, note);
+        command.Parameters.AddUtcDateTime("@now", now);
+        return await db.ExecuteAsync(command, ct).ConfigureAwait(false);
+    }
+
+    public async Task<bool> IsCancellationActorAsync(DbSession db, int bookingId, int userId, CancellationToken ct)
+    {
+        using var command = db.CreateCommand("""
+            SELECT COUNT(*) FROM dbo.BookingChangeRequests WHERE BookingId=@booking AND RequestType='Cancel'
+                AND (RequestedByUserId=@user OR DecidedByUserId=@user);
+            """);
+        command.Parameters.AddInt32("@booking", bookingId); command.Parameters.AddInt32("@user", userId);
+        return (int)(await db.ScalarAsync(command, ct).ConfigureAwait(false))! > 0;
+    }
+
     private const string From = """
          FROM dbo.BookingChangeRequests cr JOIN dbo.Bookings b ON b.Id=cr.BookingId JOIN dbo.Homestays h ON h.Id=b.HomestayId
          JOIN dbo.Customers c ON c.Id=b.CustomerId JOIN dbo.Users ru ON ru.Id=cr.RequestedByUserId

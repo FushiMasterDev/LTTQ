@@ -5,6 +5,20 @@ namespace Homestay.DAL.Repositories;
 
 public sealed partial class PaymentRepository
 {
+    public async Task<int> RecordRefundPaidAsync(UnitOfWork db, int paymentId, byte[] rowVer, string bankRef,
+        DateTime paidAtUtc, int userId, DateTime now, Guid? fileId, CancellationToken ct)
+    {
+        using var command = db.CreateCommand("""
+            UPDATE dbo.Payments SET Status='Verified',BankRef=@ref,VerifiedByUserId=@user,VerifiedAt=@paid,
+                EvidenceFileId=COALESCE(@file,EvidenceFileId),UpdatedAt=@now
+            WHERE Id=@id AND RowVer=@version AND Type='Refund' AND Direction='Out' AND Status='Pending';
+            """);
+        command.Parameters.AddInt32("@id", paymentId); command.Parameters.AddRowVersion("@version", rowVer);
+        command.Parameters.AddVarChar("@ref", 100, bankRef); command.Parameters.AddUtcDateTime("@paid", paidAtUtc);
+        command.Parameters.AddInt32("@user", userId); command.Parameters.AddUtcDateTime("@now", now);
+        command.Parameters.AddGuid("@file", fileId);
+        return await db.ExecuteAsync(command, ct).ConfigureAwait(false);
+    }
     public async Task<int> ReviewReceiptAsync(UnitOfWork db, int paymentId, byte[] rowVer, bool verify,
         int userId, DateTime now, string? reason, CancellationToken ct)
     {

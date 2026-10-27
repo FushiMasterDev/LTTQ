@@ -13,6 +13,10 @@ public sealed partial class BookingService
     // Reuse the already composed read dependencies without changing the M2.4 PaymentService constructor.
     internal ConnectionFactory ReadFactory => factory;
     internal SettingsProvider ReadSettings => settings;
+    internal WriteOperationRunner WriteOperations => writes;
+    internal DbClock WriteClock => clock;
+    internal AuditWriter WriteAudit => audit;
+    internal string WriteMachineName => machineName;
 
     public Task<IReadOnlyList<Lookup>> ListAssigneesAsync(int bookingId, CancellationToken cancellationToken = default)
     {
@@ -63,9 +67,7 @@ public sealed partial class BookingService
                 BookingStatus.Rejected => RefundReason.OwnerRejected,
                 _ => RefundReason.CustomerCancellation
             };
-            var calculation = RefundCalculator.Calculate(new(detail.Booking.CheckIn, today, detail.AmountDue,
-                detail.Payments.Any(p => p.Type == PaymentType.Deposit && p.Status == PaymentStatus.Verified), detail.CancellationPolicy)
-                { Reason = reason, TotalAmount = detail.TotalAmount, CommissionRate = detail.CommissionRate });
+            var calculation = CalculateRefund(detail, now, reason);
             return new BookingRefundPreview(bookingId, now, today, detail.Booking.RowVer, calculation);
         }, ct), cancellationToken);
     }
@@ -172,17 +174,9 @@ public sealed partial class BookingService
                         RefundAmount = target == BookingStatus.NoShow ? 0m : metadata.RefundAmount }, note, machineName), metadata, ct).ConfigureAwait(false);
             if (target == BookingStatus.Rejected)
             {
-                var key = "PC" + now.AddHours(7).ToString("yyMM", System.Globalization.CultureInfo.InvariantCulture);
-                var voucher = key + "-" + (await repository.NextSequenceAsync(db, key, ct).ConfigureAwait(false)).ToString("D4", System.Globalization.CultureInfo.InvariantCulture);
-                var paymentId = await new PaymentRepository().InsertPendingRefundAsync(db, id, voucher, metadata.RefundAmount!.Value,
-                    session.UserId, now, note, ct).ConfigureAwait(false);
-                await audit.WriteAsync(db, new(session.UserId, "Payment.CreateRefund", "Payments", paymentId.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                    null, new { BookingId = id, VoucherNo = voucher, Type = "Refund", Direction = "Out", Status = "Pending", Amount = metadata.RefundAmount }, note, machineName), ct).ConfigureAwait(false);
-                await new NotificationRepository().NotifyAccountantsAsync(db, $"Phiếu chi hoàn {voucher} đơn {old.Code} chờ chi", paymentId, now, ct).ConfigureAwait(false);
+                await CreatePendingRefundAsync(db, old, metadata.RefundAmount!.Value, note, now, ct).ConfigureAwait(false);
             }
             return await ReadDetailAsync(db, id, null, ct).ConfigureAwait(false);
         }, cancellationToken);
     }
-    public Task<BookingDetail> CancelHomestayUnavailableAsync(CancelHomestayUnavailableRequest request, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
 }
