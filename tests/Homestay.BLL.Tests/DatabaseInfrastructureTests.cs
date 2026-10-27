@@ -162,7 +162,7 @@ public sealed class DatabaseInfrastructureTests
         submitted.Parameters.AddInt32("@id", fixture.HomestayId);
         await uow.ExecuteAsync(submitted, SqlFixture.Token);
         await Assert.ThrowsAsync<ForbiddenException>(() => scope.EnsureHomestayEditableAsync(uow, fixture.HomestayId, SqlFixture.Token));
-        current.Set(new SessionInfo { Position = Position.Manager, HasAllAreas = true });
+        current.Set(new SessionInfo { Position = Position.Manager, EmployeeId = fixture.EmployeeId, HasAllAreas = true });
         await scope.EnsureHomestayEditableAsync(uow, fixture.HomestayId, SqlFixture.Token);
         await scope.EnsureBookingWritableAsync(uow, fixture.BookingId, SqlFixture.Token);
         current.Set(new SessionInfo { Position = Position.Accountant });

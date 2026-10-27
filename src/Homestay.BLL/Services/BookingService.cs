@@ -235,15 +235,8 @@ public sealed partial class BookingService(Authorizer authorizer, ICurrentSessio
             var session = currentSession.RequireSession();
             if (authorizer.GetAccess(Permission.BookingAssign) == AccessLevel.Own && old.AssignedEmployeeId != session.EmployeeId)
                 throw new ForbiddenException("Chỉ được giao lại đơn mình đang phụ trách.");
-            CheckVersion(old, version);
-            if (BookingStateMachine.IsTerminal(old.Status)) throw new BusinessException("Đơn đã kết thúc. Vui lòng tải lại đơn.");
-            if (old.AssignedEmployeeId == request.AssignedEmployeeId) throw new BusinessException("Vui lòng chọn người phụ trách khác người hiện tại.");
-            var userId = await repository.GetAssignableUserAsync(db, request.AssignedEmployeeId, old.Id, ct).ConfigureAwait(false)
-                ?? throw new BusinessException("Người nhận phải là Nhân viên hoặc Quản lý đang làm việc, có tài khoản hoạt động và phụ trách được khu vực của đơn. Vui lòng chọn lại.");
             var now = await clock.GetUtcNowAsync(db, ct).ConfigureAwait(false);
-            if (await repository.AssignAsync(db, old.Id, request.AssignedEmployeeId, version, false, now, ct).ConfigureAwait(false) == 0)
-                throw new ConcurrencyException();
-            await AssignmentAuditAsync(db, "Booking.Reassign", old, request.AssignedEmployeeId, ct).ConfigureAwait(false);
+            var userId = await AssignCoreAsync(db, old, request.AssignedEmployeeId, version, now, ct).ConfigureAwait(false);
             await new NotificationRepository().NotifyBookingAssigneeAsync(db, userId, $"Bạn được giao phụ trách đơn {old.Code}", old.Id, now, ct).ConfigureAwait(false);
             return await ReadDetailAsync(db, old.Id, null, ct).ConfigureAwait(false);
         }, cancellationToken);

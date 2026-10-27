@@ -7,7 +7,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Services;
 
-public sealed class SessionService(Authorizer authorizer, ICurrentSession currentSession, WriteOperationRunner writes,
+public sealed partial class SessionService(Authorizer authorizer, ICurrentSession currentSession, WriteOperationRunner writes,
     WriteSessionValidator validator, AuthRepository repository, DbClock clock, SettingsProvider settings, PasswordHasher hasher,
     AuditWriter audit, string machineName)
 {

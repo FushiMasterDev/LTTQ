@@ -10,7 +10,7 @@ using Homestay.DTO.Staff;
 
 namespace Homestay.BLL.Services;
 
-public sealed class StaffService(Authorizer authorizer, ICurrentSession currentSession, ConnectionFactory factory, WriteOperationRunner writes,
+public sealed partial class StaffService(Authorizer authorizer, ICurrentSession currentSession, ConnectionFactory factory, WriteOperationRunner writes,
     StaffRepository repository, AuthRepository accounts, DbClock clock, PasswordHasher hasher, AuditWriter audit, string machineName)
 {
     public Task<PagedResult<EmployeeListItem>> ListAsync(EmployeeSearchRequest request, CancellationToken cancellationToken = default)
@@ -75,9 +75,8 @@ public sealed class StaffService(Authorizer authorizer, ICurrentSession currentS
         return SetStatusAsync(request with { Reason = null }, false, cancellationToken);
     }
 
-    private Task SetStatusAsync(AccountActionRequest request, bool locking, CancellationToken cancellationToken) => writes.ExecuteAsync(async (db, ct) =>
+    private Task SetStatusAsync(AccountActionRequest request, bool locking, CancellationToken cancellationToken) => writes.ExecuteSerializedAsync("Managers", async (db, ct) =>
     {
-        await db.AcquireAppLockAsync("Managers", 10000, ct).ConfigureAwait(false);
         var account = await accounts.FindByUserIdAsync(db, request.UserId, ct).ConfigureAwait(false) ?? throw new NotFoundException();
         if (account.Status != (locking ? UserStatus.Active : UserStatus.Locked)) throw new ConcurrencyException();
         if (!locking && account.EmploymentStatus != EmploymentStatus.Active)

@@ -88,12 +88,12 @@ public sealed class M41ContractRulesTests
     public void ProfileScopesNeverUseBookingCreatorExceptionAndFinancialReadIsExplicit()
     {
         var current = new CurrentSession(); current.Set(new SessionInfo { Position = Position.Staff, EmployeeId = 11, HasAllAreas = true, AreaIds = [3, 3, 7] });
-        var scope = new DataScope(current); Assert.Equal("h.AreaId IN (@listingArea0,@listingArea1)", scope.HomestayFilter().Condition);
-        Assert.Equal(2, scope.HomestayFilter().Parameters.Count); Assert.DoesNotContain("CreatedByUserId", scope.HomestayFilter().Condition);
+        var scope = new DataScope(current); Assert.Contains("listingArea.AreaId=h.AreaId", scope.HomestayFilter().Condition);
+        Assert.Single(scope.HomestayFilter().Parameters); Assert.DoesNotContain("CreatedByUserId", scope.HomestayFilter().Condition);
         Assert.Contains("o.Status='Pending'", scope.OwnerFilter().Condition);
         Assert.Throws<ArgumentException>(() => scope.HomestayFilter("h;DELETE"));
         Assert.Throws<ArgumentException>(() => scope.AreaFilter(column: "Id;DELETE"));
-        current.Set(new SessionInfo { Position = Position.Manager, HasAllAreas = true }); Assert.Equal("1=1", scope.HomestayFilter().Condition);
+        current.Set(new SessionInfo { Position = Position.Manager, HasAllAreas = true }); Assert.Contains("listingEmployee.HasAllAreas=1", scope.HomestayFilter().Condition);
         current.Set(new SessionInfo { Position = Position.Accountant }); Assert.Equal("1=0", scope.HomestayFilter().Condition);
         Assert.Equal("1=1", scope.HomestayFilter(financialRead: true).Condition);
         Assert.Throws<ForbiddenException>(() => HomestayStateMachine.Actor((Position)999));

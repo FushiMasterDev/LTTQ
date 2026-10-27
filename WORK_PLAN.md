@@ -171,7 +171,7 @@ Mục tiêu: một đơn đi trọn tạo → cọc → xác minh → xác nhậ
 
 **MAC**
 
-- [ ] **M5.1** ⛳ Hợp đồng + cài đặt: phạm vi khu vực đầy đủ trong `DataScope`, giao nhiều đơn, `TaskService`, danh sách ngoại lệ (M02), phiên đăng nhập + buộc đăng xuất, đổi chức vụ/nghỉ việc, số liệu tổng quan QL; test NV ngoài phạm vi gọi BLL → "Không tìm thấy", hai người cùng nhận một đơn → một thành công.
+- [x] **M5.1** ⛳ Hợp đồng + cài đặt: phạm vi khu vực đầy đủ trong `DataScope`, giao nhiều đơn, `TaskService`, danh sách ngoại lệ (M02), phiên đăng nhập + buộc đăng xuất, đổi chức vụ/nghỉ việc, số liệu tổng quan QL; test NV ngoài phạm vi gọi BLL → "Không tìm thấy", hai người cùng nhận một đơn → một thành công.
 
 **WIN** (vẽ form ngay; nối dữ liệu sau M5.1)
 

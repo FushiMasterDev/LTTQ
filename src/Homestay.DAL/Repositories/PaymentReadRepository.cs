@@ -8,6 +8,7 @@ namespace Homestay.DAL.Repositories;
 
 public sealed partial class PaymentRepository
 {
+    internal const string PendingReceiptCondition = "p.Status='Pending' AND p.Type='Deposit' AND p.Direction='In'";
     private const string ReviewFrom = """
          FROM dbo.Payments p JOIN dbo.Bookings b ON b.Id=p.BookingId JOIN dbo.Homestays h ON h.Id=b.HomestayId
          JOIN dbo.Customers c ON c.Id=b.CustomerId JOIN dbo.Users u ON u.Id=p.RecordedByUserId
@@ -41,8 +42,9 @@ public sealed partial class PaymentRepository
     public async Task<PagedResult<PaymentQueueItem>> ListPendingAsync(DbSession db, PaymentQueueRequest request, bool refunds,
         int userId, string condition, Action<SqlCommand> addScope, CancellationToken ct)
     {
+        var paymentCondition = refunds ? "p.Status='Pending' AND p.Type=@type AND p.Direction=@direction" : PendingReceiptCondition;
         var where = $"""
-             WHERE ({condition}) AND p.Status='Pending' AND p.Type=@type AND p.Direction=@direction
+             WHERE ({condition}) AND {paymentCondition}
              AND (@booking IS NULL OR p.BookingId=@booking) AND (@method IS NULL OR p.Method=@method)
              AND (@search=N'' OR p.VoucherNo LIKE @search ESCAPE '~' OR b.Code LIKE @search ESCAPE '~'
                  OR c.FullName COLLATE Vietnamese_CI_AI LIKE @search ESCAPE '~' OR h.Name COLLATE Vietnamese_CI_AI LIKE @search ESCAPE '~')

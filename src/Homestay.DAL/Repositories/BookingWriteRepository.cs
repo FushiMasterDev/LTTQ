@@ -42,7 +42,10 @@ public sealed partial class BookingRepository
         return (int)(await db.ScalarAsync(command, ct).ConfigureAwait(false))! > 0;
     }
 
-    public async Task<int> AssignAsync(UnitOfWork db, int id, int employeeId, byte[] rowVer, bool claim, DateTime now, CancellationToken ct)
+    public Task<int> AssignAsync(UnitOfWork db, int id, int employeeId, byte[] rowVer, bool claim, DateTime now, CancellationToken ct) =>
+        AssignAsync(db, id, (int?)employeeId, rowVer, claim, now, ct);
+
+    public async Task<int> AssignAsync(UnitOfWork db, int id, int? employeeId, byte[] rowVer, bool claim, DateTime now, CancellationToken ct)
     {
         using var command = db.CreateCommand($"""
             UPDATE dbo.Bookings SET AssignedEmployeeId=@employee,UpdatedAt=@now

@@ -5,7 +5,7 @@ using Homestay.DTO.Staff;
 
 namespace Homestay.DAL.Repositories;
 
-public sealed class StaffRepository
+public sealed partial class StaffRepository
 {
     private const string SelectColumns = """
         SELECT e.Id AS EmployeeId, u.Id AS UserId, e.EmployeeCode, e.FullName, e.Phone, e.Position,

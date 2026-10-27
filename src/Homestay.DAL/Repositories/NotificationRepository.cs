@@ -4,7 +4,7 @@ using Homestay.DTO.Notifications;
 
 namespace Homestay.DAL.Repositories;
 
-public sealed class NotificationRepository
+public sealed partial class NotificationRepository
 {
     private const string ManagerBookingScope = """
         e.Position='Manager' AND (e.HasAllAreas=1 OR b.CreatedByEmployeeId=e.Id OR b.AssignedEmployeeId=e.Id

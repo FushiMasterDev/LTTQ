@@ -76,9 +76,11 @@ public sealed class AuthorizationTests
         var current = new CurrentSession();
         current.Set(new SessionInfo { Position = position, EmployeeId = 12, HasAllAreas = hasAll, AreaIds = new[] { 3, 7, 3 } });
         var scope = new DataScope(current).BookingFilter();
-        Assert.Contains("h.AreaId IN (@scopeArea0, @scopeArea1)", scope.Condition);
+        Assert.Contains("scopeArea.AreaId=h.AreaId", scope.Condition);
+        Assert.Contains("dbo.EmployeeAreas", scope.Condition);
+        Assert.Contains("scopeEmployee.Position='Manager' AND scopeEmployee.HasAllAreas=1", scope.Condition);
         Assert.Contains("b.CreatedByEmployeeId = @scopeEmployeeId OR b.AssignedEmployeeId = @scopeEmployeeId", scope.Condition);
-        Assert.Equal(3, scope.Parameters.Count);
+        Assert.Single(scope.Parameters);
         Assert.All(scope.Parameters, p => Assert.Equal(System.Data.SqlDbType.Int, p.SqlDbType));
         using var command = new Microsoft.Data.SqlClient.SqlCommand();
         scope.AddParametersTo(command);
@@ -94,7 +96,9 @@ public sealed class AuthorizationTests
     {
         var current = new CurrentSession();
         current.Set(new SessionInfo { Position = position, HasAllAreas = true });
-        Assert.Equal("1 = 1", new DataScope(current).BookingFilter().Condition);
+        var filter = new DataScope(current).BookingFilter();
+        if (position == Position.Accountant) Assert.Equal("1 = 1", filter.Condition);
+        else Assert.Contains("scopeEmployee.HasAllAreas=1", filter.Condition);
     }
 
     [Fact]
@@ -103,7 +107,7 @@ public sealed class AuthorizationTests
         var current = new CurrentSession();
         current.Set(new SessionInfo { Position = Position.Staff, EmployeeId = 12 });
         var scope = new DataScope(current);
-        Assert.StartsWith("(1 = 0 OR ", scope.BookingFilter().Condition);
+        Assert.Contains("b.CreatedByEmployeeId = @scopeEmployeeId", scope.BookingFilter().Condition);
         Assert.Throws<ArgumentException>(() => scope.BookingFilter("b; DELETE dbo.Users"));
     }
 }
