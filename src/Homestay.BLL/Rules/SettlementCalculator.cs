@@ -15,7 +15,8 @@ public static class SettlementCalculator
             throw new BusinessException("Dữ liệu đơn dùng lập đối soát không hợp lệ.");
         if (!Enum.IsDefined(x.Status)) throw new BusinessException("Trạng thái đơn không hợp lệ.");
         if (x.Replaced) return null;
-        var feeOnly = x.Status is BookingStatus.Rejected or BookingStatus.Expired;
+        var feeOnly = x.Status is BookingStatus.Rejected or BookingStatus.Expired ||
+            x.Status == BookingStatus.Cancelled && !x.HasVerifiedDeposit;
         if (x.Status is not (BookingStatus.Completed or BookingStatus.NoShow or BookingStatus.Cancelled or BookingStatus.Rejected or BookingStatus.Expired)) return null;
         var refund = x.RefundAmount ?? 0m;
         var percent = x.AmountDue > 0 ? decimal.Round(100m * refund / x.AmountDue, 0, MidpointRounding.AwayFromZero) : 0m;
@@ -25,17 +26,19 @@ public static class SettlementCalculator
         var feeCommission = Math.Min(decimal.Round(x.ChangeFeeAmount * x.CommissionRate, 0, MidpointRounding.AwayFromZero), x.ChangeFeeAmount);
         var retained = baseRetained + x.ChangeFeeAmount;
         if (retained <= 0) return null;
-        if (retained > x.DepositAmount + x.ChangeFeeAmount) throw new BusinessException("Phần tiền giữ lại vượt số tiền đã nhận.");
         var commission = baseCommission + feeCommission;
         var discount = feeOnly ? 0m : Math.Max(0m, x.DiscountAmount - PricingCalculator.RoundToThousand(x.DiscountAmount * percent / 100m));
-        var type = x.Status switch
+        var type = feeOnly ? SettlementItemType.FeeOnly : x.Status switch
         {
             BookingStatus.Completed => SettlementItemType.Completed,
             BookingStatus.NoShow => SettlementItemType.NoShow,
             BookingStatus.Cancelled => SettlementItemType.CancelledRetained,
             _ => SettlementItemType.FeeOnly
         };
-        return new SettlementLine(x.BookingId, x.BookingCode, type, x.TotalAmount, x.DepositAmount + x.ChangeFeeAmount,
+        var depositAmount = x.Status == BookingStatus.Cancelled && !x.HasVerifiedDeposit
+            ? x.ChangeFeeAmount
+            : x.DepositAmount + x.ChangeFeeAmount;
+        return new SettlementLine(x.BookingId, x.BookingCode, type, x.TotalAmount, depositAmount,
             refund, retained, commission, discount, retained - commission, x.CommissionRate) { CheckOut = x.CheckOut };
     }
 }

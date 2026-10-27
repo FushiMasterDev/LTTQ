@@ -4,7 +4,8 @@ namespace Homestay.DTO.Finance;
 
 public sealed record SettlementCalculationInput(int BookingId, string BookingCode, BookingStatus Status,
     DateOnly CheckOut, bool Replaced, decimal TotalAmount, decimal AmountDue, decimal DepositAmount,
-    decimal? RefundAmount, decimal ChangeFeeAmount, decimal DiscountAmount, decimal CommissionRate);
+    decimal? RefundAmount, decimal ChangeFeeAmount, decimal DiscountAmount, decimal CommissionRate,
+    bool HasVerifiedDeposit);
 public sealed record SettlementLine(int BookingId, string BookingCode, SettlementItemType ItemType,
     decimal RoomAmount, decimal DepositAmount, decimal RefundAmount, decimal RetainedAmount,
     decimal CommissionAmount, decimal DiscountAmount, decimal PayoutAmount, decimal CommissionRate)

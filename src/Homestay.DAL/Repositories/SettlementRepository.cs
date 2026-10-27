@@ -6,7 +6,7 @@ namespace Homestay.DAL.Repositories;
 
 public sealed record SettlementBookingRow(int Id,string Code,BookingStatus Status,DateOnly CheckOut,bool Replaced,
     decimal TotalAmount,decimal AmountDue,decimal DepositAmount,decimal? RefundAmount,decimal ChangeFeeAmount,
-    decimal DiscountAmount,decimal CommissionRate);
+    decimal DiscountAmount,decimal CommissionRate,bool HasVerifiedDeposit);
 public sealed record SettlementHead(int Id,int HomestayId,string HomestayName,string OwnerName,int Year,int Month,int PeriodNo,
     SettlementStatus Status,decimal TotalRoomAmount,decimal TotalRetained,decimal TotalCommission,decimal TotalDiscount,
     decimal PayoutAmount,DateTime? SentAt,DateTime? PaidAt,string? PaidBankRef,string? OwnerFeedback,string? OwnerBankName,
@@ -14,23 +14,32 @@ public sealed record SettlementHead(int Id,int HomestayId,string HomestayName,st
 
 public sealed class SettlementRepository
 {
+    private const string HeadSelect = """
+        SELECT s.Id,s.HomestayId,h.Name HomestayName,o.FullName OwnerName,o.BankName OwnerBankName,
+            o.BankAccountNo OwnerBankAccountNo,o.BankAccountName OwnerBankAccountName,s.[Year],s.[Month],
+            s.PeriodNo,s.Status,s.TotalRoomAmount,s.TotalRetained,s.TotalCommission,s.TotalDiscount,
+            s.PayoutAmount,s.SentAt,s.PaidAt,s.PaidBankRef,s.OwnerFeedback,s.RowVer
+        FROM dbo.Settlements s
+        """;
+
     public async Task<IReadOnlyList<SettlementBookingRow>> GetPeriodBookingsAsync(DbSession db,int homestay,int year,int month,int period,CancellationToken ct)
     {
         var start=new DateOnly(year,month,period==1?1:16);var end=period==1?new DateOnly(year,month,16):new DateOnly(year,month,1).AddMonths(1);
         using var c=db.CreateCommand("""
             SELECT b.Id,b.Code,b.Status,b.CheckOut,CAST(CASE WHEN b.ReplacedByBookingId IS NULL THEN 0 ELSE 1 END AS bit) Replaced,
-              b.TotalAmount,b.DepositAmount-b.DiscountAmount AmountDue,b.DepositAmount,b.RefundAmount,b.ChangeFeeAmount,b.DiscountAmount,b.CommissionRate
+              b.TotalAmount,b.DepositAmount-b.DiscountAmount AmountDue,b.DepositAmount,b.RefundAmount,b.ChangeFeeAmount,b.DiscountAmount,b.CommissionRate,
+              CAST(CASE WHEN EXISTS(SELECT 1 FROM dbo.Payments p WHERE p.BookingId=b.Id AND p.Direction='In' AND p.Type='Deposit' AND p.Status='Verified') THEN 1 ELSE 0 END AS bit) HasVerifiedDeposit
             FROM dbo.Bookings b WHERE b.HomestayId=@home AND b.CheckOut>=@start AND b.CheckOut<@end
             ORDER BY b.CheckOut,b.Code,b.Id;
             """);c.Parameters.AddInt32("@home",homestay);c.Parameters.AddDate("@start",start);c.Parameters.AddDate("@end",end);
-        return await db.QueryAsync(c,r=>new SettlementBookingRow(r.GetInt32("Id"),r.GetString("Code"),r.GetEnum<BookingStatus>("Status"),r.GetDateOnly("CheckOut"),r.GetBoolean("Replaced"),r.GetDecimal("TotalAmount"),r.GetDecimal("AmountDue"),r.GetDecimal("DepositAmount"),r.GetNullableDecimal("RefundAmount"),r.GetDecimal("ChangeFeeAmount"),r.GetDecimal("DiscountAmount"),r.GetDecimal("CommissionRate")),ct).ConfigureAwait(false);
+        return await db.QueryAsync(c,r=>new SettlementBookingRow(r.GetInt32("Id"),r.GetString("Code"),r.GetEnum<BookingStatus>("Status"),r.GetDateOnly("CheckOut"),r.GetBoolean("Replaced"),r.GetDecimal("TotalAmount"),r.GetDecimal("AmountDue"),r.GetDecimal("DepositAmount"),r.GetNullableDecimal("RefundAmount"),r.GetDecimal("ChangeFeeAmount"),r.GetDecimal("DiscountAmount"),r.GetDecimal("CommissionRate"),r.GetBoolean("HasVerifiedDeposit")),ct).ConfigureAwait(false);
     }
     public async Task<SettlementHead?> GetForPeriodAsync(DbSession db,int home,int year,int month,int period,bool update,CancellationToken ct)
-    { using var c=db.CreateCommand($"SELECT s.Id,s.HomestayId,h.Name HomestayName,o.FullName OwnerName,o.BankName OwnerBankName,o.BankAccountNo OwnerBankAccountNo,o.BankAccountName OwnerBankAccountName,s.[Year],s.[Month],s.PeriodNo,s.Status,s.TotalRoomAmount,s.TotalRetained,s.TotalCommission,s.TotalDiscount,s.PayoutAmount,s.SentAt,s.PaidAt,s.PaidBankRef,s.OwnerFeedback,s.RowVer FROM dbo.Settlements s {(update?"WITH (UPDLOCK)":"")} JOIN dbo.Homestays h ON h.Id=s.HomestayId JOIN dbo.Owners o ON o.Id=h.OwnerId WHERE s.HomestayId=@home AND s.[Year]=@year AND s.[Month]=@month AND s.PeriodNo=@period;");c.Parameters.AddInt32("@home",home);c.Parameters.AddInt32("@year",year);c.Parameters.AddInt32("@month",month);c.Parameters.AddInt32("@period",period);return (await db.QueryAsync(c,Map,ct).ConfigureAwait(false)).SingleOrDefault(); }
+    { using var c=db.CreateCommand($"{HeadSelect} {(update?"WITH (UPDLOCK)":"")} JOIN dbo.Homestays h ON h.Id=s.HomestayId JOIN dbo.Owners o ON o.Id=h.OwnerId WHERE s.HomestayId=@home AND s.[Year]=@year AND s.[Month]=@month AND s.PeriodNo=@period;");c.Parameters.AddInt32("@home",home);c.Parameters.AddInt32("@year",year);c.Parameters.AddInt32("@month",month);c.Parameters.AddInt32("@period",period);return (await db.QueryAsync(c,Map,ct).ConfigureAwait(false)).SingleOrDefault(); }
     public async Task<SettlementHead?> GetByIdAsync(DbSession db,int id,bool update,CancellationToken ct)
-    { using var c=db.CreateCommand($"SELECT s.Id,s.HomestayId,h.Name HomestayName,o.FullName OwnerName,o.BankName OwnerBankName,o.BankAccountNo OwnerBankAccountNo,o.BankAccountName OwnerBankAccountName,s.[Year],s.[Month],s.PeriodNo,s.Status,s.TotalRoomAmount,s.TotalRetained,s.TotalCommission,s.TotalDiscount,s.PayoutAmount,s.SentAt,s.PaidAt,s.PaidBankRef,s.OwnerFeedback,s.RowVer FROM dbo.Settlements s {(update?"WITH (UPDLOCK)":"")} JOIN dbo.Homestays h ON h.Id=s.HomestayId JOIN dbo.Owners o ON o.Id=h.OwnerId WHERE s.Id=@id;");c.Parameters.AddInt32("@id",id);return (await db.QueryAsync(c,Map,ct).ConfigureAwait(false)).SingleOrDefault(); }
+    { using var c=db.CreateCommand($"{HeadSelect} {(update?"WITH (UPDLOCK)":"")} JOIN dbo.Homestays h ON h.Id=s.HomestayId JOIN dbo.Owners o ON o.Id=h.OwnerId WHERE s.Id=@id;");c.Parameters.AddInt32("@id",id);return (await db.QueryAsync(c,Map,ct).ConfigureAwait(false)).SingleOrDefault(); }
     public async Task<IReadOnlyList<SettlementListItem>> ListAsync(DbSession db,int year,int month,int period,CancellationToken ct)
-    { using var c=db.CreateCommand("SELECT s.Id,s.HomestayId,h.Name HomestayName,o.FullName OwnerName,o.BankName OwnerBankName,o.BankAccountNo OwnerBankAccountNo,o.BankAccountName OwnerBankAccountName,s.[Year],s.[Month],s.PeriodNo,s.Status,s.TotalRoomAmount,s.TotalRetained,s.TotalCommission,s.TotalDiscount,s.PayoutAmount,s.SentAt,s.PaidAt,s.PaidBankRef,s.OwnerFeedback,s.RowVer FROM dbo.Settlements s JOIN dbo.Homestays h ON h.Id=s.HomestayId JOIN dbo.Owners o ON o.Id=h.OwnerId WHERE (@year=0 OR s.[Year]=@year) AND (@month=0 OR s.[Month]=@month) AND (@period=0 OR s.PeriodNo=@period) ORDER BY s.[Year] DESC,s.[Month] DESC,s.PeriodNo DESC,h.Name,s.Id DESC;");c.Parameters.AddInt32("@year",year);c.Parameters.AddInt32("@month",month);c.Parameters.AddInt32("@period",period);return await db.QueryAsync(c,r=>{var h=Map(r);return ToItem(h);},ct).ConfigureAwait(false); }
+    { using var c=db.CreateCommand($"{HeadSelect} JOIN dbo.Homestays h ON h.Id=s.HomestayId JOIN dbo.Owners o ON o.Id=h.OwnerId WHERE (@year=0 OR s.[Year]=@year) AND (@month=0 OR s.[Month]=@month) AND (@period=0 OR s.PeriodNo=@period) ORDER BY s.[Year] DESC,s.[Month] DESC,s.PeriodNo DESC,h.Name,s.Id DESC;");c.Parameters.AddInt32("@year",year);c.Parameters.AddInt32("@month",month);c.Parameters.AddInt32("@period",period);return await db.QueryAsync(c,r=>{var h=Map(r);return ToItem(h);},ct).ConfigureAwait(false); }
     public async Task<IReadOnlyList<SettlementLine>> GetItemsAsync(DbSession db,int id,CancellationToken ct)
     { using var c=db.CreateCommand("SELECT i.BookingId,b.Code BookingCode,b.CheckOut,i.ItemType,i.RoomAmount,i.DepositAmount,i.RefundAmount,i.RetainedAmount,i.CommissionAmount,i.DiscountAmount,i.PayoutAmount,i.CommissionRate FROM dbo.SettlementItems i JOIN dbo.Bookings b ON b.Id=i.BookingId WHERE i.SettlementId=@id ORDER BY b.CheckOut,b.Code;");c.Parameters.AddInt32("@id",id);return await db.QueryAsync(c,r=>new SettlementLine(r.GetInt32("BookingId"),r.GetString("BookingCode"),r.GetEnum<SettlementItemType>("ItemType"),r.GetDecimal("RoomAmount"),r.GetDecimal("DepositAmount"),r.GetDecimal("RefundAmount"),r.GetDecimal("RetainedAmount"),r.GetDecimal("CommissionAmount"),r.GetDecimal("DiscountAmount"),r.GetDecimal("PayoutAmount"),r.GetDecimal("CommissionRate")){CheckOut=r.GetDateOnly("CheckOut")},ct).ConfigureAwait(false); }
     public async Task<IReadOnlyList<SettlementAuditItem>> GetHistoryAsync(DbSession db,int id,CancellationToken ct)

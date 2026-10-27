@@ -38,8 +38,7 @@ public sealed class AccountingService(Authorizer authorizer, ICurrentSession cur
         return BusinessErrorTranslator.ExecuteAsync(async t=>{
             var rows=await factory.ReadAsync((db,token)=>finance.ListBankTransactionsAsync(db,fromUtc,toUtc,"Unmatched","",token),t).ConfigureAwait(false);
             foreach(var row in rows) { var code=ExtractBookingCode(row.TransferContent);if(code is null)continue;
-                var booking=await bookingService.GetByCodeAsync(code,t).ConfigureAwait(false);
-                try { await MatchBankTransactionAsync(new(row.Id,booking.Booking.Id,row.RowVer),true,t).ConfigureAwait(false); }
+                try { var booking=await bookingService.GetByCodeAsync(code,t).ConfigureAwait(false);await MatchBankTransactionAsync(new(row.Id,booking.Booking.Id,row.RowVer),true,t).ConfigureAwait(false); }
                 catch(BusinessException) { /* keep ambiguous/late/underpaid transactions available for accountant review */ }
             }
             return await factory.ReadAsync((db,token)=>finance.ListBankTransactionsAsync(db,fromUtc,toUtc,null,"",token),t).ConfigureAwait(false);
