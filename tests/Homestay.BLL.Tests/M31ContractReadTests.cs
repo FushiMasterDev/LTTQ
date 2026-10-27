@@ -393,21 +393,14 @@ public sealed class M31ContractReadTests
     }
 
     [SqlFact]
-    public async Task AllTwelveNewWritesRemainNotImplemented()
+    public async Task FiveRoundThreeWritesRemainNotImplemented()
     {
         var c = new M21TestClient(); await c.LoginNewAsync();
-        await Assert.ThrowsAsync<NotImplementedException>(() => c.Bookings.ConfirmOnBehalfAsync(new(1, "Gọi chủ", new byte[8])));
-        await Assert.ThrowsAsync<NotImplementedException>(() => c.Bookings.RejectOnBehalfAsync(new(1, "Chủ từ chối", new byte[8])));
-        await Assert.ThrowsAsync<NotImplementedException>(() => c.Bookings.CheckInAsync(new(1, "Chủ báo", new byte[8])));
-        await Assert.ThrowsAsync<NotImplementedException>(() => c.Bookings.CheckOutAsync(new(1, "Chủ báo", new byte[8])));
-        await Assert.ThrowsAsync<NotImplementedException>(() => c.Bookings.MarkNoShowAsync(new(1, "Chủ báo", new byte[8])));
         await Assert.ThrowsAsync<NotImplementedException>(() => c.Bookings.CancelHomestayUnavailableAsync(new(1, "Không phục vụ được", new byte[8])));
         await Assert.ThrowsAsync<NotImplementedException>(() => c.Changes.SubmitCancelAsync(new(1, "Khách hủy", new byte[8])));
         await Assert.ThrowsAsync<NotImplementedException>(() => c.Changes.ApproveAsync(new(1, new byte[8], new byte[8])));
         await Assert.ThrowsAsync<NotImplementedException>(() => c.Changes.RejectAsync(new(1, "Không đồng ý", new byte[8], new byte[8])));
         var accountant = new M21TestClient(); await accountant.LoginNewAsync(Position.Accountant);
-        await Assert.ThrowsAsync<NotImplementedException>(() => accountant.Payments.VerifyReceiptAsync(new(1, new byte[8], new byte[8])));
-        await Assert.ThrowsAsync<NotImplementedException>(() => accountant.Payments.RejectReceiptAsync(new(1, "Sai phiếu", new byte[8], new byte[8])));
         await Assert.ThrowsAsync<NotImplementedException>(() => accountant.Payments.RecordRefundPaidAsync(new() { PaymentId = 1, RowVer = new byte[8], BankRef = "TEST", PaidAtUtc = DateTime.UtcNow }));
     }
 }

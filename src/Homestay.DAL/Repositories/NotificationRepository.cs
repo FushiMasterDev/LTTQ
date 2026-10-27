@@ -29,6 +29,25 @@ public sealed class NotificationRepository
         await db.ExecuteAsync(command, ct).ConfigureAwait(false);
     }
 
+    // Same booking scope as DataScope for Managers: all areas, area membership, creator or assignee.
+    public async Task NotifyBookingOperatorsAsync(UnitOfWork db, int bookingId, string message, DateTime now, CancellationToken ct)
+    {
+        using var command = db.CreateCommand("""
+            INSERT dbo.Notifications(UserId,Message,RefType,RefId,IsRead,CreatedAt)
+            SELECT e.UserId,@message,'Booking',CONVERT(varchar(30),b.Id),0,@now
+            FROM dbo.Bookings b JOIN dbo.Homestays h ON h.Id=b.HomestayId
+            JOIN dbo.Employees e ON (b.AssignedEmployeeId=e.Id OR (b.AssignedEmployeeId IS NULL AND e.Position='Manager'
+                AND (e.HasAllAreas=1 OR b.CreatedByEmployeeId=e.Id OR EXISTS(
+                    SELECT 1 FROM dbo.EmployeeAreas ea WHERE ea.EmployeeId=e.Id AND ea.AreaId=h.AreaId))))
+            JOIN dbo.Users u ON u.Id=e.UserId
+            WHERE b.Id=@booking AND e.EmploymentStatus='Active' AND u.Status='Active';
+            """);
+        command.Parameters.AddInt32("@booking", bookingId);
+        command.Parameters.AddNVarChar("@message", 500, message);
+        command.Parameters.AddUtcDateTime("@now", now);
+        await db.ExecuteAsync(command, ct).ConfigureAwait(false);
+    }
+
     public async Task<int> CountUnreadAsync(DbSession db, int userId, CancellationToken ct)
     {
         using var command = db.CreateCommand("SELECT COUNT(*) FROM dbo.Notifications WHERE UserId=@user AND IsRead=0;");

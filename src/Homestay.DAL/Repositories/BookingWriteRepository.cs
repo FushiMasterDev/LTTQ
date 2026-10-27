@@ -7,6 +7,16 @@ namespace Homestay.DAL.Repositories;
 public sealed record BookingWriteSnapshot(int Id, string Code, BookingStatus Status, int? AssignedEmployeeId,
     DateTime HoldExpiresAtUtc, decimal AmountDue, byte[] RowVer);
 
+// Metadata applied atomically with the conditional status update, never in a second status path.
+public sealed record BookingStatusMetadata
+{
+    public DateTime? ConfirmDeadlineAtUtc { get; init; }
+    public DateTime? HoldExpiresAtUtc { get; init; }
+    public bool IncrementReceiptRejectCount { get; init; }
+    public decimal? RefundAmount { get; init; }
+    public int? RoomId { get; init; }
+}
+
 public sealed partial class BookingRepository
 {
     // PaymentRecord deliberately passes the financial BookingFilter, which includes Accountants at All access.
@@ -56,17 +66,31 @@ public sealed partial class BookingRepository
         return await db.ScalarAsync(command, ct).ConfigureAwait(false) as int?;
     }
 
-    // Only the state/timestamp updates needed by M2.4. Later services extend timestamp parameters here.
+    // The single conditional status update used by services and HoldExpiry.
+    public Task<int> UpdateStatusAsync(UnitOfWork db, int id, BookingStatus from, BookingStatus to, byte[] rowVer,
+        DateTime now, string? note, CancellationToken ct) => UpdateStatusAsync(db, id, from, to, rowVer, now, note, null, ct);
+
     public async Task<int> UpdateStatusAsync(UnitOfWork db, int id, BookingStatus from, BookingStatus to, byte[] rowVer,
-        DateTime now, string? note, CancellationToken ct)
+        DateTime now, string? note, BookingStatusMetadata? metadata, CancellationToken ct)
     {
+        metadata ??= new();
         var fields = to switch
         {
             BookingStatus.PaymentSubmitted => ",PaymentSubmittedAt=@now",
             BookingStatus.Cancelled => ",CancelledAt=@now,CancelReason=@note,RefundAmount=NULL",
+            BookingStatus.AwaitingPayment when metadata.HoldExpiresAtUtc is not null => ",HoldExpiresAt=@hold",
+            BookingStatus.Deposited when metadata.ConfirmDeadlineAtUtc is not null => ",DepositedAt=@now,ConfirmDeadlineAt=@deadline,ConfirmedAt=NULL,ConfirmAlertSentAt=NULL",
+            BookingStatus.Confirmed => ",ConfirmedAt=@now",
+            BookingStatus.CheckedIn => ",CheckedInAt=@now",
+            BookingStatus.Completed => ",CompletedAt=@now",
+            // Schema 001 stores rejection reason in CancelReason; event times are in status history.
+            BookingStatus.Rejected when metadata.RefundAmount is not null => ",CancelReason=@note,RefundAmount=@refund",
+            BookingStatus.NoShow => ",RefundAmount=0",
             BookingStatus.Expired => "",
             _ => throw new ArgumentOutOfRangeException(nameof(to), "Timestamp contract for this transition is not implemented yet.")
         };
+        if (metadata.IncrementReceiptRejectCount) fields += ",ReceiptRejectCount=ReceiptRejectCount+1";
+        if (metadata.RoomId is not null) fields += ",RoomId=@room";
         // Keep the job's final eligibility guard as well as the optimistic status/version predicate.
         var eligibility = from == BookingStatus.AwaitingPayment && to == BookingStatus.Expired
             ? "AND b.HoldExpiresAt<@now AND NOT EXISTS(SELECT 1 FROM dbo.Payments p WHERE p.BookingId=b.Id AND p.Type='Deposit' AND p.Status='Pending')"
@@ -78,6 +102,10 @@ public sealed partial class BookingRepository
         command.Parameters.AddRowVersion("@version", rowVer);
         command.Parameters.AddUtcDateTime("@now", now);
         command.Parameters.AddNVarChar("@note", 500, note);
+        command.Parameters.AddUtcDateTime("@hold", metadata.HoldExpiresAtUtc);
+        command.Parameters.AddUtcDateTime("@deadline", metadata.ConfirmDeadlineAtUtc);
+        command.Parameters.AddMoney("@refund", metadata.RefundAmount);
+        command.Parameters.AddInt32("@room", metadata.RoomId);
         return await db.ExecuteAsync(command, ct).ConfigureAwait(false);
     }
 

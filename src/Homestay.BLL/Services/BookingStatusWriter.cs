@@ -10,14 +10,19 @@ namespace Homestay.BLL.Services;
 /// Callers own scope/business checks, notifications and the enclosing transaction.</summary>
 public sealed class BookingStatusWriter(BookingRepository repository, AuditWriter audit)
 {
+    // Preserve the M2.4 signature; new callers supply metadata through the overload.
+    public Task ChangeStatusAsync(UnitOfWork db, int id, BookingStatus? from, BookingStatus to, byte[]? rowVer,
+        BookingTransitionActor actor, DateTime now, AuditEntry entry, CancellationToken ct) =>
+        ChangeStatusAsync(db, id, from, to, rowVer, actor, now, entry, null, ct);
+
     public async Task ChangeStatusAsync(UnitOfWork db, int id, BookingStatus? from, BookingStatus to, byte[]? rowVer,
-        BookingTransitionActor actor, DateTime now, AuditEntry entry, CancellationToken ct)
+        BookingTransitionActor actor, DateTime now, AuditEntry entry, BookingStatusMetadata? metadata, CancellationToken ct)
     {
         var transition = BookingStateMachine.Require(from, to, actor, entry.Note);
         if (from is { } previous)
         {
             StaffInputRules.RowVer(rowVer!);
-            if (await repository.UpdateStatusAsync(db, id, previous, to, rowVer!, now, entry.Note, ct).ConfigureAwait(false) == 0)
+            if (await repository.UpdateStatusAsync(db, id, previous, to, rowVer!, now, entry.Note, metadata, ct).ConfigureAwait(false) == 0)
                 throw new ConcurrencyException();
             if (to is BookingStatus.Expired or BookingStatus.Cancelled or BookingStatus.Rejected or BookingStatus.NoShow)
                 await repository.DeleteRoomNightsAsync(db, id, ct).ConfigureAwait(false);

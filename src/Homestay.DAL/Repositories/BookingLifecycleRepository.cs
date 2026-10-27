@@ -33,6 +33,13 @@ public sealed partial class BookingRepository
         return await db.QueryAsync(command, r => new Lookup { Id = r.GetInt32("Id"), Code = r.GetString("EmployeeCode"),
             Name = r.GetString("EmployeeCode") + " · " + r.GetString("FullName") }, ct).ConfigureAwait(false);
     }
+    public async Task MoveRoomNightsAsync(UnitOfWork db, int bookingId, int roomId, CancellationToken ct)
+    {
+        using var command = db.CreateCommand("UPDATE dbo.RoomNights SET RoomId=@room WHERE BookingId=@booking;");
+        command.Parameters.AddInt32("@booking", bookingId); command.Parameters.AddInt32("@room", roomId);
+        await db.ExecuteAsync(command, ct).ConfigureAwait(false);
+    }
+
     public async Task<IReadOnlyList<Lookup>> ListConfirmationRoomsAsync(DbSession db, int bookingId, DateTime now, CancellationToken ct)
     {
         using var command = db.CreateCommand($"""
