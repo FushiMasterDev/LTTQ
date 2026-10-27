@@ -1,0 +1,69 @@
+Fixture database=HomestayWinCheck_0e296df5e9f44dc7
+PASS F04 schema versions on separate SQL database
+PASS F04 connection check then encrypted save/load
+PASS Manager login with required password change
+PASS Manager heartbeat remains valid after password change
+PASS Staff login and permissions
+PASS Accountant login and permissions
+PASS F18 list through SQL service with server paging
+PASS F18 created employee signs in and changes temporary password
+PASS Unlock and heartbeat for created employee
+PASS F18 lock account
+PASS F18 unlock account
+PASS F18 reset password requires another change
+PASS F24 reads six catalog tabs
+PASS F24 creates, edits and deactivates catalog item
+PASS F24 updates setting with original value
+PASS W2 availability search uses real SQL
+PASS W2 calendar returns real room-night cells
+PASS W2 staff customer identity is masked
+PASS W2 customer phone lookup
+PASS W2 create booking commits real hold and pricing
+PASS W2 exact booking search
+PASS W2 shell quick search service
+PASS W2 F05 reads live queues, no placeholder banner
+PASS W2 F06 loads real availability in GUI
+PASS Completion changed search filters block stale booking and quote actions
+PASS Completion calendar filters correct homestay
+PASS Completion calendar opens draft for exact room and date
+PASS W2 F13 applies selected-customer phone filter
+PASS Audit staff can request phone change; BLL protects customers with bookings
+PASS W2 F08 loads exact matching booking in GUI
+PASS Completion all eleven booking queues are exposed
+PASS Completion initial booking search is visible and editable
+PASS Completion booking customer-name filter uses SQL
+PASS Completion booking action button matches BLL allowed actions
+PASS Completion booking deadline displays server countdown
+PASS Completion clear filters removes implicit exact-code filter
+PASS W2 F09 exposes deposit only when BLL allows
+PASS W2 F07 shows actual nightly quote without creating another booking
+PASS W2 F07 Save button creates a real booking
+PASS Completion saved booking keeps room selected from calendar
+PASS W2 F10 loads actual amount due
+PASS W2 F10 Save button records real receipt and moves booking to verification
+PASS W2 prevents duplicate deposit through allowed actions
+PASS W2 notifies accountant after receipt
+PASS Completion PDF evidence is stored and read through FileService
+PASS Completion notification inbox reads real accountant messages
+PASS Completion read-all persists through SQL and disables button
+PASS Completion accountant read-all preserves staff notifications
+PASS W2 expired-hold job is repeatable
+PASS M31 staff assignee lookup works without EmployeeManage
+PASS M31 reassignment validates recipient through real SQL service
+PASS M31 F27 reads actual receipt and booking details
+PASS M33A F27 enables eligible receipt review and evidence
+PASS M33A F27 Verify button commits verified receipt and deposited booking
+PASS M33A F09 confirms on behalf and applies selected replacement room
+PASS M33A no-show is not offered on the check-in date
+PASS M33A F09 check-in button commits real state change
+PASS M33A F09 early checkout completes without repricing or refund
+PASS M31 F29 reads real pending refunds with write disabled
+PASS M31 F20 reads cancellation details without enabling stub writes
+PASS M31 F11 displays BLL refund preview without client-side calculation or stub write
+PASS Logout clears all three sessions
+Passed!  - Failed:     0, Passed:   111, Skipped:     0, Total:   111, Duration: 40 s - Homestay.BLL.Tests.dll (net10.0)
+Detailed SQL test log=C:\Users\Pheroin\Documents\Codex\2026-10-27\https-github-com-fushimasterdev-lttq-https\work/private/live-flow-checks\0784d32b800b4cdfa040b711626b71a8\BLL-SQL-TESTS.txt
+PASS Completion full xUnit SQL suite executes on temporary database
+RESULT PASS - service integration on SQL; manual UI acceptance remains.
+Cleanup PASS - removed only this run's newly created fixture database.
+Only a new fixture database was used; main database was not changed.

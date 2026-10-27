@@ -9,6 +9,14 @@ namespace Homestay.GUI.Staff;
 
 internal static class EmployeeUi
 {
+    public static async Task ReassignAsync(AppServices services,BookingListItem booking,IWin32Window owner){
+        var lookups=await services.Bookings.ListAssigneesAsync(booking.Id);
+        if(lookups.Count==0)throw new BusinessException("Chưa có người nhận đang hoạt động phù hợp khu vực của đơn.");
+        var choices=lookups.Select(x=>new Choice(x.Id,x.Name)).ToArray();
+        using var dialog=new FieldsDialog("Giao lại đơn "+booking.Code,new FieldSpec("employee","Người phụ trách",FieldKind.Choice,Choices:choices));
+        if(dialog.ShowDialog(owner)==DialogResult.OK)
+            await services.Bookings.ReassignAsync(new(booking.Id,(int)dialog.Values["employee"]!,booking.RowVer));
+    }
     public static DateOnly Today => DateOnly.FromDateTime(DateTime.UtcNow.AddHours(7));
     public static string Date(DateOnly x) => x.ToString("dd/MM/yyyy");
     public static string Time(DateTime? x) => x is null ? "" : DateTime.SpecifyKind(x.Value,DateTimeKind.Utc).AddHours(7).ToString("dd/MM/yyyy HH:mm");

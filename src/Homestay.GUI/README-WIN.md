@@ -4,6 +4,28 @@ Mở HomestayDesktop.sln bằng Visual Studio Community 2026, chọn Homestay.GU
 Hồ sơ **Xem bố cục (không dữ liệu)** hoặc tham số --preview mở bản xem 29 màn hình.
 Chế độ này không tạo phiên, không kết nối SQL và không ghi nghiệp vụ.
 
+## Trạng thái gói WIN hiện tại
+
+Đã tích hợp hợp đồng MAC tới e875b03: tra phòng/lịch, khách, tạo đơn/thu cọc,
+thông báo, giao lại, xác minh cọc, xác nhận/đổi phòng/nhận trả phòng, hủy/duyệt hủy/chi hoàn.
+F07 tự tìm lại loại phòng khi đổi ngày/số khách; F09 khóa nút trong lúc tải dữ liệu;
+F29 giữ nội dung khi thiếu xác nhận hoặc nhập sai. Biểu mẫu đợt 4 mới ở preview,
+chưa nối dữ liệu thật và không tính là nghiệp vụ hoàn thành.
+
+Build solution 0 lỗi/0 cảnh báo. Hồi quy WIN mới nhất 53/53, kiểm biểu mẫu/chi hoàn
+19/19, GUI smoke 74/74. Lượt SQL M33B trên Windows đạt 67 bước WIN rồi dừng do
+bộ thử bấm nút F09 trước khi tải xong; đã sửa và có hồi quy, chưa có kết quả SQL chạy lại.
+131 xUnit SQL chưa chạy tới trong lượt này. Lượt M33A trước đó đạt 111/111 SQL.
+Không coi kết quả lịch sử hoặc ảnh tổng hợp là nghiệm thu M33B mới.
+
+Chi tiết: [sửa F09](../../docs/screenshots/win-next/F09_LOADING_FIX.md),
+[biểu mẫu đợt 4](../../docs/screenshots/win-next/WIN_NEXT_2026-10-27.md),
+[WORK_PLAN](../../WORK_PLAN.md). Các mục phía dưới là lịch sử từng lượt.
+
+Máy khác tải nhánh dev: mở solution, chọn Homestay.GUI làm Startup Project,
+build Release. SQL và mật khẩu cần cấu hình riêng theo hướng dẫn của dự án;
+connection.dat được mã hóa theo máy, không có trong Git và không sao chép từ máy WIN này.
+
 ## Đợt 1 sau hợp đồng M1.4
 
 Đã ghép các dịch vụ BLL M1.4 vào AppServices theo docs/M1.4_SERVICES_NOTES.md.
@@ -138,3 +160,39 @@ Bộ hồi quy có thể chạy lại: docs/screenshots/logic-audit/checks/GuiAu
 Đợt 3–7 vẫn thiếu hợp đồng/dịch vụ, giao diện chưa tích hợp tiếp tục ẩn.
 Launcher cục bộ Mo-ban-W2.cmd và Mo-ban-da-ra-soat.cmd hiện trỏ tới bản đã rà soát
 trong bin/AuditSolution/bin/Homestay.GUI/release, chỉ mở sau SQL RESULT PASS và Cleanup PASS.
+
+
+## Trạng thái mới nhất — WIN sau M3.3A
+
+Các mục trên là lịch sử từng lượt. Trạng thái hiện tại xem
+[Hoàn thiện WIN](../../docs/screenshots/win-completion/HOAN_THIEN_WIN_2026-10-27.md).
+Đã nối lookup giao lại cho NV, lịch chọn đúng phòng, khung thông báo phân trang,
+chứng từ JPG/PNG/WEBP/PDF và F27 xác minh/từ chối thu cọc.
+F09 đã nối xác nhận/từ chối thay chủ, đổi phòng khi xác nhận, nhận/trả phòng, không đến.
+SQL WIN 63 PASS + xUnit SQL 111/111 (0 Skip), dọn database tạm đạt.
+Hồi quy mới 31/31 và GUI smoke 74/74; build toàn solution 0 lỗi/0 cảnh báo.
+F11/F20/F29 có dữ liệu thật/xem trước, còn khóa các hàm ghi M3.3B chưa cài đặt.
+Launcher cục bộ hiện trỏ bin/CompletionM31/bin/Homestay.GUI/release.
+WORK_PLAN chưa hoàn thành; chưa có đủ ảnh W8 và nghiệm thu DPI/Designer.
+
+## Cập nhật tiếp M3.3B
+
+Đã tích hợp e875b03: F11 gửi hủy, F20 duyệt/từ chối, F09 hủy do homestay,
+F29 ghi nhận chi hoàn. Thay thế trạng thái “chờ năm hàm ghi” của lượt M33A.
+Rules 301/301, hồi quy WIN 37/37, GUI smoke 74/74; đang chờ nghiệm thu SQL M33B.
+Xem [báo cáo M33B](../../docs/screenshots/win-completion/WIN_M33B_2026-10-27.md).
+
+### F07 tự cập nhật loại phòng sau đổi ngày
+
+Đã sửa StayChanged chỉ xóa danh sách mà chưa tải lại. Nay tự tìm lại theo ngày/số
+khách cuối cùng, giữ loại còn trống, giải thích ngày sai/hết phòng/lỗi tải và khóa
+lưu đến báo giá mới. Hồi quy 47/47, build solution 0 lỗi/0 cảnh báo.
+Xem [báo cáo F07](../../docs/screenshots/win-completion/F07_DATE_REFRESH_2026-10-27.md).
+SQL M33B vẫn chờ lượt thử Windows; launcher riêng Mo-ban-sua-doi-ngay.cmd mở bản sửa.
+
+## WIN tiếp tục — chuẩn bị đợt 4
+
+Đã thêm bảy biểu mẫu nhập và sửa F29 giữ nội dung khi thiếu xác nhận/mã sai.
+Bản mới ở bin/WinNext; launcher Mo-ban-WIN-tiep.cmd. Preview độc lập tại
+Mo-bieu-mau-dot4.cmd; W4 chưa có M4.1 nên chưa ghi dữ liệu thật, chưa bật menu nghiệp vụ.
+Xem [báo cáo WIN tiếp tục](../../docs/screenshots/win-next/WIN_NEXT_2026-10-27.md).

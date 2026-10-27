@@ -11,7 +11,7 @@ internal sealed record ScreenEntry(string Id, string Title, string Audience, Fun
 // Layout inventory stays separate from the integrated allowlist; production always checks BLL authorization.
 internal static class ScreenRegistry
 {
-    public static readonly IReadOnlySet<string> EnabledProductionForms = new HashSet<string> { "F02", "F05", "F06", "F07", "F08", "F09", "F10", "F13", "F18", "F24" };
+    public static readonly IReadOnlySet<string> EnabledProductionForms = new HashSet<string> { "F02", "F05", "F06", "F07", "F08", "F09", "F10", "F11", "F13", "F18", "F20", "F24", "F27", "F29" };
     public static readonly ScreenEntry[] Layouts =
     [
         new("F01", "Đăng nhập", "All", () => new Shell.FrmLogin()),
@@ -55,6 +55,10 @@ internal static class ScreenRegistry
             entries.Add(new("F24","Danh mục & cấu hình","Manager",()=>services is null
                 ? throw new NotImplementedException() : new Manager.FrmCatalog(services)));
         if(services is not null) {
+            if(gateway.Can(Permission.BookingCancellationRequest))entries.Add(new("F11","Yêu cầu hủy","Operations",()=>throw new InvalidOperationException("Chọn đơn để xem tiền hoàn.")));
+            if(gateway.Can(Permission.BookingChangeReview))entries.Add(new("F20","Duyệt yêu cầu hủy","Manager",()=>new Manager.FrmCancellationApproval(services)));
+            if(gateway.Can(Permission.PaymentVerify))entries.Add(new("F27","Hàng chờ xác minh cọc","Accountant",()=>new Accountant.FrmDepositVerification(services)));
+            if(gateway.Can(Permission.BookingRefundRecord))entries.Add(new("F29","Hàng chờ hoàn tiền","Accountant",()=>new Accountant.FrmRefundQueue(services)));
             if(gateway.Can(Permission.BookingView)) {
                 entries.Add(new("F05","Tổng quan","All",()=>new Staff.FrmDashboard(services)));
                 entries.Add(new("F08","Danh sách đơn","All",()=>new Staff.FrmBookings(services)));

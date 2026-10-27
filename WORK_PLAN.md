@@ -125,11 +125,11 @@ Mục tiêu: tra phòng → tạo đơn → ghi nhận thu cọc chạy trọn. 
 **WIN** (vẽ form ngay; nối dữ liệu sau M2.1)
 
 - [x] **W2.1** **F05** Tổng quan — thẻ của Nhân viên (thẻ QL/KT làm ở đợt 5, 6).
-- [ ] **W2.2** **F06** tab Tra phòng, tab Lịch (khóa phòng làm ở đợt 4).
+- [x] **W2.2** **F06** tab Tra phòng, tab Lịch (khóa phòng làm ở đợt 4).
 - [x] **W2.3** **F13** Khách hàng.
 - [x] **W2.4** **F07** Tạo đơn (chưa có chọn voucher); sau khi tạo hiện mã đơn, số tiền, thông tin chuyển khoản, đồng hồ 15 phút.
 - [ ] **W2.5** **F08** Danh sách đơn (các tab của Nhân viên), **F09** Chi tiết đơn (tab Thông tin, Giá, Thu chi, Lịch sử), **F10** Ghi nhận thu tiền.
-- [ ] **W2.6** F03: ô tìm nhanh `Ctrl+K`, chuông và khung thông báo.
+- [x] **W2.6** F03: ô tìm nhanh `Ctrl+K`, chuông và khung thông báo.
 
 Xong đợt khi: từ S02 bấm Đặt → tạo đơn → ghi nhận thu → đơn "Chờ xác minh cọc"; đơn không ghi nhận quá 15 phút thành "Hết hạn" và phòng trống lại.
 
@@ -145,8 +145,8 @@ Mục tiêu: một đơn đi trọn tạo → cọc → xác minh → xác nhậ
 
 **WIN** (vẽ form ngay; nối dữ liệu sau M3.1)
 
-- [ ] **W3.1** **F27** Xác minh thu cọc (trái hàng chờ, phải ảnh chứng từ + thông tin đơn).
-- [ ] **W3.2** F09 các nút theo trạng thái: xác nhận/từ chối thay chủ (ghi chú bắt buộc), đổi phòng, nhận/trả phòng, không đến; F08 tab Chờ chủ xác nhận (đếm ngược, quá hạn tô đỏ) và tab Nhận/trả hôm nay.
+- [x] **W3.1** **F27** Xác minh thu cọc (trái hàng chờ, phải ảnh chứng từ + thông tin đơn).
+- [x] **W3.2** F09 các nút theo trạng thái: xác nhận/từ chối thay chủ (ghi chú bắt buộc), đổi phòng, nhận/trả phòng, không đến; F08 tab Chờ chủ xác nhận (đếm ngược, quá hạn tô đỏ) và tab Nhận/trả hôm nay.
 - [ ] **W3.3** **F11** Yêu cầu hủy (chỉ loại Hủy), **F20** Duyệt hủy, F09 tab Đổi/hủy; nút QL "Hủy — homestay không phục vụ được".
 - [ ] **W3.4** **F29** tab Hoàn tiền.
 
@@ -260,19 +260,29 @@ Không làm trong kế hoạch này. Giao diện xử lý như cột cuối; b�
 
 ## 6. Theo dõi form
 
-### Rà soát WIN ngày 27/10/2026
+### Chuẩn bị WIN đợt 4 và sửa thao tác chi hoàn
 
-Đã đối chiếu mã và kiểm thử; xem [báo cáo chi tiết](docs/screenshots/logic-audit/RA_SOAT_WORK_PLAN_2026-10-27.md).
-Các ô WIN vừa đánh dấu thêm: W1.0, W2.1, W2.3, W2.4. Không đổi ô MAC.
-Build 0 lỗi/0 cảnh báo; Rules 274 đạt; GUI smoke 74 đạt; hồi quy mới 18 đạt;
-SQL WIN 36 PASS + RESULT PASS + Cleanup PASS trên database tạm.
-80 ca xUnit SQL của MAC chưa chạy (Skip), không tính là PASS.
+[Báo cáo WIN tiếp tục](docs/screenshots/win-next/WIN_NEXT_2026-10-27.md).
+Đã có bảy biểu mẫu nhập đợt 4, kiểm đầu vào và preview không lưu;
+chưa có M4.1 nên W4 vẫn chưa hoàn thành nghiệp vụ và menu thật tiếp tục ẩn.
+F29 đã dùng checkbox rõ ràng, giữ nội dung khi nhập thiếu/sai; 19 ca WIN mới đạt.
+Build WinNext 0 lỗi/0 cảnh báo, hồi quy trước 47/47. SQL M33B vẫn chờ chạy.
+Không đổi ô MAC hoặc đánh dấu xong W4 chỉ vì biểu mẫu mở được.
 
-Bảng form đánh giá theo toàn bộ các đợt của form. F05 chỉ xong phần Nhân viên;
-F18 chỉ nối tab Nhân viên. Form chỉ có bố cục ở preview vẫn ghi Chưa làm
-nghiệp vụ. Các việc nghiệm thu còn thiếu được ghi trong báo cáo; không coi
-chế độ preview là nghiệp vụ đã hoàn thành.
+### Cập nhật WIN sau M3.3B — 27/10/2026
 
+Đã lấy hợp đồng MAC e875b03, nối đủ các thao tác đợt 3.
+[Báo cáo M33B](docs/screenshots/win-completion/WIN_M33B_2026-10-27.md).
+Các báo cáo M33A/logic-audit là lịch sử, không phải tình trạng mới nhất.
+
+Build Release 0 lỗi/0 cảnh báo; Rules 301/301; hồi quy WIN 37/37;
+GUI smoke 74/74. SQL M33B đang chờ bộ thử Windows Administrator trên database tạm.
+Chưa đánh dấu W3.3/W3.4 xong trước khi nghiệm thu SQL mới đạt.
+Lượt M33A trước đó có SQL WIN 63 PASS, xUnit SQL 111/111 và Cleanup PASS.
+
+Chưa hoàn thành toàn bộ WORK_PLAN: W2.5 còn hợp đồng bộ lọc; đợt 4–7 còn
+thiếu dịch vụ MAC; W1 còn bằng chứng kiểm tay; W7.3/W8 còn DPI/Designer và ảnh.
+Không đổi ô MAC. Bảng form tính theo toàn bộ phạm vi, không tính preview là hoàn thành.
 
 | Form | Đợt | Việc WIN | Tình trạng |
 |---|---|---|---|
@@ -285,8 +295,8 @@ chế độ preview là nghiệp vụ đã hoàn thành.
 | F07 Tạo đơn | 2 | W2.4 | Hoàn thành |
 | F08 Danh sách đơn | 2, 3, 5 | W2.5, W3.2, W5.1 | Hoàn thành một phần |
 | F09 Chi tiết đơn | 2, 3 | W2.5, W3.2, W3.3 | Hoàn thành một phần |
-| F10 Ghi nhận thu tiền | 2 | W2.5 | Hoàn thành một phần |
-| F11 Yêu cầu đổi/hủy | 3 | W3.3 (chỉ hủy) | Chưa làm |
+| F10 Ghi nhận thu tiền | 2 | W2.5 | Hoàn thành |
+| F11 Yêu cầu đổi/hủy | 3 | W3.3 (chỉ hủy) | Hoàn thành một phần |
 | F12 Xử lý trùng phòng | — | — | Tạm chưa làm |
 | F13 Khách hàng | 2 | W2.3 | Hoàn thành |
 | F14 Của tôi | 5, 7 | W5.3, W7.2 | Chưa làm |
@@ -295,18 +305,24 @@ chế độ preview là nghiệp vụ đã hoàn thành.
 | F17 | — | — | Bỏ (D9) |
 | F18 Nhân viên & tài khoản | 1, 5 | W1.5, W5.2 | Hoàn thành một phần |
 | F19 Giao việc | 5 | W5.3 | Chưa làm |
-| F20 Duyệt đổi/hủy | 3 | W3.3 (chỉ hủy) | Chưa làm |
+| F20 Duyệt đổi/hủy | 3 | W3.3 (chỉ hủy) | Hoàn thành một phần |
 | F21 Voucher | — | — | Tạm chưa làm |
 | F22 Chủ homestay | 4 | W4.1 | Chưa làm |
 | F23 Hợp đồng | 4 | W4.4 | Chưa làm |
 | F24 Danh mục & cấu hình | 1 | W1.5 | Hoàn thành một phần |
 | F25 Báo cáo | 7 | W7.1 | Chưa làm |
 | F26 Nhật ký hệ thống | 7 | W7.2 | Chưa làm |
-| F27 Xác minh thu cọc | 3 | W3.1 | Chưa làm |
+| F27 Xác minh thu cọc | 3 | W3.1 | Hoàn thành |
 | F28 Sao kê ngân hàng | 6 | W6.2 (nhập tay) | Chưa làm |
-| F29 Hàng chờ chi & cọc bổ sung | 3 | W3.4 (tab Hoàn tiền) | Chưa làm |
+| F29 Hàng chờ chi & cọc bổ sung | 3 | W3.4 (tab Hoàn tiền) | Hoàn thành một phần |
 | F30 Danh sách đối soát | 6 | W6.3 | Chưa làm |
 | F31 Chi tiết đối soát | 6 | W6.3 | Chưa làm |
 | F32 Sổ thu chi & công nợ | 6 | W6.4 | Chưa làm |
 
 Tình trạng dùng đúng ba nhãn của báo cáo: **Hoàn thành / Hoàn thành một phần / Chưa làm** (cộng "Tạm chưa làm", "Bỏ" cho hai loại ở mục 5).
+
+
+WIN — cập nhật lượt nghiệm thu M33B: 67 bước WIN đã PASS, dừng ở nút hủy homestay
+trước khi chạy 131 xUnit SQL; database tạm đã được dọn. Đã tái hiện/sửa lỗi nút F09
+chưa tải dữ liệu nhưng Enabled=true; hồi quy 53/53. Chờ chạy lại bộ Administrator.
+Chi tiết: docs/screenshots/win-next/F09_LOADING_FIX.md. Chưa đánh dấu xong W3.3/W3.4.

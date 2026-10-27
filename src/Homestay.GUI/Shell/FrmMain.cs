@@ -79,7 +79,7 @@ public partial class FrmMain : ScreenForm
         if (gateway is null) roleBox.SelectedIndex = 0;
         else
         {
-            SetMenu(ScreenRegistry.Production(gateway, services).Where(e=>e.Id is not ("F09" or "F10")).ToArray());
+            SetMenu(ScreenRegistry.Production(gateway, services).Where(e=>e.Id is not ("F09" or "F10" or "F11")).ToArray());
             var welcome = new TabPage("Trang chủ");
             welcome.Controls.Add(new Label
             {
@@ -222,10 +222,7 @@ public partial class FrmMain : ScreenForm
         base.OnFormClosing(e);
     }
     private bool jobsBusy;
-    private bool noticesBusy;
-    private int noticesPage=1;
-    private readonly Button previousNotice=new(){Text="Trước",AutoSize=true};
-    private readonly Button nextNotice=new(){Text="Sau",AutoSize=true};
+    private NotificationInbox? inbox;
     private async Task RunJobsAsync() {
         if(services is null||jobsBusy||ending)return;jobsBusy=true;
         try { var n=await services.Jobs.RunOnceAsync(lifetime.Token); if(n>0)services.Logger.Maintenance(n); }
@@ -233,31 +230,19 @@ public partial class FrmMain : ScreenForm
         finally{jobsBusy=false;}
     }
     private void SetupNotifications() {
-        notificationList.DisplayMember=nameof(NotificationItem.Message);
-        var buttons=new FlowLayoutPanel{Dock=DockStyle.Bottom,AutoSize=true};
-        var readAll=new Button{Text="Đọc tất cả",AutoSize=true};
-        buttons.Controls.AddRange([previousNotice,nextNotice,readAll]);notificationSplit.Panel2.Controls.Add(buttons);
-        previousNotice.Click+=async(_,_)=>{if(noticesPage>1)noticesPage--;await RefreshNotificationsAsync();};
-        nextNotice.Click+=async(_,_)=>{noticesPage++;await RefreshNotificationsAsync();};
-        readAll.Click+=async(_,_)=>await ErrorHandler.RunAsync(readAll,async()=>{await services!.Notifications.MarkAllReadAsync(lifetime.Token);await RefreshNotificationsAsync();});
+        notificationSplit.Panel2.Controls.Remove(notificationList);notificationList.Dispose();
+        inbox=new NotificationInbox(
+            (q,ct)=>services!.Notifications.ListAsync(q,ct),
+            ct=>services!.Notifications.CountUnreadAsync(ct),
+            (id,ct)=>services!.Notifications.MarkReadAsync(id,ct),
+            ct=>services!.Notifications.MarkAllReadAsync(ct)){Dock=DockStyle.Fill};
+        inbox.UnreadCountChanged+=count=>notificationsButton.Text="Thông báo ("+count+")";
+        inbox.BookingRequested+=id=>services!.Navigate("F09",id);
+        inbox.PaymentRequested+=_=>{if(services!.Can(Permission.BookingRefundRecord))services.Navigate("F29",null);};
+        notificationSplit.Panel2.Controls.Add(inbox);
         notificationsButton.Click+=async(_,_)=>await RefreshNotificationsAsync();
-        notificationList.DoubleClick+=async(_,_)=>{
-            if(notificationList.SelectedItem is not NotificationItem n)return;
-            try {await services!.Notifications.MarkReadAsync(n.Id,lifetime.Token);
-                if(n.RefType is "Booking" or "Bookings"&&int.TryParse(n.RefId,out var id))services.Navigate("F09",id);
-                await RefreshNotificationsAsync();
-            }catch(Exception e){ErrorHandler.Show(e,this);}
-        };
     }
-    private async Task RefreshNotificationsAsync() {
-        if(services is null||noticesBusy||ending)return;noticesBusy=true;
-        try{
-            var unread=await services.Notifications.CountUnreadAsync(lifetime.Token);
-            var page=await services.Notifications.ListAsync(new(){PageNumber=noticesPage,PageSize=20},lifetime.Token);
-            if(IsDisposed)return;notificationsButton.Text="Thông báo ("+unread+")";
-            notificationList.DataSource=page.Items.ToArray();previousNotice.Enabled=noticesPage>1;nextNotice.Enabled=noticesPage*20<page.TotalCount;
-        }catch(OperationCanceledException){}catch(Exception e){services.Logger.Error(e);}finally{noticesBusy=false;}
-    }
+    private Task RefreshNotificationsAsync()=>ending||IsDisposed||inbox is null?Task.CompletedTask:inbox.RefreshAsync();
     private bool quickSearchBusy;
     private async Task SearchQuickAsync() {
         if(services is null||quickSearchBusy||ending||locked||string.IsNullOrWhiteSpace(quickSearch.Text))return;
@@ -278,9 +263,10 @@ public partial class FrmMain : ScreenForm
     private async void OpenRequested(string id,object? argument) {
         if(services is null||ending||IsDisposed)return;
         try {
-            var key=id+(id is "F09" or "F10"?":"+argument:argument is BookingSearchRequest q?":"+q.Queue+":"+q.OnlyExpiringHolds+":"+q.OnlyOverdueConfirmation+":"+q.AssignedToMeOnly:"");
+            var key=id+(id is "F09" or "F10" or "F11" or "F20"?":"+argument:argument is BookingSearchRequest q?":"+q.Queue+":"+q.OnlyExpiringHolds+":"+q.OnlyOverdueConfirmation+":"+q.AssignedToMeOnly:"");
             if(id=="F13"&&argument is Homestay.DTO.Customers.CustomerItem c)key+=":"+c.Id;
             if(id=="F07"&&argument is Homestay.DTO.Availability.QuoteRequest r)key+=":"+r.RoomTypeId+":"+r.CheckIn+":"+r.CheckOut+":"+r.Guests;
+            if(id=="F07"&&argument is BookingDraftSelection draft)key+=":calendar:"+draft.Quote.RoomTypeId+":"+draft.Quote.CheckIn+":"+draft.Quote.CheckOut+":"+draft.Quote.Guests+":"+draft.PreferredRoomId;
             if(id=="F07"&&argument is Homestay.DTO.Customers.CustomerItem customer)key+=":customer:"+customer.Id;
             var alreadyOpen=tabs.ContainsKey(key);
             OpenScreen(key,()=>id switch {
@@ -288,10 +274,17 @@ public partial class FrmMain : ScreenForm
                 "F08"=>new FrmBookings(services,argument as BookingSearchRequest),
                 "F09"=>new FrmBookingDetail(services,(int)argument!),
                 "F10"=>new FrmReceipt(services,(int)argument!),
+                "F11"=>new FrmCancellation(services,(int)argument!),
                 "F13"=>new FrmCustomers(services,argument as Homestay.DTO.Customers.CustomerItem),
+                "F20"=>new Homestay.GUI.Manager.FrmCancellationApproval(services,argument as int?),
+                "F29"=>new Homestay.GUI.Accountant.FrmRefundQueue(services),
                 _=>throw new NotImplementedException()
             });
             if(id=="F09"&&alreadyOpen&&tabs.TryGetValue(key,out var page)&&page.Controls.OfType<FrmBookingDetail>().FirstOrDefault() is {} detail)await detail.RefreshFromServerAsync();
+            if(alreadyOpen&&tabs.TryGetValue(key,out var existing)){
+                if(existing.Controls.OfType<Homestay.GUI.Manager.FrmCancellationApproval>().FirstOrDefault() is {} approval)await approval.RefreshFromServerAsync();
+                if(existing.Controls.OfType<Homestay.GUI.Accountant.FrmRefundQueue>().FirstOrDefault() is {} refunds)await refunds.RefreshFromServerAsync();
+            }
         }catch(Exception e){ErrorHandler.Show(e,this);}
     }
     private void DisposeRuntime()
