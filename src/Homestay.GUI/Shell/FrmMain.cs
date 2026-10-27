@@ -258,10 +258,13 @@ public partial class FrmMain : ScreenForm
             notificationList.DataSource=page.Items.ToArray();previousNotice.Enabled=noticesPage>1;nextNotice.Enabled=noticesPage*20<page.TotalCount;
         }catch(OperationCanceledException){}catch(Exception e){services.Logger.Error(e);}finally{noticesBusy=false;}
     }
+    private bool quickSearchBusy;
     private async Task SearchQuickAsync() {
-        if(services is null||string.IsNullOrWhiteSpace(quickSearch.Text))return;
+        if(services is null||quickSearchBusy||ending||locked||string.IsNullOrWhiteSpace(quickSearch.Text))return;
+        quickSearchBusy=true;
         try {
             var r=await services.Bookings.QuickSearchAsync(quickSearch.Text,lifetime.Token);
+            if(IsDisposed||ending||locked)return;
             var choices=r.Bookings.Select(b=>new Choice("B:"+b.Id,b.Code+" · "+b.CustomerName+" · "+b.HomestayName))
                 .Concat(r.Customers.Select(c=>new Choice("C:"+c.Id,c.FullName+" · "+c.Phone))).ToArray();
             if(choices.Length==0){MessageBox.Show(this,"Không tìm thấy kết quả.");return;}
@@ -270,6 +273,7 @@ public partial class FrmMain : ScreenForm
             if(key.StartsWith("B:"))OpenRequested("F09",int.Parse(key[2..]));
             else {var c=r.Customers.Single(c=>c.Id==int.Parse(key[2..]));OpenRequested("F13",c);}
         }catch(Exception e){if(!IsDisposed)ErrorHandler.Show(e,this);}
+        finally{quickSearchBusy=false;}
     }
     private async void OpenRequested(string id,object? argument) {
         if(services is null||ending||IsDisposed)return;

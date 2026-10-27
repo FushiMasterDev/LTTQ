@@ -123,3 +123,18 @@ mở đúng đơn từ kết quả đạt. Ctrl+N đã nối Tạo đơn trong c
 Bằng chứng: WIN_DOT2_UI_ACCEPTANCE.txt và WIN_DOT2_REGRESSION.txt cùng thư mục bằng chứng SQL.
 Bản đang chạy là work/w2-app-final; launcher Mo-ban-W2.cmd đã trỏ tới bản này.
 Chưa có ảnh W8 hoặc kiểm toàn bộ DPI/Designer. NV giao lại đơn vẫn chờ lookup từ MAC.
+
+## Rà soát logic ngày 27/10/2026
+
+Đã sửa trạng thái nút sau thao tác, báo giá và tìm khách trả về muộn, đóng form
+khi đang lưu, xuất CSV giữ sắp xếp, đổi SĐT khách chưa có đơn cho Nhân viên,
+F2/Ctrl+F và tìm nhanh chống mở lặp. F09 chỉ bật nút sau khi tải được AllowedActions.
+Build solution 0 lỗi/0 cảnh báo; Rules 274/274; GUI 74/74; hồi quy mới 18/18;
+SQL WIN trên DB tạm 36 PASS + RESULT PASS + Cleanup PASS (không sửa DB chính).
+80 ca SQL xUnit của MAC chưa được chạy trong lượt này vì thiếu biến kết nối DB thử.
+WORK_PLAN đã cập nhật trạng thái form và các ô WIN có bằng chứng.
+Báo cáo đầy đủ: docs/screenshots/logic-audit/RA_SOAT_WORK_PLAN_2026-10-27.md.
+Bộ hồi quy có thể chạy lại: docs/screenshots/logic-audit/checks/GuiAuditChecks.csproj.
+Đợt 3–7 vẫn thiếu hợp đồng/dịch vụ, giao diện chưa tích hợp tiếp tục ẩn.
+Launcher cục bộ Mo-ban-W2.cmd và Mo-ban-da-ra-soat.cmd hiện trỏ tới bản đã rà soát
+trong bin/AuditSolution/bin/Homestay.GUI/release, chỉ mở sau SQL RESULT PASS và Cleanup PASS.

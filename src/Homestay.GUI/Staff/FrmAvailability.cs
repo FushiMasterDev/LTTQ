@@ -32,7 +32,10 @@ public partial class FrmAvailability : ScreenForm
         viewTabs.SelectedIndexChanged+=async(_,_)=>await ReloadAsync();
         grid1.Grid.CellDoubleClick+=(_,e)=>{if(e.RowIndex>=0&&e.ColumnIndex>0&&e.RowIndex<grid1.Grid.Rows.Count){
             var room=calendar[grid1.Query.PageNumber*grid1.Query.PageSize-grid1.Query.PageSize+e.RowIndex];
-            var cell=room.Cells[e.ColumnIndex-1];if(cell.BookingId is int id)services.Navigate("F09",id);
+            var cell=room.Cells[e.ColumnIndex-1];
+            if(cell.BookingId is int id)services.Navigate("F09",id);
+            else if(cell.State==RoomCalendarState.Available&&services.Can(Permission.BookingCreate))
+                services.Navigate("F07",new QuoteRequest(room.RoomTypeId,cell.Date,cell.Date.AddDays(1),(int)filterPanelField3.Value));
         }};
         Shown+=async(_,_)=>await ErrorHandler.RunAsync(searchButton,async()=>{
             filterPanelField0.SetItems((await services.Catalog.ListAreasAsync()).Where(x=>x.IsActive).Select(x=>new Lookup{Id=x.Id,Name=x.Name}));

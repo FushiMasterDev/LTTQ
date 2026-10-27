@@ -121,6 +121,11 @@ public sealed class PagedGrid : UserControl
             "HomestayDesktop", "columns", file + ".json");
         RestoreColumns();
     }
+    public void OpenSelectedDetail()
+    {
+        if(grid.SelectedRows.Count!=1)throw new InvalidDataException("Vui lòng chọn một dòng.");
+        DetailRequested?.Invoke(this,EventArgs.Empty);
+    }
     private void Request(int target)
     {
         if(QueryRequested is null) { ErrorHandler.Pending(FindForm()); return; }

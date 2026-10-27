@@ -11,6 +11,9 @@ namespace Homestay.GUI.Staff;
 public partial class FrmBookingCreate : ScreenForm
 {
     private AppServices? services;
+    private readonly AsyncLoader quoteLoader=new();
+    private readonly AsyncLoader roomLoader=new();
+    private readonly AsyncLoader customerLoader=new();
     private BookingQuote? quote;
     private QuoteRequest? quoteRequest;
     private CustomerItem? customer;
@@ -31,7 +34,7 @@ public partial class FrmBookingCreate : ScreenForm
     public FrmBookingCreate(AppServices services,object? initial=null):this(){
         if(!services.Can(Permission.BookingCreate))throw new ForbiddenException();
         this.services=services;EmployeeUi.Activate(pendingNotice,quoteButton,receiptButton,saveButton);
-        receiptButton.Enabled=false;editorFieldsField0.ReadOnly=true;toolbar.Controls.AddRange([searchRooms,findCustomer,quickButton]);
+        receiptButton.Enabled=saveButton.Enabled=false;editorFieldsField0.ReadOnly=true;toolbar.Controls.AddRange([searchRooms,findCustomer,quickButton]);
         editorFieldsField2.Visible=editorFieldsField2Label.Visible=false;
         editorFieldsField1.Visible=editorFieldsField1Label.Visible=false;
         editorFieldsField5.Value=EmployeeUi.Today.ToDateTime(TimeOnly.MinValue);editorFieldsField6.Value=editorFieldsField5.Value.AddDays(1);
@@ -43,20 +46,27 @@ public partial class FrmBookingCreate : ScreenForm
         findCustomer.Click+=async(_,_)=>await ErrorHandler.RunAsync(findCustomer,async()=>{
             using var d=new FieldsDialog("Tìm khách",new FieldSpec("phone","Số điện thoại",Initial:editorFieldsField0.Text,MaxLength:20));
             if(d.ShowDialog(this)!=DialogResult.OK)return;
-            customer=await services.Customers.FindByPhoneAsync((string)d.Values["phone"]!);quickCustomer=null;
-            if(customer is null){MessageBox.Show(this,"Chưa tìm thấy khách. Chọn Khách mới để nhập hồ sơ.");return;}ShowCustomer();
+            var phone=(string)d.Values["phone"]!;
+            await customerLoader.LoadAsync(ct=>services.Customers.FindByPhoneAsync(phone,ct),found=>{
+                customer=found;quickCustomer=null;
+                if(customer is null){
+                    editorFieldsField0.Text=phone;editorFieldsField8.Clear();editorFieldsField9.Clear();
+                    MessageBox.Show(this,"Chưa tìm thấy khách. Chọn Khách mới để nhập hồ sơ.");return;
+                }
+                ShowCustomer();
+            });
         });
         quickButton.Click+=(_,_)=>{
             using var d=new FieldsDialog("Khách mới",new("name","Họ tên",MaxLength:100),new("phone","SĐT",Initial:editorFieldsField0.Text,MaxLength:20));
             if(d.ShowDialog(this)!=DialogResult.OK)return;
-            customer=null;quickCustomer=new(){FullName=(string)d.Values["name"]!,Phone=(string)d.Values["phone"]!};
+            customerLoader.CancelPending();customer=null;quickCustomer=new(){FullName=(string)d.Values["name"]!,Phone=(string)d.Values["phone"]!};
             editorFieldsField0.Text=quickCustomer.Phone;editorFieldsField8.Text=quickCustomer.FullName;editorFieldsField9.Text=quickCustomer.Phone;
         };
         quoteButton.Click+=async(_,_)=>await ErrorHandler.RunAsync(quoteButton,QuoteAsync);
         saveButton.Click+=async(_,_)=>{await RunMutationAsync(saveButton,CreateAsync);if(created is not null)saveButton.Enabled=false;};
         receiptButton.Click+=(_,_)=>{if(created is not null)services.Navigate("F10",created.Booking.Id);};
-        foreach(var c in new DateTimePicker[]{editorFieldsField5,editorFieldsField6})c.ValueChanged+=(_,_)=>InvalidateQuote();
-        editorFieldsField7.ValueChanged+=(_,_)=>InvalidateQuote();
+        foreach(var c in new DateTimePicker[]{editorFieldsField5,editorFieldsField6})c.ValueChanged+=(_,_)=>StayChanged();
+        editorFieldsField7.ValueChanged+=(_,_)=>StayChanged();
         editorFieldsField3.SelectionChanged+=(_,_)=>InvalidateQuote();
         Shown+=async(_,_)=>await ErrorHandler.RunAsync(searchRooms,async()=>{
             if(initial is CustomerItem x){customer=x;ShowCustomer();}
@@ -66,26 +76,44 @@ public partial class FrmBookingCreate : ScreenForm
     }
     private void ShowCustomer(){editorFieldsField0.Text=customer!.Phone;editorFieldsField8.Text=customer.FullName;editorFieldsField9.Text=customer.Phone;}
     private QuoteRequest Request()=>new(editorFieldsField3.SelectedItem?.Id??throw new BusinessException("Vui lòng chọn loại phòng."),DateOnly.FromDateTime(editorFieldsField5.Value),DateOnly.FromDateTime(editorFieldsField6.Value),(int)editorFieldsField7.Value);
-    private void InvalidateQuote(){quote=null;quoteRequest=null;editorFieldsField4.SetItems([]);saveButton.Enabled=created is null;}
+    private void InvalidateQuote(){
+        if(created is not null)return;
+        quoteLoader.CancelPending();quote=null;quoteRequest=null;editorFieldsField4.SetItems([]);saveButton.Enabled=false;
+        EmployeeUi.Local(nightlyPrices,Array.Empty<object?[]>(),x=>x);
+        foreach(var field in new[]{filterPanelField1,filterPanelField2,filterPanelField3,filterPanelField4,filterPanelField5})field.Clear();
+    }
+    private void StayChanged(){
+        if(created is not null)return;
+        roomLoader.CancelPending();editorFieldsField3.SetItems([]);InvalidateQuote();
+    }
     private async Task SearchRoomsAsync(int? selected=null){
-        var list=await services!.Availability.SearchAsync(new(){CheckIn=DateOnly.FromDateTime(editorFieldsField5.Value),CheckOut=DateOnly.FromDateTime(editorFieldsField6.Value),Guests=(int)editorFieldsField7.Value},lifetime.Token);
-        editorFieldsField3.SetItems(list.Where(x=>x.AvailableRooms>0).Select(x=>new Lookup{Id=x.RoomTypeId,Name=x.HomestayName+" / "+x.RoomTypeName+" — "+EmployeeUi.Money(x.AveragePrice)+"/đêm"}));
-        if(selected.HasValue)editorFieldsField3.SelectId(selected);
+        if(created is not null)return;
+        InvalidateQuote();
+        var request=new AvailabilitySearchRequest{CheckIn=DateOnly.FromDateTime(editorFieldsField5.Value),CheckOut=DateOnly.FromDateTime(editorFieldsField6.Value),Guests=(int)editorFieldsField7.Value};
+        await roomLoader.LoadAsync(ct=>services!.Availability.SearchAsync(request,ct),list=>{
+            if(created is not null)return;
+            editorFieldsField3.SetItems(list.Where(x=>x.AvailableRooms>0).Select(x=>new Lookup{Id=x.RoomTypeId,Name=x.HomestayName+" / "+x.RoomTypeName+" — "+EmployeeUi.Money(x.AveragePrice)+"/đêm"}));
+            if(selected.HasValue)editorFieldsField3.SelectId(selected);
+        });
     }
     private async Task QuoteAsync(){
-        var r=Request();var result=await services!.Bookings.QuoteAsync(r,lifetime.Token);
-        if(IsDisposed)return;quote=result;quoteRequest=r;
+        if(created is not null)return;
+        var r=Request();InvalidateQuote();
+        await quoteLoader.LoadAsync(ct=>services!.Bookings.QuoteAsync(r,ct),result=>{
+        if(created is not null)return;quote=result;quoteRequest=r;saveButton.Enabled=result.AvailableRooms.Count>0;
         EmployeeUi.Local(nightlyPrices,result.Pricing.Nights,n=>[EmployeeUi.Date(n.Date),n.DayType switch{DayType.Holiday=>"Ngày lễ",DayType.Weekend=>"Cuối tuần",_=>"Ngày thường"},EmployeeUi.Money(n.Price)]);
         editorFieldsField4.SetItems(new[]{new Lookup{Id=0,Name="Tự động chọn phòng"}}.Concat(result.AvailableRooms.Select(x=>new Lookup{Id=x.RoomId,Name=x.RoomCode})));editorFieldsField4.SelectId(0);
         filterPanelField1.Text=EmployeeUi.Money(result.Pricing.TotalAmount);filterPanelField2.Text=EmployeeUi.Money(result.Pricing.DepositAmount);filterPanelField3.Text=EmployeeUi.Money(result.AmountDue);
         filterPanelField4.Text=result.RoomType.CancellationPolicy.Name;
         filterPanelField5.Text=result.Bank.BankName+" / "+result.Bank.AccountNo+" / "+result.Bank.AccountName;
         quoteTabs.SelectedTab=quoteTab;
+        });
     }
     private async Task CreateAsync(){
         if(created is not null)return;
         if(quote is null||quoteRequest!=Request())throw new BusinessException("Vui lòng xem lại báo giá cho thông tin hiện tại.");
         if(customer is null&&quickCustomer is null)throw new BusinessException("Vui lòng tìm khách theo SĐT hoặc nhập Khách mới.");
+        customerLoader.CancelPending();
         var r=quoteRequest!;
         created=await services!.Bookings.CreateAsync(new(){CustomerId=customer?.Id,QuickCustomer=customer is null?quickCustomer:null,
             RoomTypeId=r.RoomTypeId,RoomId=editorFieldsField4.SelectedItem?.Id is >0?editorFieldsField4.SelectedItem.Id:null,
@@ -105,6 +133,7 @@ public partial class FrmBookingCreate : ScreenForm
     {
         if(lifetimeDisposed)return;
         lifetimeDisposed=true;
+        quoteLoader.Dispose();roomLoader.Dispose();customerLoader.Dispose();
         try{lifetime.Cancel();}
         finally{lifetime.Dispose();}
     }

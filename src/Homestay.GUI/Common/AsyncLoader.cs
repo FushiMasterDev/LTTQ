@@ -24,11 +24,15 @@ public sealed class AsyncLoader : IDisposable
         catch (Exception) when (disposed || request != Volatile.Read(ref version)) { }
         finally { if (ReferenceEquals(current, source)) current = null; }
     }
-    public void Dispose()
+    public void CancelPending()
     {
-        disposed = true;
         Interlocked.Increment(ref version);
         current?.Cancel();
         current = null;
+    }
+    public void Dispose()
+    {
+        disposed = true;
+        CancelPending();
     }
 }

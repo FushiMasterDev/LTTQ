@@ -25,7 +25,7 @@ public partial class FrmBookings : ScreenForm
         filterPanelField5.Items.AddRange(Enum.GetValues<BookingStatus>().Select(s=>new Choice(s,EmployeeUi.Status(s))).ToArray());filterPanelField5.SelectedIndex=0;
         viewTabs.SelectedIndex=Array.IndexOf(queues,basis.Queue) is var i&&i>=0?i:7;
         foreach(var g in Grids){EmployeeUi.BookingColumns(g);g.SetPreferenceIdentity(services.Session!.UserId.ToString(),"F08."+Array.IndexOf(Grids,g));g.QueryRequested+=async(_,e)=>await LoadAsync(e.Request);g.DetailRequested+=(_,_)=>detailButton.PerformClick();
-            g.ExportFilteredAsync=async ct=>{var all=new List<BookingListItem>();var q=Search(new(){PageNumber=1,PageSize=100});
+            g.ExportFilteredAsync=async ct=>{var all=new List<BookingListItem>();var q=Search(g.Query with{PageNumber=1,PageSize=100});
                 while(true){var p=await services.Bookings.ListAsync(q,ct);all.AddRange(p.Items);if(p.Items.Count==0||all.Count>=p.TotalCount)break;q=q with{Page=q.Page with{PageNumber=q.Page.PageNumber+1}};}
                 return EmployeeUi.Table(g,all.Select(EmployeeUi.BookingRow));};
         }

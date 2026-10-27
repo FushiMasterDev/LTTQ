@@ -90,7 +90,7 @@ Mục tiêu: đăng nhập được bằng tài khoản mẫu của 3 vai trò, 
 
 **WIN**
 
-- [ ] **W1.0** Cài môi trường (mục 2) — làm ngay, không phụ thuộc.
+- [x] **W1.0** Cài môi trường (mục 2) — làm ngay, không phụ thuộc.
 - [ ] **W1.1** ⛳ (sau M1.3 bước tạo solution) **Thêm project GUI trong Visual Studio 2026** vào `HomestayDesktop.sln` có sẵn (MAC đã tạo DTO, DAL, BLL và 2 project test):
   - Mở `HomestayDesktop.sln` → Add → New Project → mẫu **Windows Forms App**, tên `Homestay.GUI`, đặt tại `src/Homestay.GUI`, `net10.0-windows`.
   - Thêm `<EnableWindowsTargeting>true</EnableWindowsTargeting>` vào `Homestay.GUI.csproj` để MAC build được.
@@ -124,10 +124,10 @@ Mục tiêu: tra phòng → tạo đơn → ghi nhận thu cọc chạy trọn. 
 
 **WIN** (vẽ form ngay; nối dữ liệu sau M2.1)
 
-- [ ] **W2.1** **F05** Tổng quan — thẻ của Nhân viên (thẻ QL/KT làm ở đợt 5, 6).
+- [x] **W2.1** **F05** Tổng quan — thẻ của Nhân viên (thẻ QL/KT làm ở đợt 5, 6).
 - [ ] **W2.2** **F06** tab Tra phòng, tab Lịch (khóa phòng làm ở đợt 4).
-- [ ] **W2.3** **F13** Khách hàng.
-- [ ] **W2.4** **F07** Tạo đơn (chưa có chọn voucher); sau khi tạo hiện mã đơn, số tiền, thông tin chuyển khoản, đồng hồ 15 phút.
+- [x] **W2.3** **F13** Khách hàng.
+- [x] **W2.4** **F07** Tạo đơn (chưa có chọn voucher); sau khi tạo hiện mã đơn, số tiền, thông tin chuyển khoản, đồng hồ 15 phút.
 - [ ] **W2.5** **F08** Danh sách đơn (các tab của Nhân viên), **F09** Chi tiết đơn (tab Thông tin, Giá, Thu chi, Lịch sử), **F10** Ghi nhận thu tiền.
 - [ ] **W2.6** F03: ô tìm nhanh `Ctrl+K`, chuông và khung thông báo.
 
@@ -260,32 +260,46 @@ Không làm trong kế hoạch này. Giao diện xử lý như cột cuối; b�
 
 ## 6. Theo dõi form
 
+### Rà soát WIN ngày 27/10/2026
+
+Đã đối chiếu mã và kiểm thử; xem [báo cáo chi tiết](docs/screenshots/logic-audit/RA_SOAT_WORK_PLAN_2026-10-27.md).
+Các ô WIN vừa đánh dấu thêm: W1.0, W2.1, W2.3, W2.4. Không đổi ô MAC.
+Build 0 lỗi/0 cảnh báo; Rules 274 đạt; GUI smoke 74 đạt; hồi quy mới 18 đạt;
+SQL WIN 36 PASS + RESULT PASS + Cleanup PASS trên database tạm.
+80 ca xUnit SQL của MAC chưa chạy (Skip), không tính là PASS.
+
+Bảng form đánh giá theo toàn bộ các đợt của form. F05 chỉ xong phần Nhân viên;
+F18 chỉ nối tab Nhân viên. Form chỉ có bố cục ở preview vẫn ghi Chưa làm
+nghiệp vụ. Các việc nghiệm thu còn thiếu được ghi trong báo cáo; không coi
+chế độ preview là nghiệp vụ đã hoàn thành.
+
+
 | Form | Đợt | Việc WIN | Tình trạng |
 |---|---|---|---|
-| F01 Đăng nhập | 1 | W1.4 | Chưa làm |
-| F02 Đổi mật khẩu | 1 | W1.4 | Chưa làm |
-| F03 Cửa sổ chính | 1, 2 | W1.4, W2.6 | Chưa làm |
-| F04 Cấu hình kết nối | 1 | W1.2 | Chưa làm |
-| F05 Tổng quan | 2, 5, 6 | W2.1, W5.1, W6.1 | Chưa làm |
-| F06 Tra phòng & lịch phòng | 2, 4 | W2.2, W4.5 | Chưa làm |
-| F07 Tạo đơn | 2 | W2.4 | Chưa làm |
-| F08 Danh sách đơn | 2, 3, 5 | W2.5, W3.2, W5.1 | Chưa làm |
-| F09 Chi tiết đơn | 2, 3 | W2.5, W3.2, W3.3 | Chưa làm |
-| F10 Ghi nhận thu tiền | 2 | W2.5 | Chưa làm |
+| F01 Đăng nhập | 1 | W1.4 | Hoàn thành |
+| F02 Đổi mật khẩu | 1 | W1.4 | Hoàn thành |
+| F03 Cửa sổ chính | 1, 2 | W1.4, W2.6 | Hoàn thành một phần |
+| F04 Cấu hình kết nối | 1 | W1.2 | Hoàn thành một phần |
+| F05 Tổng quan | 2, 5, 6 | W2.1, W5.1, W6.1 | Hoàn thành một phần |
+| F06 Tra phòng & lịch phòng | 2, 4 | W2.2, W4.5 | Hoàn thành một phần |
+| F07 Tạo đơn | 2 | W2.4 | Hoàn thành |
+| F08 Danh sách đơn | 2, 3, 5 | W2.5, W3.2, W5.1 | Hoàn thành một phần |
+| F09 Chi tiết đơn | 2, 3 | W2.5, W3.2, W3.3 | Hoàn thành một phần |
+| F10 Ghi nhận thu tiền | 2 | W2.5 | Hoàn thành một phần |
 | F11 Yêu cầu đổi/hủy | 3 | W3.3 (chỉ hủy) | Chưa làm |
 | F12 Xử lý trùng phòng | — | — | Tạm chưa làm |
-| F13 Khách hàng | 2 | W2.3 | Chưa làm |
+| F13 Khách hàng | 2 | W2.3 | Hoàn thành |
 | F14 Của tôi | 5, 7 | W5.3, W7.2 | Chưa làm |
 | F15 Danh sách homestay | 4 | W4.2 | Chưa làm |
 | F16 Hồ sơ homestay | 4 | W4.3 | Chưa làm |
 | F17 | — | — | Bỏ (D9) |
-| F18 Nhân viên & tài khoản | 1, 5 | W1.5, W5.2 | Chưa làm |
+| F18 Nhân viên & tài khoản | 1, 5 | W1.5, W5.2 | Hoàn thành một phần |
 | F19 Giao việc | 5 | W5.3 | Chưa làm |
 | F20 Duyệt đổi/hủy | 3 | W3.3 (chỉ hủy) | Chưa làm |
 | F21 Voucher | — | — | Tạm chưa làm |
 | F22 Chủ homestay | 4 | W4.1 | Chưa làm |
 | F23 Hợp đồng | 4 | W4.4 | Chưa làm |
-| F24 Danh mục & cấu hình | 1 | W1.5 | Chưa làm |
+| F24 Danh mục & cấu hình | 1 | W1.5 | Hoàn thành một phần |
 | F25 Báo cáo | 7 | W7.1 | Chưa làm |
 | F26 Nhật ký hệ thống | 7 | W7.2 | Chưa làm |
 | F27 Xác minh thu cọc | 3 | W3.1 | Chưa làm |

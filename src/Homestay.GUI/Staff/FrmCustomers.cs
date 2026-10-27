@@ -19,7 +19,7 @@ public partial class FrmCustomers : ScreenForm
         this.services=services;if(initial is not null)filterPanelField0.Text=initial.Phone;EmployeeUi.Activate(pendingNotice,reloadButton,addButton,editButton,bookButton);
         addButton.Enabled=editButton.Enabled=services.Session!.Position!=Position.Accountant;
         bookButton.Enabled=services.Can(Permission.BookingCreate);
-        toolbar.Controls.Add(phoneButton);phoneButton.Enabled=services.Can(Permission.CustomerPhoneChange);
+        toolbar.Controls.Add(phoneButton);phoneButton.Enabled=services.Session.Position!=Position.Accountant;
         grid0.SetColumns("Mã","Họ tên","SĐT","Email","CCCD / hộ chiếu","Ghi chú");
         grid0.SetSortKeys("Id","FullName","Phone","Email",null,null);grid1.SetColumns("Mã đơn","Homestay","Ngày nhận","Ngày trả","Trạng thái","Thanh toán");
         grid0.SetPreferenceIdentity(services.Session.UserId.ToString(),"F13");
@@ -30,7 +30,7 @@ public partial class FrmCustomers : ScreenForm
         addButton.Click+=async(_,_)=>await RunMutationAsync(addButton,()=>EditAsync(true),ReloadAsync);
         editButton.Click+=async(_,_)=>await RunMutationAsync(editButton,()=>EditAsync(false),ReloadAsync);
         phoneButton.Click+=async(_,_)=>await RunMutationAsync(phoneButton,async()=>{
-            var x=Selected();using var d=new FieldsDialog("Đổi SĐT",new FieldSpec("phone","SĐT mới",Initial:x.Phone,MaxLength:20));
+            var x=Selected();if(x.HasBookings&&!services.Can(Permission.CustomerPhoneChange))throw new BusinessException("Khách đã có đơn. Chỉ Quản lý được đổi số điện thoại.");using var d=new FieldsDialog("Đổi SĐT",new FieldSpec("phone","SĐT mới",Initial:x.Phone,MaxLength:20));
             if(d.ShowDialog(this)==DialogResult.OK)await services.Customers.ChangePhoneAsync(new(x.Id,(string)d.Values["phone"]!,x.RowVer));
         },ReloadAsync);
         bookButton.Click+=(_,_)=>{try{services.Navigate("F07",Selected());}catch(Exception e){ErrorHandler.Show(e,this);}};

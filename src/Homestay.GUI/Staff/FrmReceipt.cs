@@ -26,7 +26,7 @@ public partial class FrmReceipt : ScreenForm
             if(new FileInfo(d.FileName).Length>Homestay.BLL.Rules.ReceiptRules.MaxEvidenceBytes)throw new BusinessException("Ảnh chứng từ tối đa 5 MB.");
             evidence=await File.ReadAllBytesAsync(d.FileName);evidenceName=Path.GetFileName(d.FileName);editorFieldsField7.Text=evidenceName;
         });
-        saveButton.Click+=async(_,_)=>await RunMutationAsync(saveButton,SaveAsync,LoadAsync);
+        saveButton.Click+=async(_,_)=>await RunMutationAsync(saveButton,SaveAsync,LoadAsync,()=>booking?.AllowedActions.Contains(BookingAction.RecordDeposit)==true);
         Shown+=async(_,_)=>await ErrorHandler.RunAsync(fileButton,LoadAsync);
     }
     private async Task LoadAsync(){
@@ -46,6 +46,6 @@ public partial class FrmReceipt : ScreenForm
             TransferContent=editorFieldsField6.Text,EvidenceBytes=evidence,EvidenceFileName=evidenceName,RowVer=booking.Booking.RowVer});
         filterPanelField2.Text="Chờ xác minh — "+result.VoucherNo;saveButton.Enabled=false;editorFields.Enabled=false;fileButton.Enabled=false;
         ShowSuccess("Đã ghi phiếu "+result.VoucherNo+". Đơn chờ kế toán xác minh."+(result.Warning is null?"":"\n"+result.Warning),"Ghi nhận thu cọc");
-        services.Navigate("F09",bookingId);Close();
+        services.Navigate("F09",bookingId);CloseAfterMutation();
     }
 }

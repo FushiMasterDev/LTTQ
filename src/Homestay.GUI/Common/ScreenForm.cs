@@ -28,14 +28,36 @@ public class ScreenForm : Form
             Wire(control.Controls);
         }
     }
-    protected Task RunMutationAsync(Button trigger, Func<Task> action, Func<Task>? reload = null) =>
-        ErrorHandler.RunAsync(trigger, async () =>
+    private bool mutationBusy, allowMutationClose;
+    protected async Task RunMutationAsync(Button trigger, Func<Task> action, Func<Task>? reload = null,
+        Func<bool>? enabledAfter = null)
+    {
+        if (mutationBusy) return;
+        mutationBusy = true;
+        try
         {
-            var body = Controls.Count == 0 ? this : Controls[0];
-            body.Enabled = false;
-            try { await action(); }
-            finally { if (!body.IsDisposed) body.Enabled = true; }
-        }, reload);
+            await ErrorHandler.RunAsync(trigger, async () =>
+            {
+                var body = Controls.Count == 0 ? this : Controls[0];
+                body.Enabled = false;
+                try { await action(); }
+                finally { if (!body.IsDisposed) body.Enabled = true; }
+            }, reload, enabledAfter);
+        }
+        finally { mutationBusy = false; }
+    }
+    protected override void OnFormClosing(FormClosingEventArgs e)
+    {
+        // Do not cancel a write while SQL may already have committed it.
+        if (mutationBusy && !allowMutationClose && e.CloseReason == CloseReason.UserClosing) e.Cancel = true;
+        base.OnFormClosing(e);
+    }
+    protected void CloseAfterMutation()
+    {
+        allowMutationClose = true;
+        try { Close(); }
+        finally { allowMutationClose = false; }
+    }
 
     protected override bool ProcessDialogKey(Keys keyData)
     {
@@ -46,7 +68,15 @@ public class ScreenForm : Form
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
         if (keyData == Keys.Escape) { Close(); return true; }
-        if (keyData is Keys.F5 or Keys.F2)
+        if (keyData == (Keys.Control | Keys.F) && FindControl(Controls,"filterPanelField0") is TextBox filter && filter.Visible)
+        { filter.Focus();filter.SelectAll();return true; }
+        if (keyData == Keys.F2)
+        {
+            var grids=Descendants(Controls).OfType<PagedGrid>().Where(g=>g.Visible).ToArray();
+            var grid=grids.FirstOrDefault(g=>g.ContainsFocus)??grids.FirstOrDefault();
+            if(grid is not null){try{grid.OpenSelectedDetail();}catch(Exception e){ErrorHandler.Show(e,this);}return true;}
+        }
+        if (keyData == Keys.F5)
         { ErrorHandler.Pending(this); return true; }
         if (keyData == (Keys.Control | Keys.Enter))
         {
@@ -55,6 +85,17 @@ public class ScreenForm : Form
         }
         return base.ProcessCmdKey(ref msg, keyData);
     }
+    private static IEnumerable<Control> Descendants(Control.ControlCollection controls)
+    {
+        foreach(Control control in controls)
+        {
+            if(control is Form)continue;
+            yield return control;
+            foreach(var child in Descendants(control.Controls))yield return child;
+        }
+    }
+    private static Control? FindControl(Control.ControlCollection controls,string name)=>
+        Descendants(controls).FirstOrDefault(c=>c.Name==name);
     private static Button? FindButton(Control.ControlCollection controls, string name)
     {
         foreach(Control control in controls)

@@ -1,0 +1,75 @@
+PASS Normal login does not force password change
+PASS Cancel required password change logs out before main
+PASS Required password change reads committed session before continuing
+PASS Required change cannot be bypassed by closing dialog OK
+PASS Main rejects temporary password session
+PASS Production menu uses BLL Authorizer for Staff
+PASS Production hides and rejects future screens for Staff
+PASS Production menu uses BLL Authorizer for Accountant
+PASS Production hides and rejects future screens for Accountant
+PASS Production menu uses BLL Authorizer for Manager
+PASS Production hides and rejects future screens for Manager
+PASS Idle tracker measures configured inactivity interval
+PASS Keyboard activity resets idle timer without swallowing input
+PASS Grid requests logical sort key instead of displayed column name
+PASS Unsupported server sort column makes no request
+PASS Editor returns typed dates and role values
+PASS Temporary password display is read only
+PASS Closing temporary password dialog clears textbox
+PASS BLL errors are translated for users
+PASS Startup BLL errors propagate instead of accepting schema
+PASS Accent-free Vietnamese search
+PASS Vietnamese currency
+PASS UTC to Vietnam date rollover
+PASS Late request cannot overwrite newer result
+PASS Disposed form discards pending results
+PASS CSV UTF-8 BOM
+PASS CSV quoted delimiters and line breaks
+PASS CSV neutralizes spreadsheet formulas
+PASS DPAPI LocalMachine round trip
+PASS Encrypted file contains no plaintext password
+PASS Log retention deletes expired dated logs
+PASS Error ID logged without exception message / secrets
+PASS Exact schema versions accepted
+PASS Unknown schema version rejected
+PASS Missing schema version rejected
+PASS PrintDocument paginates and terminates for 60 rows
+PASS 29 planned forms, excluding deferred F12/F21 and removed F17
+PASS Open and render FrmAudit at DPI 144
+PASS Open and render FrmAvailability at DPI 144
+PASS Open and render FrmBankStatement at DPI 144
+PASS Open and render FrmBookingCreate at DPI 144
+PASS Open and render FrmBookingDetail at DPI 144
+PASS Open and render FrmBookings at DPI 144
+PASS Open and render FrmCancellation at DPI 144
+PASS Open and render FrmCancellationApproval at DPI 144
+PASS Open and render FrmCashBook at DPI 144
+PASS Open and render FrmCatalog at DPI 144
+PASS Open and render FrmChangePassword at DPI 144
+PASS Open and render FrmConnection at DPI 144
+PASS Open and render FrmContracts at DPI 144
+PASS Open and render FrmCustomers at DPI 144
+PASS Open and render FrmDashboard at DPI 144
+PASS Open and render FrmDepositVerification at DPI 144
+PASS Open and render FrmHomestayProfile at DPI 144
+PASS Open and render FrmHomestays at DPI 144
+PASS Open and render FrmLogin at DPI 144
+PASS Open and render FrmMain at DPI 144
+PASS Open and render FrmMyWork at DPI 144
+PASS Open and render FrmOwners at DPI 144
+PASS Open and render FrmReceipt at DPI 144
+PASS Open and render FrmRefundQueue at DPI 144
+PASS Open and render FrmReports at DPI 144
+PASS Open and render FrmSettlementDetail at DPI 144
+PASS Open and render FrmSettlements at DPI 144
+PASS Open and render FrmStaff at DPI 144
+PASS Open and render FrmTasks at DPI 144
+PASS Reopening a screen reuses its tab
+PASS Audience change disposes previous audience tabs
+PASS SearchPicker filters real Lookup by accent-free name
+PASS Paging requests next database page with size 50
+PASS DTO page size 10 resets page to one
+PASS DTO page size 20 resets page to one
+PASS DTO page size 50 resets page to one
+PASS DTO page size 100 resets page to one
+NOTE Render smoke is not real DPI/Designer/SQL acceptance. W7.3/W8 remain incomplete.

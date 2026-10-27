@@ -20,7 +20,7 @@ public static class ErrorHandler
         MessageBox.Show(owner, MessageFor(exception), "Fuji Homestay", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         if (exception is SessionExpiredException) SessionExpired?.Invoke();
     }
-    public static async Task RunAsync(Control trigger, Func<Task> action, Func<Task>? reload = null)
+    public static async Task RunAsync(Control trigger, Func<Task> action, Func<Task>? reload = null, Func<bool>? enabledAfter = null)
     {
         if (!trigger.Enabled) return;
         trigger.Enabled = false;
@@ -36,7 +36,7 @@ public static class ErrorHandler
             Show(exception, trigger.FindForm());
         }
         catch (Exception exception) { if (!trigger.IsDisposed) Show(exception, trigger.FindForm()); }
-        finally { if (!trigger.IsDisposed) trigger.Enabled = true; }
+        finally { if (!trigger.IsDisposed) trigger.Enabled = enabledAfter?.Invoke() ?? true; }
     }
     public static void Pending(IWin32Window? owner = null) => Show(new NotImplementedException(), owner);
 }
