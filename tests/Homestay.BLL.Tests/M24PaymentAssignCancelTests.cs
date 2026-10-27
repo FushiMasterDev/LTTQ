@@ -110,7 +110,9 @@ public sealed class M24PaymentAssignCancelTests
         var before = await Now(c);
         var result = await c.Payments.RecordReceiptAsync(request with { Method = PaymentMethod.Cash, TransferredAtUtc = default });
         var after = await Now(c);
-        Assert.InRange(result.Receipt.TransferredAtUtc!.Value, before, after);
+        // TransferredAt is persisted as datetime2(3), so SQL may truncate sub-millisecond
+        // precision from the timestamp sampled immediately after `before`.
+        Assert.InRange(result.Receipt.TransferredAtUtc!.Value, before.AddMilliseconds(-1), after.AddMilliseconds(1));
         Assert.Equal(result.Receipt.RecordedAtUtc, result.Receipt.TransferredAtUtc); Assert.Null(result.Receipt.EvidenceFileId);
         Assert.False(result.IsInsufficient); Assert.Null(result.Warning);
     }

@@ -117,7 +117,7 @@ public partial class FrmMain : ScreenForm
     }
     public void OpenScreen(string key, Func<Form> create)
     {
-        if (gateway is not null && !ScreenRegistry.Production(gateway,services).Any(s=>s.Id==key.Split(':')[0]))
+        if (gateway is not null && !(key.Split(':')[0]=="F31"&&gateway.Can(Permission.SettlementView)) && !ScreenRegistry.Production(gateway,services).Any(s=>s.Id==key.Split(':')[0]))
             throw new ForbiddenException();
         if (tabs.TryGetValue(key, out var existing)) { workspaceTabs.SelectedTab = existing; return; }
         var form = create();
@@ -263,7 +263,7 @@ public partial class FrmMain : ScreenForm
     private async void OpenRequested(string id,object? argument) {
         if(services is null||ending||IsDisposed)return;
         try {
-            var key=id+(id is "F09" or "F10" or "F11" or "F20"?":"+argument:argument is BookingSearchRequest q?":"+q.Queue+":"+q.OnlyExpiringHolds+":"+q.OnlyOverdueConfirmation+":"+q.AssignedToMeOnly:"");
+            var key=id+(id is "F09" or "F10" or "F11" or "F20" or "F31"?":"+argument:argument is BookingSearchRequest q?":"+q.Queue+":"+q.OnlyExpiringHolds+":"+q.OnlyOverdueConfirmation+":"+q.AssignedToMeOnly:"");
             if(id=="F13"&&argument is Homestay.DTO.Customers.CustomerItem c)key+=":"+c.Id;
             if(id=="F07"&&argument is Homestay.DTO.Availability.QuoteRequest r)key+=":"+r.RoomTypeId+":"+r.CheckIn+":"+r.CheckOut+":"+r.Guests;
             if(id=="F07"&&argument is BookingDraftSelection draft)key+=":calendar:"+draft.Quote.RoomTypeId+":"+draft.Quote.CheckIn+":"+draft.Quote.CheckOut+":"+draft.Quote.Guests+":"+draft.PreferredRoomId;
@@ -278,12 +278,16 @@ public partial class FrmMain : ScreenForm
                 "F13"=>new FrmCustomers(services,argument as Homestay.DTO.Customers.CustomerItem),
                 "F20"=>new Homestay.GUI.Manager.FrmCancellationApproval(services,argument as int?),
                 "F29"=>new Homestay.GUI.Accountant.FrmRefundQueue(services),
+                "F30"=>new Homestay.GUI.Accountant.FrmSettlements(services),
+                "F31"=>new Homestay.GUI.Accountant.FrmSettlementDetail(services,(int)argument!),
+                "F32"=>new Homestay.GUI.Accountant.FrmCashBook(services),
                 _=>throw new NotImplementedException()
             });
             if(id=="F09"&&alreadyOpen&&tabs.TryGetValue(key,out var page)&&page.Controls.OfType<FrmBookingDetail>().FirstOrDefault() is {} detail)await detail.RefreshFromServerAsync();
             if(alreadyOpen&&tabs.TryGetValue(key,out var existing)){
                 if(existing.Controls.OfType<Homestay.GUI.Manager.FrmCancellationApproval>().FirstOrDefault() is {} approval)await approval.RefreshFromServerAsync();
                 if(existing.Controls.OfType<Homestay.GUI.Accountant.FrmRefundQueue>().FirstOrDefault() is {} refunds)await refunds.RefreshFromServerAsync();
+                if(existing.Controls.OfType<Homestay.GUI.Accountant.FrmSettlementDetail>().FirstOrDefault() is {} settlement)await settlement.RefreshFromServerAsync();
             }
         }catch(Exception e){ErrorHandler.Show(e,this);}
     }

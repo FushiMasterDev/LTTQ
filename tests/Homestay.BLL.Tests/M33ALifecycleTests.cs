@@ -151,7 +151,8 @@ public sealed class M33ALifecycleTests
             var fresh = await c.Bookings.GetAsync(id);
             if (n < max)
             {
-                Assert.InRange(result.HoldExpiresAtUtc, before.AddMinutes(minutes), after.AddMinutes(minutes));
+                // HoldExpiresAt is datetime2(3); allow one millisecond for SQL precision truncation.
+                Assert.InRange(result.HoldExpiresAtUtc, before.AddMinutes(minutes).AddMilliseconds(-1), after.AddMinutes(minutes).AddMilliseconds(1));
                 Assert.Contains(BookingAction.RecordDeposit, fresh.AllowedActions);
             }
             else Assert.Empty(fresh.AllowedActions);

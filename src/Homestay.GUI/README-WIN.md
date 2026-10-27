@@ -8,11 +8,14 @@ Chế độ này không tạo phiên, không kết nối SQL và không ghi nghi
 
 Đã tích hợp hợp đồng MAC tới e875b03: tra phòng/lịch, khách, tạo đơn/thu cọc,
 thông báo, giao lại, xác minh cọc, xác nhận/đổi phòng/nhận trả phòng, hủy/duyệt hủy/chi hoàn.
+W2.5/W3.3/W3.4 đã nối, gồm lọc F08 theo phạm vi ở SQL. Build SDK 10 Release
+0 lỗi/0 cảnh báo; Rules 310/310. Nghiệm thu SQL M33B end-to-end vẫn chờ vì phiên
+này không có HOMESTAY_TEST_CONNECTION và script Windows Administrator không nằm trong repo.
 F07 tự tìm lại loại phòng khi đổi ngày/số khách; F09 khóa nút trong lúc tải dữ liệu;
 F29 giữ nội dung khi thiếu xác nhận hoặc nhập sai. Biểu mẫu đợt 4 mới ở preview,
 chưa nối dữ liệu thật và không tính là nghiệp vụ hoàn thành.
 
-Build solution 0 lỗi/0 cảnh báo. Hồi quy WIN mới nhất 53/53, kiểm biểu mẫu/chi hoàn
+Build solution 0 lỗi/0 cảnh báo. Hồi quy WIN trước cập nhật bộ lọc F08 53/53, kiểm biểu mẫu/chi hoàn
 19/19, GUI smoke 74/74. Lượt SQL M33B trên Windows đạt 67 bước WIN rồi dừng do
 bộ thử bấm nút F09 trước khi tải xong; đã sửa và có hồi quy, chưa có kết quả SQL chạy lại.
 131 xUnit SQL chưa chạy tới trong lượt này. Lượt M33A trước đó đạt 111/111 SQL.
@@ -40,7 +43,7 @@ Không có SqlConnection, câu SQL, command hay lời gọi repository trong GUI
 | W1.3 | Control dùng chung hoàn thành. PagedGrid có khóa sắp xếp logic cho service, bỏ cột không hỗ trợ. |
 | W1.4 | Đã nối F01/AuthService, F02/SessionService, F03/Authorizer.Can. Bắt buộc đổi mật khẩu tạm trước khi mở chính; hủy đổi thì logout. Heartbeat 60 giây, khóa sau Session.IdleMinutes, mở khóa, logout, hết phiên về đăng nhập. Đợt 1 đã kiểm F02/F18/F24; phạm vi đợt 2 hiện được bật tập trung ở ScreenRegistry. Bộ thử dịch vụ ba vai trò đã đạt trên DB tạm (RESULT PASS, Cleanup PASS). Giao diện Quản lý, menu, tái sử dụng tab và đăng xuất về F01 đã kiểm đạt; Nhân viên/Kế toán đã kiểm đúng menu, vai trò/khu vực và đăng xuất về F01; còn các ca ngoại lệ. |
 | W1.5 | F18 nối tìm kiếm/phân trang/sắp xếp qua StaffService, xem hồ sơ, tạo NV, khóa/mở, reset và hiện mật khẩu tạm một lần. Xuất toàn bộ bộ lọc qua các trang service; không xuất mật khẩu. F24 nối 6 tab CatalogService, editor khu vực/danh mục/ngày lễ/chính sách/tham số. Gửi giá trị gốc/RowVer để BLL kiểm đồng thời, reload khi xung đột; không tự gửi lại thao tác ghi. Dịch vụ F18/F24 đã đạt trên SQL thật ở DB tạm; giao diện Quản lý đã kiểm đọc/tìm nhân viên và đủ sáu tab danh mục. Chưa nghiệm thu thao tác ghi bằng GUI. |
-| W2–W6 | Đợt 2 đã nối F05/F06/F07/F08/F09/F10/F13 và F03 tìm nhanh/thông báo/job, SQL 37 PASS. Đợt 3–6 còn bố cục. Xem giới hạn bên dưới. |
+| W2–W6 | Đợt 2–3 đã nối F05/F06/F07/F08/F09/F10/F11/F13/F20/F27/F29 và F03 tìm nhanh/thông báo/job. Đợt 4–6 chưa được nghiệm thu theo WORK_PLAN. Xem giới hạn bên dưới. |
 | W7.3 | Có help/phím tắt, khóa theo idle, lưu cột theo UserId F18/F24. Chưa kiểm đủ DPI100/125/150%, màn1366×768, mở mọi form trong VS Designer. |
 | W8 | Chưa có ảnh luồng nghiệp vụ trên dữ liệu mẫu, không dùng ảnh layout-preview thay nghiệm thu. |
 

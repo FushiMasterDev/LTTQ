@@ -128,7 +128,7 @@ Mục tiêu: tra phòng → tạo đơn → ghi nhận thu cọc chạy trọn. 
 - [x] **W2.2** **F06** tab Tra phòng, tab Lịch (khóa phòng làm ở đợt 4).
 - [x] **W2.3** **F13** Khách hàng.
 - [x] **W2.4** **F07** Tạo đơn (chưa có chọn voucher); sau khi tạo hiện mã đơn, số tiền, thông tin chuyển khoản, đồng hồ 15 phút.
-- [ ] **W2.5** **F08** Danh sách đơn (các tab của Nhân viên), **F09** Chi tiết đơn (tab Thông tin, Giá, Thu chi, Lịch sử), **F10** Ghi nhận thu tiền.
+- [x] **W2.5** **F08** Danh sách đơn (các tab của Nhân viên), **F09** Chi tiết đơn (tab Thông tin, Giá, Thu chi, Lịch sử), **F10** Ghi nhận thu tiền; F08 có lọc khu vực/homestay/người phụ trách ở SQL trong phạm vi quyền.
 - [x] **W2.6** F03: ô tìm nhanh `Ctrl+K`, chuông và khung thông báo.
 
 Xong đợt khi: từ S02 bấm Đặt → tạo đơn → ghi nhận thu → đơn "Chờ xác minh cọc"; đơn không ghi nhận quá 15 phút thành "Hết hạn" và phòng trống lại.
@@ -147,8 +147,8 @@ Mục tiêu: một đơn đi trọn tạo → cọc → xác minh → xác nhậ
 
 - [x] **W3.1** **F27** Xác minh thu cọc (trái hàng chờ, phải ảnh chứng từ + thông tin đơn).
 - [x] **W3.2** F09 các nút theo trạng thái: xác nhận/từ chối thay chủ (ghi chú bắt buộc), đổi phòng, nhận/trả phòng, không đến; F08 tab Chờ chủ xác nhận (đếm ngược, quá hạn tô đỏ) và tab Nhận/trả hôm nay.
-- [ ] **W3.3** **F11** Yêu cầu hủy (chỉ loại Hủy), **F20** Duyệt hủy, F09 tab Đổi/hủy; nút QL "Hủy — homestay không phục vụ được".
-- [ ] **W3.4** **F29** tab Hoàn tiền.
+- [x] **W3.3** **F11** Yêu cầu hủy (chỉ loại Hủy), **F20** Duyệt hủy, F09 tab Đổi/hủy; nút QL "Hủy — homestay không phục vụ được".
+- [x] **W3.4** **F29** tab Hoàn tiền.
 
 ### Đợt 4 — Hồ sơ homestay (spec G1 + G4)
 
@@ -271,16 +271,19 @@ Không đổi ô MAC hoặc đánh dấu xong W4 chỉ vì biểu mẫu mở đ�
 
 ### Cập nhật WIN sau M3.3B — 27/10/2026
 
-Đã lấy hợp đồng MAC e875b03, nối đủ các thao tác đợt 3.
+Đã lấy hợp đồng MAC e875b03, nối đủ các thao tác đợt 3. W2.5 bổ sung lookup
+khu vực/homestay/người phụ trách theo BookingView và lọc ở SQL; không lọc một trang
+ở client.
 [Báo cáo M33B](docs/screenshots/win-completion/WIN_M33B_2026-10-27.md).
 Các báo cáo M33A/logic-audit là lịch sử, không phải tình trạng mới nhất.
 
-Build Release 0 lỗi/0 cảnh báo; Rules 301/301; hồi quy WIN 37/37;
-GUI smoke 74/74. SQL M33B đang chờ bộ thử Windows Administrator trên database tạm.
-Chưa đánh dấu W3.3/W3.4 xong trước khi nghiệm thu SQL mới đạt.
+Build Release 0 lỗi/0 cảnh báo; Rules 310/310; hồi quy WIN trước thay đổi lọc F08
+53/53; GUI smoke 74/74. SQL M33B vẫn chờ bộ thử Windows Administrator trên database tạm;
+bản chạy hiện tại không có HOMESTAY_TEST_CONNECTION và script Administrator không có
+trong repository, nên chưa xác nhận SQL end-to-end sau sửa giao diện.
 Lượt M33A trước đó có SQL WIN 63 PASS, xUnit SQL 111/111 và Cleanup PASS.
 
-Chưa hoàn thành toàn bộ WORK_PLAN: W2.5 còn hợp đồng bộ lọc; đợt 4–7 còn
+Chưa hoàn thành toàn bộ WORK_PLAN: đợt 4–7 còn
 thiếu dịch vụ MAC; W1 còn bằng chứng kiểm tay; W7.3/W8 còn DPI/Designer và ảnh.
 Không đổi ô MAC. Bảng form tính theo toàn bộ phạm vi, không tính preview là hoàn thành.
 
@@ -294,9 +297,9 @@ Không đổi ô MAC. Bảng form tính theo toàn bộ phạm vi, không tính 
 | F06 Tra phòng & lịch phòng | 2, 4 | W2.2, W4.5 | Hoàn thành một phần |
 | F07 Tạo đơn | 2 | W2.4 | Hoàn thành |
 | F08 Danh sách đơn | 2, 3, 5 | W2.5, W3.2, W5.1 | Hoàn thành một phần |
-| F09 Chi tiết đơn | 2, 3 | W2.5, W3.2, W3.3 | Hoàn thành một phần |
+| F09 Chi tiết đơn | 2, 3 | W2.5, W3.2, W3.3 | Hoàn thành |
 | F10 Ghi nhận thu tiền | 2 | W2.5 | Hoàn thành |
-| F11 Yêu cầu đổi/hủy | 3 | W3.3 (chỉ hủy) | Hoàn thành một phần |
+| F11 Yêu cầu đổi/hủy | 3 | W3.3 (chỉ hủy) | Hoàn thành |
 | F12 Xử lý trùng phòng | — | — | Tạm chưa làm |
 | F13 Khách hàng | 2 | W2.3 | Hoàn thành |
 | F14 Của tôi | 5, 7 | W5.3, W7.2 | Chưa làm |
@@ -305,7 +308,7 @@ Không đổi ô MAC. Bảng form tính theo toàn bộ phạm vi, không tính 
 | F17 | — | — | Bỏ (D9) |
 | F18 Nhân viên & tài khoản | 1, 5 | W1.5, W5.2 | Hoàn thành một phần |
 | F19 Giao việc | 5 | W5.3 | Chưa làm |
-| F20 Duyệt đổi/hủy | 3 | W3.3 (chỉ hủy) | Hoàn thành một phần |
+| F20 Duyệt đổi/hủy | 3 | W3.3 (chỉ hủy) | Hoàn thành |
 | F21 Voucher | — | — | Tạm chưa làm |
 | F22 Chủ homestay | 4 | W4.1 | Chưa làm |
 | F23 Hợp đồng | 4 | W4.4 | Chưa làm |
@@ -314,7 +317,7 @@ Không đổi ô MAC. Bảng form tính theo toàn bộ phạm vi, không tính 
 | F26 Nhật ký hệ thống | 7 | W7.2 | Chưa làm |
 | F27 Xác minh thu cọc | 3 | W3.1 | Hoàn thành |
 | F28 Sao kê ngân hàng | 6 | W6.2 (nhập tay) | Chưa làm |
-| F29 Hàng chờ chi & cọc bổ sung | 3 | W3.4 (tab Hoàn tiền) | Hoàn thành một phần |
+| F29 Hàng chờ chi & cọc bổ sung | 3 | W3.4 (tab Hoàn tiền) | Hoàn thành |
 | F30 Danh sách đối soát | 6 | W6.3 | Chưa làm |
 | F31 Chi tiết đối soát | 6 | W6.3 | Chưa làm |
 | F32 Sổ thu chi & công nợ | 6 | W6.4 | Chưa làm |
@@ -322,7 +325,7 @@ Không đổi ô MAC. Bảng form tính theo toàn bộ phạm vi, không tính 
 Tình trạng dùng đúng ba nhãn của báo cáo: **Hoàn thành / Hoàn thành một phần / Chưa làm** (cộng "Tạm chưa làm", "Bỏ" cho hai loại ở mục 5).
 
 
-WIN — cập nhật lượt nghiệm thu M33B: 67 bước WIN đã PASS, dừng ở nút hủy homestay
-trước khi chạy 131 xUnit SQL; database tạm đã được dọn. Đã tái hiện/sửa lỗi nút F09
-chưa tải dữ liệu nhưng Enabled=true; hồi quy 53/53. Chờ chạy lại bộ Administrator.
-Chi tiết: docs/screenshots/win-next/F09_LOADING_FIX.md. Chưa đánh dấu xong W3.3/W3.4.
+WIN — lượt trước đã đạt 67 bước rồi dừng ở thao tác hủy homestay; database tạm đã
+được dọn. Đã sửa trạng thái Enabled ban đầu ở F09; hồi quy sau sửa 53/53.
+W2.5/W3.3/W3.4 đã được nối và hoàn thành ở mã; nghiệm thu SQL M33B trên Windows
+Administrator vẫn đang chờ. Chi tiết: docs/screenshots/win-next/F09_LOADING_FIX.md.

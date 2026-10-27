@@ -12,7 +12,6 @@ public partial class FrmBookings : ScreenForm
     private readonly AsyncLoader loader=new();
     private readonly AsyncLoader actionLoader=new();
     private IReadOnlyList<BookingAction> selectionActions=[];
-    private readonly TextBox customerNameFilter=new(){Dock=DockStyle.Top,Name="customerNameFilter"};
     private readonly Button clearFilters=new(){Text="Xóa lọc",AutoSize=true};
     private readonly Label filterSummary=new(){AutoSize=true,Padding=new Padding(4,8,4,4)};
     private readonly System.Diagnostics.Stopwatch serverWatch=new();
@@ -20,6 +19,7 @@ public partial class FrmBookings : ScreenForm
     private System.Windows.Forms.Timer? deadlineTimer;
     private IReadOnlyList<BookingListItem> rows=[];
     private BookingSearchRequest basis=new();
+    private bool initializingFilters=true;
     private readonly BookingQueue[] queues=[BookingQueue.Mine,BookingQueue.Unassigned,BookingQueue.AwaitingPayment,BookingQueue.DepositVerification,BookingQueue.OwnerConfirmation,BookingQueue.ArrivalsToday,BookingQueue.DeparturesToday,BookingQueue.All,BookingQueue.Upcoming,BookingQueue.InHouse,BookingQueue.OpenChangeRequests];
     private readonly PagedGrid upcomingGrid=new(),inHouseGrid=new(),changesGrid=new();
     private PagedGrid[] Grids=>[grid0,grid1,grid2,grid3,grid4,grid5,grid6,grid7,upcomingGrid,inHouseGrid,changesGrid];
@@ -27,19 +27,15 @@ public partial class FrmBookings : ScreenForm
     public FrmBookings(){InitializeComponent();HelpText="Tìm mã đơn hoặc SĐT đầy đủ để tra toàn hệ thống. Chi tiết ngoài phạm vi chỉ được xem. BLL kiểm lại quyền và phiên khi ghi.";Disposed+=(_,_)=>{loader.Dispose();actionLoader.Dispose();upcomingGrid.Dispose();inHouseGrid.Dispose();changesGrid.Dispose();};}
     public FrmBookings(AppServices services,BookingSearchRequest? request=null):this(){
         this.services=services;basis=request??new();
-        filterPanelField0.Text=basis.Code??basis.Phone??basis.Page.SearchText??"";
-        customerNameFilter.Text=basis.CustomerName??"";
+        filterPanelField0.Text=basis.Code??basis.Phone??basis.Page.SearchText??basis.CustomerName??"";
         basis=basis with{Code=null,Phone=null,CustomerName=null};
-        var nameRow=filterPanel.GetRow(filterPanelField1);
-        filterPanel.Controls.Remove(filterPanelField1);filterPanelField1.Dispose();
-        filterPanel.Controls.Add(customerNameFilter,0,nameRow);filterPanelField1Label.Text="Tên khách";
         toolbar.Controls.AddRange([clearFilters,filterSummary]);
         EmployeeUi.Activate(pendingNotice,reloadButton,detailButton,claimButton,assignButton);tab7.Text="Tất cả";
         foreach(var item in new[]{("Sắp đến",upcomingGrid),("Đang ở",inHouseGrid),("Yêu cầu đang mở",changesGrid)}){
             var tab=new TabPage(item.Item1){Padding=new Padding(8)};item.Item2.Dock=DockStyle.Fill;tab.Controls.Add(item.Item2);viewTabs.TabPages.Add(tab);
         }
         viewTabs.Multiline=true;
-        foreach(var c in new Control[]{filterPanelField2,filterPanelField2Label,filterPanelField6,filterPanelField6Label})c.Visible=false;
+        filterPanelField1Label.Text="Khu vực";filterPanelField2Label.Text="Homestay";filterPanelField6Label.Text="Người phụ trách";
         filterPanelField3.ShowCheckBox=filterPanelField4.ShowCheckBox=true;filterPanelField3.Checked=filterPanelField4.Checked=false;
         filterPanelField5.Items.Clear();filterPanelField5.DisplayMember=nameof(Choice.Label);filterPanelField5.Items.Add(new Choice(null,"Tất cả"));
         filterPanelField5.Items.AddRange(Enum.GetValues<BookingStatus>().Select(s=>new Choice(s,EmployeeUi.Status(s))).ToArray());filterPanelField5.SelectedIndex=0;
@@ -58,13 +54,16 @@ public partial class FrmBookings : ScreenForm
                 return EmployeeUi.Table(g,all.Select(EmployeeUi.BookingRow));};
         }
         reloadButton.Click+=async(_,_)=>await LoadAsync(Current.Query with{PageNumber=1});
+        filterPanelField1.SelectionChanged+=async(_,_)=>{if(!initializingFilters)await ReloadLookupsAndBookingsAsync(filterPanelField1.SelectedItem?.Id,null,null);};
+        filterPanelField2.SelectionChanged+=async(_,_)=>{if(!initializingFilters)await ReloadLookupsAndBookingsAsync(filterPanelField1.SelectedItem?.Id,filterPanelField2.SelectedItem?.Id,null);};
+        filterPanelField6.SelectionChanged+=async(_,_)=>{if(!initializingFilters)await LoadAsync(Current.Query with{PageNumber=1});};
         viewTabs.SelectedIndexChanged+=async(_,_)=>{basis=basis with{OnlyExpiringHolds=false,OnlyOverdueConfirmation=false,AssignedToMeOnly=false};await LoadAsync(Current.Query with{PageNumber=1});};
         detailButton.Click+=(_,_)=>{try{services.Navigate("F09",Selected().Id);}catch(Exception e){ErrorHandler.Show(e,this);}};
         claimButton.Enabled=assignButton.Enabled=false;assignButton.Visible=services.Can(Permission.BookingAssign);
         clearFilters.Click+=async(_,_)=>{
-            basis=new(){Queue=queues[viewTabs.SelectedIndex]};filterPanelField0.Clear();customerNameFilter.Clear();
+            basis=new(){Queue=queues[viewTabs.SelectedIndex]};filterPanelField0.Clear();
             filterPanelField3.Checked=filterPanelField4.Checked=false;filterPanelField5.SelectedIndex=0;
-            await LoadAsync(Current.Query with{PageNumber=1});
+            await ReloadLookupsAndBookingsAsync(null,null,null);
         };
         deadlineTimer=new(components!){Interval=1000};
         deadlineTimer.Tick+=(_,_)=>{if(!IsDisposed&&Current.Grid.Columns.Count>10)Current.Grid.InvalidateColumn(10);};
@@ -73,7 +72,7 @@ public partial class FrmBookings : ScreenForm
         assignButton.Click+=async(_,_)=>await RunMutationAsync(assignButton,async()=>{
             await EmployeeUi.ReassignAsync(services,Selected(),this);await ReloadAsync();
         },ReloadAsync,()=>selectionActions.Contains(BookingAction.Reassign)&&services.Can(Permission.BookingAssign));
-        Shown+=async(_,_)=>await ReloadAsync();
+        Shown+=async(_,_)=>await ReloadLookupsAndBookingsAsync(basis.AreaId,basis.HomestayId,basis.AssignedEmployeeId);
     }
     private async Task RefreshSelectionActionsAsync(){
         actionLoader.CancelPending();selectionActions=[];claimButton.Enabled=assignButton.Enabled=false;
@@ -88,9 +87,20 @@ public partial class FrmBookings : ScreenForm
     }
     private BookingListItem Selected()=>rows[EmployeeUi.Selected(Current)];
     private BookingSearchRequest Search(PageRequest q)=>basis with{Page=q with{SearchText=filterPanelField0.Text},Queue=queues[viewTabs.SelectedIndex],
-        Status=(filterPanelField5.SelectedItem as Choice)?.Value as BookingStatus?,CustomerName=string.IsNullOrWhiteSpace(customerNameFilter.Text)?null:customerNameFilter.Text.Trim(),
+        AreaId=filterPanelField1.SelectedItem?.Id,HomestayId=filterPanelField2.SelectedItem?.Id,AssignedEmployeeId=filterPanelField6.SelectedItem?.Id,
+        Status=(filterPanelField5.SelectedItem as Choice)?.Value as BookingStatus?,CustomerName=null,
         CheckInFrom=filterPanelField3.Checked?DateOnly.FromDateTime(filterPanelField3.Value):null,CheckInTo=filterPanelField4.Checked?DateOnly.FromDateTime(filterPanelField4.Value):null};
     private Task ReloadAsync()=>LoadAsync(Current.Query);
+    private async Task ReloadLookupsAndBookingsAsync(int? areaId,int? homestayId,int? assigneeId){
+        initializingFilters=true;
+        try{
+            var areas=await services!.Bookings.ListFilterAreasAsync();filterPanelField1.SetItems(areas);filterPanelField1.SelectId(areaId);
+            var homes=await services.Bookings.ListFilterHomestaysAsync(areaId);filterPanelField2.SetItems(homes);filterPanelField2.SelectId(homestayId);
+            var assignees=await services.Bookings.ListFilterAssigneesAsync(areaId,homestayId);filterPanelField6.SetItems(assignees);filterPanelField6.SelectId(assigneeId);
+        }catch(Exception e){if(!IsDisposed)ErrorHandler.Show(e,this);}
+        finally{initializingFilters=false;}
+        await LoadAsync(Current.Query with{PageNumber=1});
+    }
     private async Task LoadAsync(PageRequest q){
         var g=Current;var request=Search(q);actionLoader.CancelPending();selectionActions=[];claimButton.Enabled=assignButton.Enabled=false;
         filterSummary.Text=request.OnlyExpiringHolds?"Giữ phòng sắp hết hạn":request.OnlyOverdueConfirmation?"Chờ chủ quá hạn":"";
@@ -98,5 +108,5 @@ public partial class FrmBookings : ScreenForm
         try{await loader.LoadAsync(async ct=>{var result=await services!.Bookings.ListAsync(request,ct);var now=await services.ServerNowAsync(ct);return (Result:result,Now:now);},loaded=>{var p=loaded.Result;serverAnchor=loaded.Now;serverWatch.Restart();rows=p.Items;g.SetPage(p,EmployeeUi.BookingRow);foreach(DataGridViewRow row in g.Grid.Rows){var x=p.Items[row.Index];if(x.IsConfirmationOverdue)row.DefaultCellStyle.BackColor=Color.MistyRose;}});}
         catch(Exception e){if(!IsDisposed)ErrorHandler.Show(e,this);}
     }
-    protected override bool ProcessCmdKey(ref Message msg,Keys k){if(services is not null&&(k==Keys.F5||k==Keys.Enter&&(filterPanelField0.Focused||customerNameFilter.Focused))){reloadButton.PerformClick();return true;}return base.ProcessCmdKey(ref msg,k);}
+    protected override bool ProcessCmdKey(ref Message msg,Keys k){if(services is not null&&(k==Keys.F5||k==Keys.Enter&&filterPanelField0.Focused)){reloadButton.PerformClick();return true;}return base.ProcessCmdKey(ref msg,k);}
 }

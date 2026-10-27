@@ -19,7 +19,8 @@ public sealed class AppServices : IAccountGateway
     private sealed record Runtime(CurrentSession Current, Authorizer Authorizer, AuthService Auth,
         SessionService Sessions, StaffService Staff, CatalogService Catalog, SettingsProvider Settings,
         AvailabilityService Availability, CustomerService Customers, BookingService Bookings,
-        PaymentService Payments, NotificationService Notifications, FileService Files, JobRunner Jobs, DbClock Clock, ChangeRequestService Changes);
+        PaymentService Payments, NotificationService Notifications, FileService Files, JobRunner Jobs, DbClock Clock, ChangeRequestService Changes,
+        AccountingService Accounting, SettlementService Settlements);
     private Runtime? runtime;
     private Runtime Ready => runtime ?? throw new InvalidOperationException("Chưa khởi tạo kết nối ứng dụng.");
     public AppSettings Settings { get; }
@@ -40,6 +41,8 @@ public sealed class AppServices : IAccountGateway
     public FileService Files => Ready.Files;
     public JobRunner Jobs => Ready.Jobs;
     public ChangeRequestService Changes => Ready.Changes;
+    public AccountingService Accounting => Ready.Accounting;
+    public SettlementService Settlements => Ready.Settlements;
     public Task<DateTime> ServerNowAsync(CancellationToken token=default)=>Ready.Clock.GetUtcNowAsync(token);
     public event Action<string, object?>? NavigationRequested;
     public void Navigate(string screen, object? argument = null) => NavigationRequested?.Invoke(screen, argument);
@@ -119,7 +122,9 @@ public sealed class AppServices : IAccountGateway
             new NotificationService(current,factory,writes,notifications,clock),
             new FileService(authorizer,factory,evidence),
             new JobRunner(factory,clock,expiryRepository,new HoldExpiry(expiryRepository,audit,MachineName)),clock,
-            new ChangeRequestService(authorizer,current,scope,factory,new ChangeRequestRepository(),bookings));
+            new ChangeRequestService(authorizer,current,scope,factory,new ChangeRequestRepository(),bookings),
+            new AccountingService(authorizer,current,factory,writes,new FinanceRepository(),bookingRepository,bookings,clock,settings,audit,MachineName),
+            new SettlementService(authorizer,current,factory,writes,new SettlementRepository(),clock,settings,audit,MachineName));
     }
     public bool Can(Permission permission) => Session is not null && Ready.Authorizer.Can(permission);
     public Task<SessionInfo> LoginAsync(LoginRequest request, CancellationToken token = default) => Ready.Auth.LoginAsync(request, token);
