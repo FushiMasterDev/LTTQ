@@ -5,9 +5,12 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Vị trí của loại phòng/phòng cần ghi (thuộc homestay nào) để kiểm tra phạm vi.</summary>
 public sealed record RoomWriteLocation(int HomestayId, int RoomTypeId, int? RoomId);
+/// <summary>Thông tin xung đột khi khóa phòng: trùng với đơn nào hoặc lịch khóa nào.</summary>
 public sealed record RoomBlockConflict(string? BookingCode, int? RoomBlockId);
 
+/// <summary>Truy vấn ghi phòng: loại phòng, phòng, bật/tắt, bảng giá và lịch khóa phòng.</summary>
 public sealed partial class RoomRepository
 {
     // Resolve IDs without taking child locks before the parent. Relations cannot be moved by a writer.

@@ -9,6 +9,7 @@ using Homestay.DTO.Homestays;
 using Microsoft.Data.SqlClient;
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử M4.1: các hàm đọc chủ nhà, homestay, hợp đồng, phòng khớp dữ liệu mẫu.</summary>
 [Collection("M23 SQL")]
 public sealed class M41ContractReadTests
 {

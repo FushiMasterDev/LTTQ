@@ -1,5 +1,6 @@
 namespace Homestay.BLL.Infrastructure;
 
+/// <summary>Danh sách các quyền thao tác trong hệ thống, dùng để phân quyền theo chức vụ.</summary>
 public enum Permission
 {
     /// <summary>Đăng nhập, đổi mật khẩu của mình</summary>
@@ -128,6 +129,7 @@ public enum Permission
     RefundAccountEdit,
 }
 
+/// <summary>Mức truy cập của một quyền: không có, chỉ dữ liệu của mình/khu vực mình, hoặc toàn bộ.</summary>
 public enum AccessLevel
 {
     None, All, InScope, DraftOnly, OnBehalfOfOwner, OnBehalfOfOwnerInScope, ReadOnly, Own, FinancialTables

@@ -2,6 +2,7 @@ using Homestay.BLL.Infrastructure;
 using Homestay.DTO.Common;
 namespace Homestay.BLL.Services;
 
+/// <summary>Phần bộ lọc của dịch vụ đặt phòng: lấy danh sách homestay, khu vực, người phụ trách để đổ vào ô lọc.</summary>
 public sealed partial class BookingService
 {
     private ScopeSql FilterHomestayScope()

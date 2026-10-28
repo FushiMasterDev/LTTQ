@@ -3,6 +3,7 @@ using Homestay.GUI.Infrastructure;
 
 namespace Homestay.GUI.Shell;
 
+/// <summary>Phần điều hướng của màn hình chính: các nút menu bên trái và mở màn hình tương ứng.</summary>
 public partial class FrmMain
 {
     private void InitializeNavigation()

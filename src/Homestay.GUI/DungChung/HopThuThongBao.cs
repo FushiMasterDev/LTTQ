@@ -5,6 +5,7 @@ using Homestay.GUI.Infrastructure;
 
 namespace Homestay.GUI.Common;
 
+/// <summary>Hộp thư thông báo trên màn hình chính: đếm chưa đọc, xem, bấm để mở đơn/phiếu liên quan.</summary>
 public sealed class NotificationInbox : UserControl
 {
     private const int PageSize=20;

@@ -2,6 +2,7 @@ using Homestay.BLL.Infrastructure;
 
 namespace Homestay.GUI.Infrastructure;
 
+/// <summary>Xử lý lỗi tập trung cho giao diện: ghi log, hiện thông báo dễ hiểu, xử lý khi phiên hết hạn.</summary>
 public static class ErrorHandler
 {
     public static FileLogger? Logger { get; set; }

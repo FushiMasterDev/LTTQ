@@ -4,6 +4,7 @@ using Homestay.GUI.Infrastructure;
 namespace Homestay.GUI.Common;
 
 // Only shared presentation behavior lives here; business rules remain in BLL.
+/// <summary>Form gốc cho mọi màn hình: áp giao diện chung và dòng hướng dẫn sử dụng.</summary>
 public class ScreenForm : Form
 {
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]

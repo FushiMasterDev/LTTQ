@@ -10,6 +10,7 @@ using Homestay.DAL.Infrastructure;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử M2.1: tìm phòng trống, báo giá, khách hàng, thông báo với CSDL thật.</summary>
 public sealed class M21ServiceTests
 {
     private static AvailabilitySearchRequest Search(M21Data d) => new() { AreaId = d.AreaId, CheckIn = M21Data.CheckIn, CheckOut = M21Data.CheckOut, Guests = 2 };

@@ -5,6 +5,7 @@ using Homestay.DTO.Files;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ tập tin: đọc ảnh chứng từ thanh toán, ảnh và giấy tờ homestay theo quyền xem.</summary>
 public sealed class FileService(Authorizer authorizer, ConnectionFactory factory, EvidenceRepository repository, DataScope? dataScope = null)
 {
     // Trả byte; GUI chọn lưu/mở tệp cục bộ. Không mở ứng dụng hay tạo tệp từ BLL.

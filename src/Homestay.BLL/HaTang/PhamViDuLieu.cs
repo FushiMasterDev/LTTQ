@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.BLL.Infrastructure;
 
+/// <summary>Điều kiện SQL kèm tham số để lọc dữ liệu theo phạm vi của người dùng.</summary>
 public sealed record ScopeSql(string Condition, IReadOnlyList<SqlParameter> Parameters)
 {
     public void AddParametersTo(SqlCommand command)
@@ -14,6 +15,7 @@ public sealed record ScopeSql(string Condition, IReadOnlyList<SqlParameter> Para
     }
 }
 
+/// <summary>Giới hạn dữ liệu theo phạm vi người dùng (khu vực phụ trách, đơn mình phụ trách) và kiểm tra có được sửa bản ghi không.</summary>
 public sealed class DataScope(ICurrentSession currentSession)
 {
     // Preserve the M4.1 OwnerService constructor while sharing its authenticated session with the real write runner.

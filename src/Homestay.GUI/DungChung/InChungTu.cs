@@ -3,9 +3,11 @@ using System.Drawing.Printing;
 namespace Homestay.GUI.Common;
 
 // Presentation-only input. Amounts, totals and amount-in-words must come from BLL.
+/// <summary>Nội dung một chứng từ cần in: tiêu đề, các dòng thông tin, bảng, chữ ký.</summary>
 public sealed record PrintContent(string Title, IReadOnlyList<string> Information,
     IReadOnlyList<string> Headers, IReadOnlyList<string[]> Rows, string Footer);
 
+/// <summary>Tạo và xem trước bản in chứng từ (phiếu thu, phiếu chi, bảng đối soát).</summary>
 public static class DocumentPrinter
 {
     public static PrintDocument Create(PrintContent content)

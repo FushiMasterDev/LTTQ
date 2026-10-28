@@ -1,5 +1,6 @@
 namespace Homestay.GUI.Common;
 
+/// <summary>Hộp thoại hiển thị thông tin bí mật một lần (ví dụ mật khẩu tạm) để người dùng sao chép.</summary>
 public partial class SecretDialog : ScreenForm
 {
     public SecretDialog()

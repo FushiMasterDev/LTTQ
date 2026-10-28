@@ -6,6 +6,7 @@ using Homestay.GUI.Staff;
 
 namespace Homestay.GUI.Accountant;
 
+/// <summary>Màn hình danh sách đối soát theo kỳ: lập bảng nháp cho homestay và mở chi tiết.</summary>
 public partial class FrmSettlements : ScreenForm
 {
     private readonly AsyncLoader loader=new(); private AppServices? services; private IReadOnlyList<SettlementListItem> rows=[];

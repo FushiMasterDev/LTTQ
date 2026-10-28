@@ -4,6 +4,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử ma trận phân quyền khớp đặc tả và mọi quyền đều được khai báo rõ.</summary>
 public sealed class AuthorizationTests
 {
     // Mỗi dòng kiểm tra đủ NV/QL/KT; bao phủ cả sáu bảng của spec.

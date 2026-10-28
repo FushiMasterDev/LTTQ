@@ -4,6 +4,7 @@ using Homestay.GUI.Staff;
 
 namespace Homestay.GUI.Accountant;
 
+/// <summary>Tạo hộp thoại nhập thông tin đã chuyển hoàn tiền (mã giao dịch, thời điểm, chứng từ).</summary>
 public static class RefundPaymentEditor
 {
     public static FieldsDialog Create(PaymentQueueItem item,DateTime serverNowUtc){

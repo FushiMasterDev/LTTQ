@@ -4,8 +4,10 @@ using Homestay.DAL.Infrastructure;
 
 namespace Homestay.BLL.Infrastructure;
 
+/// <summary>Một dòng nhật ký hệ thống: ai làm gì, trên bảng/bản ghi nào, giá trị cũ và mới, ghi chú, máy nào.</summary>
 public sealed record AuditEntry(int? UserId, string ActionCode, string TableName, string RecordId, object? OldValues, object? NewValues, string? Note, string MachineName);
 
+/// <summary>Ghi nhật ký hệ thống (AuditLogs) cho mọi thao tác thay đổi dữ liệu quan trọng.</summary>
 public sealed class AuditWriter
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };

@@ -10,6 +10,7 @@ using System.Globalization;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ yêu cầu thay đổi (chủ yếu là yêu cầu hủy đơn): xem trước, gửi yêu cầu, quản lý duyệt hoặc từ chối.</summary>
 public sealed class ChangeRequestService(Authorizer authorizer, ICurrentSession currentSession, DataScope dataScope,
     ConnectionFactory factory, ChangeRequestRepository repository, BookingService bookings)
 {

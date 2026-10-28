@@ -7,6 +7,7 @@ using Homestay.DTO.Payments;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử máy trạng thái đơn đặt phòng: mọi cặp trạng thái và người thực hiện đúng đặc tả.</summary>
 public sealed class M24RulesTests
 {
     // Independent transcription of spec 7.2, including creation and internal-only rollback after applying changes.

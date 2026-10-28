@@ -10,6 +10,7 @@ using Homestay.DTO.Staff;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ nhân viên: danh sách, chi tiết, tạo tài khoản, khóa/mở khóa và đặt lại mật khẩu.</summary>
 public sealed partial class StaffService(Authorizer authorizer, ICurrentSession currentSession, ConnectionFactory factory, WriteOperationRunner writes,
     StaffRepository repository, AuthRepository accounts, DbClock clock, PasswordHasher hasher, AuditWriter audit, string machineName)
 {

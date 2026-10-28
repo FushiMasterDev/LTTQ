@@ -4,6 +4,7 @@ using Homestay.DAL.Infrastructure;
 using Homestay.DAL.Repositories;
 namespace Homestay.BLL.Tests;
 
+/// <summary>Bộ khởi tạo các dịch vụ tin đăng (chủ nhà, homestay, phòng, hợp đồng) cho kiểm thử.</summary>
 internal sealed class M41TestClient
 {
     public M21TestClient Base { get; } = new();

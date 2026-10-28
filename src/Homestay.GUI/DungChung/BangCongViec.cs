@@ -4,7 +4,9 @@ using Homestay.DTO.Enums;
 using Homestay.DTO.Tasks;
 using Homestay.GUI.Staff;
 namespace Homestay.GUI.Common;
+/// <summary>Điều kiện mở bảng công việc: lọc theo đơn hoặc chỉ việc quá hạn.</summary>
 public sealed record TaskBoardSelection(int? BookingId=null,bool OnlyOverdue=false);
+/// <summary>Màn hình bảng công việc dùng chung: xem, tạo, bắt đầu, hoàn thành, hủy việc.</summary>
 internal sealed class WorkTaskBoard:ScreenForm
 {
     private readonly AppServices services;private readonly bool manager;private readonly PagedGrid grid=new(){Dock=DockStyle.Fill};private readonly TextBox search=new(){Width=230,PlaceholderText="Tìm tiêu đề / mô tả / mã đơn"};private readonly ComboBox status=new(){DropDownStyle=ComboBoxStyle.DropDownList,Width=160};private readonly CheckBox overdue=new(){Text="Chỉ quá hạn",AutoSize=true};

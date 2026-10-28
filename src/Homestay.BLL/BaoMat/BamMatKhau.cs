@@ -3,8 +3,10 @@ using System.Security.Cryptography;
 
 namespace Homestay.BLL.Security;
 
+/// <summary>Kết quả kiểm tra mật khẩu: đúng hay sai và có cần băm lại theo thông số mới không.</summary>
 public readonly record struct PasswordVerificationResult(bool IsValid, bool NeedsRehash);
 
+/// <summary>Băm và kiểm tra mật khẩu (PBKDF2 có muối), đồng thời kiểm tra mật khẩu mới có đủ mạnh theo chính sách không.</summary>
 public sealed class PasswordHasher
 {
     public const int Iterations = 600_000;

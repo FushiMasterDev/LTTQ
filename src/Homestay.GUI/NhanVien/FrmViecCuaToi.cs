@@ -2,6 +2,7 @@ using Homestay.GUI.Common;
 
 namespace Homestay.GUI.Staff;
 
+/// <summary>Màn hình việc của tôi: các công việc được giao cho người đang đăng nhập.</summary>
 public partial class FrmMyWork : ScreenForm
 {
     public FrmMyWork()

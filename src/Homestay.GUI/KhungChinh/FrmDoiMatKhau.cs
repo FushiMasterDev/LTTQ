@@ -6,6 +6,7 @@ using Homestay.GUI.Workflow;
 
 namespace Homestay.GUI.Shell;
 
+/// <summary>Màn hình đổi mật khẩu (bắt buộc ở lần đăng nhập đầu với mật khẩu tạm).</summary>
 public partial class FrmChangePassword : ScreenForm
 {
     private IAccountGateway? gateway;

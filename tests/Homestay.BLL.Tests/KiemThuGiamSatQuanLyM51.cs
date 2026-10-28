@@ -5,6 +5,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử M5.1: danh sách đơn ngoại lệ và tổng quan quản lý khớp nhau.</summary>
 [Collection("M23 SQL")]
 public sealed class M51ManagerMonitoringTests
 {

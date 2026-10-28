@@ -2,6 +2,7 @@ using Homestay.BLL.Infrastructure;
 
 namespace Homestay.BLL.Rules;
 
+/// <summary>Chuẩn hóa số điện thoại Việt Nam về một dạng thống nhất để lưu và tìm kiếm.</summary>
 public static class PhoneNumber
 {
     public static string Normalize(string? value)

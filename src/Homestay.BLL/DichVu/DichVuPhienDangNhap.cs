@@ -7,6 +7,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ phiên đăng nhập của chính mình: giữ phiên sống (heartbeat), đổi mật khẩu, mở khóa màn hình và đăng xuất.</summary>
 public sealed partial class SessionService(Authorizer authorizer, ICurrentSession currentSession, WriteOperationRunner writes,
     WriteSessionValidator validator, AuthRepository repository, DbClock clock, SettingsProvider settings, PasswordHasher hasher,
     AuditWriter audit, string machineName)

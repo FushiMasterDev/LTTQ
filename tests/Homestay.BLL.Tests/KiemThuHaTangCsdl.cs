@@ -5,6 +5,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử hạ tầng CSDL: ràng buộc có tên đúng và được dịch thành câu báo lỗi nghiệp vụ.</summary>
 public sealed class DatabaseInfrastructureTests
 {
     [SqlFact]

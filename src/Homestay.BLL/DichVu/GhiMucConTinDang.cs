@@ -11,6 +11,7 @@ namespace Homestay.BLL.Services;
 
 // Room/contract writes share the parent lock and the existing M4.2A parent UPDATE.
 // The runner returns the reread DTO only after committing the whole operation.
+/// <summary>Bộ ghi dùng chung cho các mục con của tin đăng (loại phòng, phòng, giá…): kiểm quyền, phạm vi và khóa dữ liệu trước khi ghi.</summary>
 internal sealed class ListingChildWriter(Authorizer authorizer, DataScope scope, ConnectionFactory factory, DbClock clock)
 {
     internal void Require(Permission permission)

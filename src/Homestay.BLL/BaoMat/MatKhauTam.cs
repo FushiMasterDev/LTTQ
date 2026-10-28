@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 
 namespace Homestay.BLL.Security;
 
+/// <summary>Sinh mật khẩu tạm ngẫu nhiên khi tạo nhân viên mới hoặc đặt lại mật khẩu.</summary>
 public static class TemporaryPassword
 {
     private const string Letters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";

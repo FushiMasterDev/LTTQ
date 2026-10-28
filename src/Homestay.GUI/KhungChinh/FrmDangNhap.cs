@@ -6,6 +6,7 @@ using Homestay.GUI.Workflow;
 
 namespace Homestay.GUI.Shell;
 
+/// <summary>Màn hình đăng nhập.</summary>
 public partial class FrmLogin : ScreenForm
 {
     private IAccountGateway? gateway;

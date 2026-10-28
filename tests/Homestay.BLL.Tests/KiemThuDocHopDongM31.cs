@@ -10,6 +10,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử M3.1: các hàm đọc phục vụ vòng đời đơn (người có thể giao, chi tiết theo phạm vi).</summary>
 [Collection("M23 SQL")]
 public sealed class M31ContractReadTests
 {

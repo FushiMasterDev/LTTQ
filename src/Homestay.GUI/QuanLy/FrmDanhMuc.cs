@@ -9,6 +9,7 @@ using Homestay.GUI.Infrastructure;
 
 namespace Homestay.GUI.Manager;
 
+/// <summary>Màn hình danh mục: khu vực, tiện nghi, hạng phòng, ngày lễ, chính sách hủy, tham số cấu hình.</summary>
 public partial class FrmCatalog : ScreenForm
 {
     private AppServices? services;

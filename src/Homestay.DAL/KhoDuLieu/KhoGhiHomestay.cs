@@ -7,6 +7,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn ghi homestay: khóa để sửa, thêm/sửa thông tin, tiện nghi, ảnh, giấy tờ, trạng thái.</summary>
 public sealed partial class HomestayRepository
 {
     public async Task<HomestayItem?> GetForUpdateAsync(UnitOfWork db, int id, string scope, Action<SqlCommand> addScope, CancellationToken ct)

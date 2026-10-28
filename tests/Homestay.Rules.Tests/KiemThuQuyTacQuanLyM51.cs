@@ -12,6 +12,7 @@ using Homestay.DTO.Tasks;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử quy tắc công việc và thao tác quản lý M5.1.</summary>
 public sealed class M51ManagerRulesTests
 {
     public static IEnumerable<object[]> TaskTransitions()

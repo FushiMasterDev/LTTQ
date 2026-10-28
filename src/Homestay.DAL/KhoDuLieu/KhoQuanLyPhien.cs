@@ -5,6 +5,7 @@ using Homestay.DTO.Staff;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn phiên đăng nhập: danh sách phiên, lấy người dùng của một phiên.</summary>
 public sealed class SessionManagementRepository
 {
     public async Task<PagedResult<EmployeeSessionItem>> ListAsync(DbSession db, SessionSearchRequest request, bool openOnly, CancellationToken ct)

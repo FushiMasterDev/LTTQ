@@ -2,10 +2,12 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.GUI.Common;
 
+/// <summary>Một lựa chọn trong combobox: giá trị và nhãn tiếng Việt.</summary>
 public sealed record Choice(object? Value, string Label)
 {
     public override string ToString() => Label;
 }
+/// <summary>Đổi giá trị enum (chức vụ, trạng thái…) sang tên tiếng Việt để hiển thị.</summary>
 public static class UiNames
 {
     public static string Position(Position position) => position switch

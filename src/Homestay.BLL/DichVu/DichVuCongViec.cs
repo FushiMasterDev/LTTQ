@@ -9,6 +9,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ giao việc nội bộ: xem việc được giao/của mình, tạo, sửa, bắt đầu, hoàn thành và hủy công việc.</summary>
 public sealed class TaskService(Authorizer authorizer, ICurrentSession currentSession, DataScope dataScope, ConnectionFactory factory,
     WriteOperationRunner writes, TaskRepository repository, NotificationRepository notifications, DbClock clock, AuditWriter audit, string machineName)
 {

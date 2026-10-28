@@ -9,6 +9,7 @@ using Homestay.DTO.Staff;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử M1.4: đăng nhập, khóa tài khoản, phiên, nhân viên và danh mục với CSDL thật.</summary>
 public sealed class M14ServiceTests
 {
     [SqlFact]

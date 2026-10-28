@@ -6,6 +6,7 @@ using Homestay.GUI.Staff;
 
 namespace Homestay.GUI.Accountant;
 
+/// <summary>Màn hình sao kê ngân hàng: nhập giao dịch, khớp tự động/thủ công với đơn, bỏ qua hoặc ghi trả lại.</summary>
 public partial class FrmBankStatement : ScreenForm
 {
     private readonly AsyncLoader loader=new();

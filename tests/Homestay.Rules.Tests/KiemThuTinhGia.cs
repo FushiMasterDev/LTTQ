@@ -6,6 +6,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử tính giá: phân loại ngày thường/cuối tuần/lễ và chọn đúng phiên bản giá.</summary>
 public sealed class PricingCalculatorTests
 {
     private static readonly DateOnly Start = new(2026, 10, 26); // Thứ Hai.

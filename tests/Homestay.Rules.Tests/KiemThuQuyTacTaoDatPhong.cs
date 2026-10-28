@@ -8,6 +8,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử quy tắc tạo đơn: sinh mã đơn theo ngày Việt Nam, kiểm tra ngày ở.</summary>
 public sealed class BookingCreationRulesTests
 {
     private static CreateBookingRequest Request() => new()

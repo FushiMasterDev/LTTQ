@@ -4,6 +4,7 @@ using Homestay.DTO.Owners;
 
 namespace Homestay.BLL.Rules;
 
+/// <summary>Kiểm tra và chuẩn hóa dữ liệu nhập cho tin đăng (chủ nhà, homestay): bắt buộc, độ dài, lý do, ký tự hợp lệ.</summary>
 internal static class ListingWriteRules
 {
     internal static string? Text(string? value, int max)

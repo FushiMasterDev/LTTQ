@@ -6,6 +6,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử M6: dữ liệu nhập kế toán sai bị chặn trước khi mở CSDL và vẫn kiểm quyền trước.</summary>
 public sealed class M6AccountingInputTests
 {
     private static AccountingService Service(Position role)

@@ -7,6 +7,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ đăng nhập: kiểm tra tài khoản/mật khẩu, khóa khi sai nhiều lần và mở phiên làm việc.</summary>
 public sealed class AuthService(ConnectionFactory factory, AuthRepository repository, DbClock clock, SettingsProvider settings,
     PasswordHasher hasher, AuditWriter audit, ICurrentSession currentSession)
 {

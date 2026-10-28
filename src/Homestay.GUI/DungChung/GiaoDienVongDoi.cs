@@ -2,6 +2,7 @@ using Homestay.DTO.Bookings;
 using Homestay.GUI.Staff;
 
 namespace Homestay.GUI.Common;
+/// <summary>Hàm hỗ trợ giao diện cho các thao tác vòng đời đơn: kiểm tra có được làm không, hiển thị thông báo, xem tiền hoàn.</summary>
 internal static class LifecycleUi
 {
     public static bool ReceiptReviewAvailable => true;

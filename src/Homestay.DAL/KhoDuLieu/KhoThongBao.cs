@@ -4,6 +4,7 @@ using Homestay.DTO.Notifications;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn thông báo: gửi cho quản lý khu vực, kế toán, người phụ trách đơn; đếm, xem và đánh dấu đã đọc.</summary>
 public sealed partial class NotificationRepository
 {
     private const string ManagerBookingScope = """

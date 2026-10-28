@@ -7,6 +7,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử tính tiền hoàn theo các mốc chính sách hủy và lý do đặc biệt.</summary>
 public sealed class RefundCalculatorTests
 {
     private static readonly DateOnly CheckIn = new(2026, 11, 10);

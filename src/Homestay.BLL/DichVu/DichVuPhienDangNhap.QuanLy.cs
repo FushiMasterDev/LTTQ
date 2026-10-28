@@ -7,6 +7,7 @@ using Homestay.DTO.Staff;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Phần quản lý phiên: xem phiên đang mở, lịch sử phiên và buộc đăng xuất người khác.</summary>
 public sealed partial class SessionService
 {
     public Task<PagedResult<EmployeeSessionItem>> ListOpenSessionsAsync(SessionSearchRequest request, CancellationToken cancellationToken = default)

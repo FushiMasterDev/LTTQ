@@ -3,6 +3,7 @@ using Homestay.BLL.Rules;
 using Homestay.DTO.Payments;
 namespace Homestay.BLL.Services;
 
+/// <summary>Phần tài khoản nhận hoàn tiền: cập nhật số tài khoản khách dùng để nhận tiền hoàn.</summary>
 public sealed partial class PaymentService
 {
     public Task<RefundAccountResult> UpdateRefundAccountAsync(UpdateRefundAccountRequest request, CancellationToken cancellationToken = default)

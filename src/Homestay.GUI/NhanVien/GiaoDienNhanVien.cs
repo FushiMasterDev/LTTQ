@@ -7,6 +7,7 @@ using Homestay.GUI.Common;
 
 namespace Homestay.GUI.Staff;
 
+/// <summary>Hàm hỗ trợ giao diện cho màn hình nhân viên: giao lại đơn, định dạng ngày/tiền, tên trạng thái tiếng Việt.</summary>
 internal static class EmployeeUi
 {
     public static async Task ReassignAsync(AppServices services,BookingListItem booking,IWin32Window owner){

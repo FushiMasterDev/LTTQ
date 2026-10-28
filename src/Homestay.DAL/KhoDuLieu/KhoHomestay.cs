@@ -7,6 +7,7 @@ using Homestay.DTO.Homestays;
 using Microsoft.Data.SqlClient;
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn đọc homestay: danh sách, chi tiết, khu vực, tiện nghi, ảnh, giấy tờ, chính sách, điều kiện duyệt.</summary>
 public sealed partial class HomestayRepository
 {
     private const string From = "FROM dbo.Homestays h JOIN dbo.Owners o ON o.Id=h.OwnerId JOIN dbo.Areas a ON a.Id=h.AreaId ";

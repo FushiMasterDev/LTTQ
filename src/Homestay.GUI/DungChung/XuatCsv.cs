@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Homestay.GUI.Common;
 
+/// <summary>Xuất dữ liệu ra tập tin CSV (mở được bằng Excel).</summary>
 public static class CsvExporter
 {
     public static string Cell(object? value)

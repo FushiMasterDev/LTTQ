@@ -6,6 +6,7 @@ using Homestay.DTO.Common;
 using Homestay.DTO.Contracts;
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ hợp đồng chủ nhà (phần đọc): danh sách, chi tiết hợp đồng và homestay được phép lập hợp đồng.</summary>
 public sealed partial class ContractService(Authorizer authorizer, DataScope dataScope, ConnectionFactory factory, ContractRepository repository)
 {
     public Task<PagedResult<ContractItem>> ListAsync(ContractSearchRequest request, CancellationToken cancellationToken = default)

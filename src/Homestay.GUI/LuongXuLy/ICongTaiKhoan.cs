@@ -3,6 +3,7 @@ using Homestay.DTO.Auth;
 
 namespace Homestay.GUI.Workflow;
 
+/// <summary>Hợp đồng các thao tác tài khoản mà luồng đăng nhập cần (đăng nhập, đổi mật khẩu), giúp tách khỏi form để dễ kiểm thử.</summary>
 public interface IAccountGateway
 {
     SessionInfo? Session { get; }
@@ -14,6 +15,7 @@ public interface IAccountGateway
     Task LogoutAsync(CancellationToken token = default);
 }
 
+/// <summary>Luồng đăng nhập: gọi đăng nhập và xử lý trường hợp bắt buộc đổi mật khẩu.</summary>
 public sealed class LoginFlow(IAccountGateway gateway)
 {
     public async Task<SessionInfo?> SignInAsync(LoginRequest request,

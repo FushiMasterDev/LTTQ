@@ -1,5 +1,6 @@
 namespace Homestay.GUI.Workflow;
 
+/// <summary>Theo dõi chuột/bàn phím để biết người dùng bỏ máy bao lâu, phục vụ tự khóa màn hình.</summary>
 public sealed class ActivityTracker : IMessageFilter
 {
     private readonly Func<long> clock;

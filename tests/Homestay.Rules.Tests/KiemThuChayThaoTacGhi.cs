@@ -4,8 +4,10 @@ using Homestay.DTO.Auth;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử bộ chạy thao tác ghi không cần CSDL: thiếu phiên bị chặn trước khi mở kết nối.</summary>
 public sealed class WriteOperationRunnerTests
 {
+    /// <summary>Bộ kiểm phiên giả không bao giờ được gọi tới.</summary>
     private sealed class UnusedValidator : IWriteSessionValidator
     {
         public Task ValidateAsync(SessionInfo session, UnitOfWork unitOfWork, CancellationToken cancellationToken) =>

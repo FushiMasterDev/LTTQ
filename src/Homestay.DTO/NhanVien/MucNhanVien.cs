@@ -3,6 +3,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.DTO.Staff;
 
+/// <summary>Một nhân viên hiển thị trên danh sách (mã, tên, chức vụ, tình trạng, khu vực, lần đăng nhập cuối).</summary>
 public sealed record EmployeeListItem
 {
     public int EmployeeId { get; init; }
@@ -20,6 +21,7 @@ public sealed record EmployeeListItem
     public byte[] RowVer { get; init; } = [];
 }
 
+/// <summary>Chi tiết một nhân viên: email, lý do khóa, phải đổi mật khẩu không, khu vực phụ trách.</summary>
 public sealed record EmployeeDetail
 {
     public EmployeeListItem Employee { get; init; } = new();

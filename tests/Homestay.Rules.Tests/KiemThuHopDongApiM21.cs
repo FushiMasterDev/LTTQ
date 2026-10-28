@@ -5,6 +5,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử hợp đồng API M2.1: kiểm dữ liệu nhập và quyền trước khi mở CSDL.</summary>
 public sealed class M21ContractTests
 {
     private static (CurrentSession Current, Authorizer Authorizer) Session(Position role)

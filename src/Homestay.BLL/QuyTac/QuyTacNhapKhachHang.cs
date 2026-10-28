@@ -4,6 +4,7 @@ using Homestay.DTO.Customers;
 
 namespace Homestay.BLL.Rules;
 
+/// <summary>Kiểm tra và chuẩn hóa dữ liệu nhập của khách hàng: họ tên, email, giấy tờ tùy thân, ghi chú.</summary>
 internal static class CustomerInputRules
 {
     internal static CreateCustomerRequest Normalize(CreateCustomerRequest request) => request with

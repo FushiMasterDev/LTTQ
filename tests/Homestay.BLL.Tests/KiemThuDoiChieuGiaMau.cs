@@ -4,8 +4,10 @@ using Homestay.DTO.Enums;
 namespace Homestay.BLL.Tests;
 
 // Đối chiếu chéo: seed tính giá bằng T-SQL, báo giá tính bằng PricingCalculator C# — hai cài đặt độc lập phải ra cùng số.
+/// <summary>Kiểm thử đối chiếu: báo giá tính bằng C# khớp với giá các đơn mẫu tính bằng SQL.</summary>
 public sealed class SeedPriceCrossCheckTests
 {
+    /// <summary>Một đơn mẫu trong dữ liệu seed dùng để đối chiếu giá.</summary>
     private sealed record SeedBooking(string Code, int RoomTypeId, DateOnly CheckIn, DateOnly CheckOut, int Guests,
         decimal TotalAmount, decimal DepositAmount, IReadOnlyList<(DateOnly Date, string DayType, decimal Price)> Nights);
 

@@ -5,6 +5,7 @@ using Homestay.GUI.Infrastructure;
 
 namespace Homestay.GUI.Common;
 
+/// <summary>Chọn, đọc và hiển thị ảnh/tập tin chứng từ.</summary>
 public static class EvidencePresentation
 {
     public const string FileFilter="Chứng từ (*.jpg;*.jpeg;*.png;*.webp;*.pdf)|*.jpg;*.jpeg;*.png;*.webp;*.pdf";

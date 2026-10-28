@@ -4,6 +4,7 @@ using Homestay.GUI.Common;
 using Homestay.GUI.Infrastructure;
 using Homestay.GUI.Staff;
 namespace Homestay.GUI.Manager;
+/// <summary>Phần quản lý của màn hình nhân viên: khu vực phụ trách, đổi chức vụ, nghỉ việc, phiên đăng nhập.</summary>
 public partial class FrmStaff
 {
     private LiveGrid<EmployeeSessionItem>? sessions;

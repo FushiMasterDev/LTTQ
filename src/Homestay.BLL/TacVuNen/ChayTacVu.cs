@@ -4,6 +4,7 @@ using Homestay.DAL.Repositories;
 
 namespace Homestay.BLL.Jobs;
 
+/// <summary>Chạy các tác vụ nền định kỳ, hiện tại là quét và hủy các đơn giữ phòng đã quá hạn.</summary>
 public sealed class JobRunner(ConnectionFactory factory, DbClock clock, HoldExpiryRepository repository, HoldExpiry expiry)
 {
     // GUI calls only after login, every 60 seconds. No user session is needed by system work.

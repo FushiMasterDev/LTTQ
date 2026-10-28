@@ -1,5 +1,6 @@
 namespace Homestay.DAL.Infrastructure;
 
+/// <summary>Lấy giờ hiện tại (UTC) từ máy chủ CSDL để mọi máy dùng chung một đồng hồ.</summary>
 public sealed class DbClock(ConnectionFactory factory)
 {
     public Task<DateTime> GetUtcNowAsync(CancellationToken cancellationToken) =>

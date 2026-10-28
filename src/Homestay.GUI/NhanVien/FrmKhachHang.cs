@@ -7,6 +7,7 @@ using Homestay.GUI.Common;
 using Homestay.GUI.Infrastructure;
 
 namespace Homestay.GUI.Staff;
+/// <summary>Màn hình khách hàng: tìm, xem hồ sơ, thêm, sửa, đổi số điện thoại.</summary>
 public partial class FrmCustomers : ScreenForm
 {
     private AppServices? services;

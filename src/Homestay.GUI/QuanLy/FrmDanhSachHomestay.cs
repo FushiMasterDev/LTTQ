@@ -5,6 +5,7 @@ using Homestay.DTO.Homestays;
 using Homestay.GUI.Common;
 using Homestay.GUI.Staff;
 namespace Homestay.GUI.Manager;
+/// <summary>Màn hình danh sách homestay: lọc theo trạng thái/khu vực/chủ, tạo mới và mở hồ sơ.</summary>
 public partial class FrmHomestays:ScreenForm
 {
     private ListingOwnerSelection? selectedOwner;private readonly SearchPicker ownerFilter=new(){Width=230};private AppServices? services;private LiveGrid<HomestayItem>? main,pending;

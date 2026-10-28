@@ -5,6 +5,7 @@ using Homestay.DTO.Staff;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn quản lý nhân viên: theo khu vực, gán khu vực, đổi chức vụ/tình trạng làm việc.</summary>
 public sealed partial class StaffRepository
 {
     public async Task<PagedResult<EmployeeListItem>> ListByAreaAsync(DbSession db, EmployeesByAreaRequest request, CancellationToken ct)
@@ -72,4 +73,5 @@ public sealed partial class StaffRepository
 }
 
 // DAL signals a domain condition; BLL translates it inside the runner (ensuring rollback).
+/// <summary>Lỗi gán khu vực không hợp lệ cho nhân viên (khu vực không tồn tại hoặc đã ngưng).</summary>
 public sealed class InvalidEmployeeAreaException : Exception;

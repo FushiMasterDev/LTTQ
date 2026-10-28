@@ -2,6 +2,7 @@ using Homestay.BLL.Rules;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử đọc số tiền bằng chữ tiếng Việt và mã ngân hàng.</summary>
 public sealed class M6AmountWordsAndBankCodeTests
 {
     [Theory]

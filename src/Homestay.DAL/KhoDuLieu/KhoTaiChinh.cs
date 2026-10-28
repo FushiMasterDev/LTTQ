@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn tài chính: giao dịch sao kê ngân hàng, số tiền phải thu, tiền cọc đã có và dữ liệu sổ quỹ.</summary>
 public sealed class FinanceRepository
 {
     public async Task<IReadOnlyList<BankTransactionItem>> ListBankTransactionsAsync(DbSession db, DateTime from, DateTime to, string? status, string search, CancellationToken ct)

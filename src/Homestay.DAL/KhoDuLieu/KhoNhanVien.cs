@@ -5,6 +5,7 @@ using Homestay.DTO.Staff;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn bảng nhân viên: danh sách, chi tiết, cấp mã nhân viên, đếm quản lý còn hoạt động, đổi trạng thái.</summary>
 public sealed partial class StaffRepository
 {
     private const string SelectColumns = """

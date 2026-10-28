@@ -2,6 +2,7 @@ using Homestay.DTO.Auth;
 
 namespace Homestay.BLL.Infrastructure;
 
+/// <summary>Hợp đồng truy cập phiên đăng nhập hiện tại (người đang dùng, chức vụ, khu vực).</summary>
 public interface ICurrentSession
 {
     SessionInfo? Session { get; }
@@ -10,6 +11,7 @@ public interface ICurrentSession
     void Clear();
 }
 
+/// <summary>Giữ phiên đăng nhập hiện tại trong bộ nhớ ứng dụng; đặt khi đăng nhập và xóa khi đăng xuất.</summary>
 public sealed class CurrentSession : ICurrentSession
 {
     private SessionInfo? _session;

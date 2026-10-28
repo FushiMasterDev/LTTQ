@@ -13,9 +13,11 @@ namespace Homestay.BLL.Tests;
 
 // Existing M1.4 tests temporarily edit global settings. Jobs also scans all types.
 // Serialize this collection against other classes, while individual tests explicitly launch concurrent clients.
+/// <summary>Nhóm các kiểm thử M2.3 để chạy tuần tự (tránh tranh chấp dữ liệu).</summary>
 [CollectionDefinition("M23 SQL", DisableParallelization = true)]
 public sealed class M23SqlCollection;
 
+/// <summary>Kiểm thử M2.3: tạo đơn khi nhiều nhân viên tranh cùng phòng, khớp báo giá, sinh mã đơn.</summary>
 [Collection("M23 SQL")]
 public sealed class M23BookingCreateTests
 {

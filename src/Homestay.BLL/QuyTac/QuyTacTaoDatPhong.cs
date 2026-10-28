@@ -5,6 +5,7 @@ using Homestay.DTO.Bookings;
 
 namespace Homestay.BLL.Rules;
 
+/// <summary>Quy tắc tạo đơn: chuẩn hóa dữ liệu, kiểm tra ngày ở, chọn phòng còn trống và sinh mã đơn.</summary>
 public static class BookingCreationRules
 {
     public const string SoldOutMessage = "Đã hết phòng loại này trong khoảng ngày đã chọn";

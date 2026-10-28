@@ -3,8 +3,10 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Ảnh chụp khoản hoàn tiền tại thời điểm sửa: chiều, loại, trạng thái, số tài khoản và tên chủ tài khoản nhận.</summary>
 public sealed record RefundAccountSnapshot(int Id, int BookingId, string Direction, string Type, string Status, string? Account, string? Name, byte[] RowVer);
 
+/// <summary>Truy vấn tài khoản nhận hoàn tiền của khách: đọc và cập nhật.</summary>
 public sealed partial class PaymentRepository
 {
     public async Task<RefundAccountSnapshot?> GetAccountAsync(DbSession db, int id, string scope, Action<SqlCommand> addScope, CancellationToken ct)

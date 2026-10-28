@@ -3,6 +3,7 @@ using Homestay.DTO.Enums;
 using Homestay.DTO.Rooms;
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn đọc phòng: loại phòng, phòng, bảng giá và lịch khóa phòng.</summary>
 public sealed partial class RoomRepository
 {
     public async Task<IReadOnlyList<RoomTypeItem>> ListTypesAsync(DbSession db, int home, CancellationToken ct)

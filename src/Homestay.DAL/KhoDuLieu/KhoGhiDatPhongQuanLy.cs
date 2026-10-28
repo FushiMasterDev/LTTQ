@@ -3,6 +3,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn đơn đang mở của một nhân viên (dùng khi quản lý chuyển giao trước lúc cho nghỉ việc).</summary>
 public sealed partial class BookingRepository
 {
     public async Task<IReadOnlyList<BookingWriteSnapshot>> ListEmployeeOpenBookingsAsync(UnitOfWork db, int employeeId, CancellationToken ct)

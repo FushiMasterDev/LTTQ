@@ -2,6 +2,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Security;
 
+/// <summary>Tập hợp các câu báo lỗi đăng nhập (sai thông tin, tài khoản ngưng, bị khóa đến lúc nào) để hiển thị thống nhất.</summary>
 public static class LoginErrors
 {
     public const string InvalidCredentials = "Tên đăng nhập hoặc mật khẩu không đúng";

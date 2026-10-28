@@ -2,6 +2,7 @@ using Homestay.GUI.Common;
 
 namespace Homestay.GUI.Manager;
 
+/// <summary>Màn hình báo cáo theo quyền (kế toán chỉ thấy báo cáo tài chính).</summary>
 public partial class FrmReports : ScreenForm
 {
     public FrmReports()

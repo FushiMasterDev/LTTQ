@@ -8,6 +8,7 @@ using Homestay.DTO.Finance;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ kế toán: nhập sao kê ngân hàng, khớp giao dịch với đơn (tự động/thủ công), bỏ qua, ghi hoàn tiền và sổ quỹ.</summary>
 public sealed class AccountingService(Authorizer authorizer, ICurrentSession current, ConnectionFactory factory,
     WriteOperationRunner writes, FinanceRepository finance, BookingRepository bookings,
     BookingService bookingService, DbClock clock, SettingsProvider settings, AuditWriter audit, string machineName)

@@ -12,9 +12,11 @@ using Homestay.DTO.Rooms;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử M4.2B: ghi loại phòng, phòng, giá, hợp đồng đến khi bán được và tạo đơn.</summary>
 [Collection("M23 SQL")]
 public sealed class M42BRoomContractWriteTests
 {
+    /// <summary>Dữ liệu chuẩn bị sẵn cho các ca kiểm thử M4.2B.</summary>
     private sealed record Fixture(M41TestClient Manager, M41TestClient Staff, int Home, int Area, int Category,
         int Type, int Room, DateOnly Today, int? Contract);
     private static string Unique(string prefix) => prefix + Guid.NewGuid().ToString("N")[..20];

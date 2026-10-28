@@ -9,8 +9,10 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Tài khoản thử nghiệm đã tạo (id, mã, mật khẩu).</summary>
 internal sealed record TestIdentity(int UserId, int EmployeeId, string Code, string Password);
 
+/// <summary>Bộ khởi tạo dịch vụ thật cho kiểm thử: đăng nhập, tạo tài khoản thử, sinh tên/số điện thoại duy nhất.</summary>
 internal sealed class M14TestClient
 {
     public ConnectionFactory Factory { get; } = SqlFixture.Factory();

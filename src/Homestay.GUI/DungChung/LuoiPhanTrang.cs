@@ -8,10 +8,12 @@ using Homestay.GUI.Infrastructure;
 
 namespace Homestay.GUI.Common;
 
+/// <summary>Dữ liệu sự kiện khi lưới cần tải một trang mới.</summary>
 public sealed class PageQueryEventArgs(PageRequest request) : EventArgs
 {
     public PageRequest Request { get; } = request;
 }
+/// <summary>Lưới dữ liệu có phân trang, sắp xếp, tìm kiếm và xuất CSV dùng chung cho các màn hình danh sách.</summary>
 [DefaultEvent(nameof(QueryRequested))]
 public sealed class PagedGrid : UserControl
 {

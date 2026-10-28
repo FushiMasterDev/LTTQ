@@ -6,6 +6,7 @@ using Homestay.DTO.Common;
 using Homestay.DTO.Owners;
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ chủ nhà (phần đọc): xem danh sách, chi tiết, tra cứu chủ nhà theo quyền và phạm vi khu vực, che bớt thông tin nhạy cảm.</summary>
 public sealed partial class OwnerService(Authorizer authorizer, DataScope dataScope, ConnectionFactory factory, OwnerRepository repository)
 {
     public Task<PagedResult<OwnerItem>> ListAsync(OwnerSearchRequest request, CancellationToken cancellationToken = default)

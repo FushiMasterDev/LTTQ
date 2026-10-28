@@ -14,8 +14,10 @@ namespace Homestay.GUI;
 
 // Only this composition root references DAL types, to assemble BLL as documented in M1.4.
 // Forms call BLL services; no SQL, SqlConnection, commands or repository calls in GUI.
+/// <summary>Nơi duy nhất khởi tạo và nối các dịch vụ BLL/DAL cho giao diện; giữ phiên hiện tại và cung cấp dịch vụ cho từng form.</summary>
 public sealed class AppServices : IAccountGateway
 {
+    /// <summary>Bộ các đối tượng dịch vụ đã khởi tạo sau khi có kết nối CSDL.</summary>
     private sealed record Runtime(CurrentSession Current, Authorizer Authorizer, AuthService Auth,
         SessionService Sessions, StaffService Staff, CatalogService Catalog, SettingsProvider Settings,
         AvailabilityService Availability, CustomerService Customers, BookingService Bookings,

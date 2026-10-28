@@ -5,6 +5,7 @@ using System.Text.Json;
 namespace Homestay.GUI.Configuration;
 
 // Only this encrypted file contains SQL credentials. Never serialize a profile to logs.
+/// <summary>Thông tin kết nối SQL Server người dùng đã nhập (máy chủ, database, tài khoản).</summary>
 public sealed class ConnectionProfile
 {
     public string Server { get; set; } = "";
@@ -14,6 +15,7 @@ public sealed class ConnectionProfile
     public bool Encrypt { get; set; } = true;
     public bool TrustServerCertificate { get; set; }
 }
+/// <summary>Lưu/đọc thông tin kết nối CSDL ra tập tin được mã hóa theo máy (DPAPI); chỉ quản trị viên được cấu hình lại.</summary>
 public sealed class ConnectionStore(string path)
 {
     public string Path { get; } = System.IO.Path.GetFullPath(path);

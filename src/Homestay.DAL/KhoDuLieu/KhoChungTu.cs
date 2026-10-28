@@ -3,6 +3,7 @@ using Homestay.DTO.Files;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn tập tin chứng từ: lưu ảnh chứng từ, đọc chứng từ và tập tin của homestay.</summary>
 public sealed class EvidenceRepository
 {
     public async Task<Guid> InsertAsync(UnitOfWork db, string fileName, string contentType, byte[] content, byte[] sha256, int userId, CancellationToken ct)

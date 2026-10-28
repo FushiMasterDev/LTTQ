@@ -4,6 +4,7 @@ using Homestay.DTO.Auth;
 using Homestay.DTO.Enums;
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử máy trạng thái homestay và quy tắc tin đăng M4.1.</summary>
 public sealed class M41ContractRulesTests
 {
     public static IEnumerable<object?[]> EveryTransition()

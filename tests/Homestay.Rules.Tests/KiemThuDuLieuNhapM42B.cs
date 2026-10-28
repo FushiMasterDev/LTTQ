@@ -8,6 +8,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử M4.2B: phân quyền và dữ liệu nhập phòng/hợp đồng/tài khoản hoàn bị chặn sớm.</summary>
 public sealed class M42BInputContractTests
 {
     private static (RoomService Rooms, ContractService Contracts, PaymentService Payments) Client(Position role)

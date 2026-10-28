@@ -10,6 +10,7 @@ using Homestay.DTO.Enums;
 using Homestay.DTO.Homestays;
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ homestay (phần đọc): danh sách, chi tiết hồ sơ, điều kiện duyệt và các danh mục phục vụ màn hình tin đăng.</summary>
 public sealed partial class HomestayService(Authorizer authorizer, ICurrentSession currentSession, DataScope dataScope,
     ConnectionFactory factory, HomestayRepository repository, DbClock clock)
 {

@@ -8,6 +8,7 @@ using Homestay.DTO.Staff;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Phần quản lý của dịch vụ nhân viên: gán khu vực phụ trách, đổi chức vụ và cho nghỉ việc.</summary>
 public sealed partial class StaffService
 {
     public async Task<EmployeeAreasDetail> GetAreasAsync(int employeeId, CancellationToken cancellationToken = default)

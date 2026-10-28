@@ -7,6 +7,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ tìm phòng trống: tìm theo ngày/khu vực/số khách, báo giá và lịch phòng trống.</summary>
 public sealed class AvailabilityService(Authorizer authorizer, ICurrentSession currentSession, ConnectionFactory factory,
     AvailabilityRepository repository, DbClock clock, SettingsProvider settings)
 {

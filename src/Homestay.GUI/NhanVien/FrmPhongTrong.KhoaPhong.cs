@@ -6,6 +6,7 @@ using Homestay.GUI.Common;
 using Homestay.GUI.Infrastructure;
 using Homestay.GUI.Manager;
 namespace Homestay.GUI.Staff;
+/// <summary>Phần khóa/gỡ khóa phòng trên màn hình lịch phòng.</summary>
 public partial class FrmAvailability
 {
     private readonly Button unblockButton = new() { Text = "Mở khóa ô đã chọn", AutoSize = true, Enabled = false };

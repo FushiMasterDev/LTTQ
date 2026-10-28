@@ -5,6 +5,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn các bảng danh mục: khu vực, tiện nghi, loại phòng, ngày lễ, chính sách hủy.</summary>
 public sealed class CatalogRepository
 {
     public static string TableName(CatalogKind kind) => kind switch

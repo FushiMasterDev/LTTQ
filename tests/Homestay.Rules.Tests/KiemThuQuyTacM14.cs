@@ -11,6 +11,7 @@ using Homestay.DTO.Staff;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử quy tắc M1.4: chuẩn hóa số điện thoại, chính sách hủy, dữ liệu nhập nhân viên.</summary>
 public sealed class M14RulesTests
 {
     [Theory]
@@ -122,6 +123,7 @@ public sealed class M14RulesTests
         await context.Sessions.LogoutAsync();
     }
 
+    /// <summary>Bộ dịch vụ khởi tạo không có CSDL, dùng để kiểm tra lỗi nhập được chặn trước khi kết nối.</summary>
     private sealed class ServicesWithoutDatabase
     {
         public CurrentSession Current { get; } = new();

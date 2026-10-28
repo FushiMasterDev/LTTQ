@@ -5,6 +5,7 @@ using Homestay.DTO.Availability;
 using Homestay.DTO.Rooms;
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ phòng (phần đọc): loại phòng, phòng, bảng giá, lịch khóa phòng và lịch phòng của homestay.</summary>
 public sealed partial class RoomService(Authorizer authorizer, DataScope dataScope, ConnectionFactory factory, RoomRepository repository, DbClock clock,
     AvailabilityService availability)
 {

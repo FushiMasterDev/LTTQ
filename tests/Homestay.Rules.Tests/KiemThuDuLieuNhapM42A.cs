@@ -10,6 +10,7 @@ using Homestay.DTO.Owners;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử M4.2A: dữ liệu nhập chủ nhà/homestay/tập tin sai bị chặn trước khi mở giao dịch.</summary>
 public sealed class M42AInputContractTests
 {
     private static (OwnerService Owners, HomestayService Homes) Client(Position position = Position.Manager)

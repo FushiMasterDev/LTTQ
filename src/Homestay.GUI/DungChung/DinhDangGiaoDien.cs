@@ -3,6 +3,7 @@ using System.Text;
 
 namespace Homestay.GUI.Common;
 
+/// <summary>Định dạng hiển thị kiểu Việt Nam: tiền, ngày, giờ Việt Nam, chuẩn hóa từ khóa tìm kiếm.</summary>
 public static class UiFormat
 {
     public static readonly CultureInfo Vietnamese = CultureInfo.GetCultureInfo("vi-VN");

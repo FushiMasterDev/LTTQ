@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Infrastructure;
 
+/// <summary>Đọc lỗi SqlException (số lỗi, tên ràng buộc) và đổi thành các ngoại lệ CSDL riêng của dự án.</summary>
 public static class SqlErrorTranslator
 {
     public static DbConstraintViolationException? ParseConstraint(int errorNumber, string message, Exception? innerException = null)

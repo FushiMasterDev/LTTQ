@@ -13,6 +13,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ đặt phòng: tra cứu, xem chi tiết, báo giá, tạo đơn giữ phòng, giao đơn và số liệu bảng điều khiển cho nhân viên.</summary>
 public sealed partial class BookingService(Authorizer authorizer, ICurrentSession currentSession, DataScope dataScope, ConnectionFactory factory,
     BookingRepository repository, CustomerRepository customers, DbClock clock, SettingsProvider settings, AvailabilityService availability,
     WriteOperationRunner writes, AuditWriter audit, string machineName)

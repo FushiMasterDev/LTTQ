@@ -8,6 +8,7 @@ using Homestay.GUI.Infrastructure;
 using Homestay.GUI.Staff;
 
 namespace Homestay.GUI.Accountant;
+/// <summary>Màn hình hàng chờ hoàn tiền của kế toán: xem khoản chờ chi, cập nhật tài khoản nhận, ghi đã chuyển hoàn.</summary>
 public partial class FrmRefundQueue : ScreenForm
 {
     private AppServices? services;

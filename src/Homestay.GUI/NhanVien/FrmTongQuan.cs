@@ -3,6 +3,7 @@ using Homestay.GUI.Infrastructure;
 using Homestay.DTO.Bookings;
 
 namespace Homestay.GUI.Staff;
+/// <summary>Màn hình tổng quan: số đơn theo hàng đợi và các việc gấp cần xử lý.</summary>
 public partial class FrmDashboard : ScreenForm
 {
     private AppServices? services;private readonly Button waitingReceipt=new(){AutoSize=true},waitingCancel=new(){AutoSize=true},lateTasks=new(){AutoSize=true},unassignedExceptions=new(){AutoSize=true};

@@ -9,6 +9,7 @@ using Homestay.DTO.Owners;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Phần ghi của dịch vụ chủ nhà: tạo, sửa hồ sơ, đổi tài khoản ngân hàng và đổi trạng thái chủ nhà.</summary>
 public sealed partial class OwnerService
 {
     private WriteOperationRunner Writes => new(factory, dataScope.CurrentSession, new WriteSessionValidator(new AuthRepository()));

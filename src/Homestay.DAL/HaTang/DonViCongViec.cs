@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Infrastructure;
 
+/// <summary>Một giao dịch CSDL: mở, commit/rollback và lấy khóa ứng dụng (app lock) để tránh ghi chồng.</summary>
 public sealed class UnitOfWork : DbSession, IAsyncDisposable
 {
     private bool _committed;

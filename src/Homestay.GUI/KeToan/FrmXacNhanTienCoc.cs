@@ -7,6 +7,7 @@ using Homestay.GUI.Infrastructure;
 using Homestay.GUI.Staff;
 
 namespace Homestay.GUI.Accountant;
+/// <summary>Màn hình kế toán xác nhận tiền cọc: xem phiếu thu và chứng từ, xác nhận hoặc từ chối.</summary>
 public partial class FrmDepositVerification : ScreenForm
 {
     private AppServices? services;

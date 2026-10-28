@@ -4,6 +4,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Thông tin tài khoản phục vụ đăng nhập: danh tính, mật khẩu băm, trạng thái, số lần sai, thời điểm hết khóa.</summary>
 public sealed record AuthAccount
 {
     public SessionInfo Identity { get; init; } = new();
@@ -15,6 +16,7 @@ public sealed record AuthAccount
     public byte[] RowVer { get; init; } = [];
 }
 
+/// <summary>Truy vấn đăng nhập và phiên: tìm tài khoản, ghi lần sai/thành công, mở/đóng phiên, heartbeat, đổi mật khẩu.</summary>
 public sealed class AuthRepository
 {
     private const string Columns = """

@@ -8,6 +8,7 @@ using Homestay.GUI.Common;
 using Homestay.GUI.Infrastructure;
 
 namespace Homestay.GUI.Staff;
+/// <summary>Màn hình tạo đơn giữ phòng: chọn khách, phòng, ngày, xem báo giá và hướng dẫn chuyển khoản.</summary>
 public partial class FrmBookingCreate : ScreenForm
 {
     private AppServices? services;

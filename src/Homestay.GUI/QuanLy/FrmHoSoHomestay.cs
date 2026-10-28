@@ -8,6 +8,7 @@ using Homestay.GUI.Common;
 using Homestay.GUI.Infrastructure;
 using Homestay.GUI.Staff;
 namespace Homestay.GUI.Manager;
+/// <summary>Màn hình hồ sơ homestay: thông tin, tiện nghi, ảnh, giấy tờ, phòng, giá, hợp đồng, duyệt và đổi trạng thái.</summary>
 public partial class FrmHomestayProfile:ScreenForm
 {
     private AppServices? services;private int homestayId;private HomestayDetail? detail;private readonly AsyncLoader loader=new();

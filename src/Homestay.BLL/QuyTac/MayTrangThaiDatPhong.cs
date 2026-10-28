@@ -3,8 +3,10 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Rules;
 
+/// <summary>Ai được thực hiện một bước chuyển trạng thái đơn: nhân viên, quản lý, kế toán, hệ thống hay nội bộ.</summary>
 public enum BookingTransitionActor { Staff, Manager, Accountant, System, Internal }
 
+/// <summary>Một bước chuyển trạng thái đơn đặt phòng hợp lệ: từ trạng thái nào sang trạng thái nào, ai được làm.</summary>
 public sealed record BookingTransition(BookingStatus? From, BookingStatus To,
     IReadOnlyList<BookingTransitionActor> Actors, bool OnBehalfOfOwner = false);
 

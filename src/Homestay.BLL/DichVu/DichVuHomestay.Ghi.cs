@@ -10,9 +10,11 @@ using Homestay.DTO.Homestays;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Phần ghi của dịch vụ homestay: tạo nháp, sửa thông tin, tiện nghi, ảnh, giấy tờ, gửi duyệt và đổi trạng thái.</summary>
 public sealed partial class HomestayService
 {
     private WriteOperationRunner Writes => new(factory, currentSession, new WriteSessionValidator(new AuthRepository()));
+    /// <summary>Mô tả một thay đổi cần ghi (trạng thái, lý do, giá trị mới, bản cũ/mới của mục con) để dùng chung cho việc ghi và nhật ký.</summary>
     private sealed record Change(HomestayStatus? Status = null, string? Reason = null, CreateHomestayRequest? Values = null, object? OldChild = null, object? NewChild = null);
     private void RequireWrite(Permission permission)
     {

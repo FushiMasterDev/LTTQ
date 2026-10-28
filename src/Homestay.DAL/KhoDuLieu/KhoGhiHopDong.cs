@@ -3,6 +3,7 @@ using Homestay.DTO.Contracts;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn ghi hợp đồng: xác định homestay, thêm, đổi trạng thái và kiểm tra còn đơn đang ở không.</summary>
 public sealed partial class ContractRepository
 {
     public async Task<int?> LocateHomeAsync(DbSession db, int id, CancellationToken ct)

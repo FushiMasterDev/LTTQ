@@ -8,6 +8,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Phần hủy đơn của dịch vụ đặt phòng: tính tiền hoàn, tạo khoản hoàn chờ chi và áp dụng việc hủy (kể cả khi homestay không phục vụ được).</summary>
 public sealed partial class BookingService
 {
     // Preview and transactional submission use exactly the same calculation and collected-deposit predicate.

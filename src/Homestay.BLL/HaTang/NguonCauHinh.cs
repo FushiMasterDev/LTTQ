@@ -4,8 +4,10 @@ using Homestay.DAL.Infrastructure;
 
 namespace Homestay.BLL.Infrastructure;
 
+/// <summary>Đọc và kiểm tra các tham số cấu hình nghiệp vụ trong CSDL (thời gian giữ phòng, tỷ lệ cọc, giới hạn…).</summary>
 public sealed class SettingsProvider(ConnectionFactory factory)
 {
+    /// <summary>Quy tắc hợp lệ của một tham số cấu hình: kiểu dữ liệu và khoảng giá trị cho phép.</summary>
     private sealed record Rule(string Type, decimal? Min = null, decimal? Max = null);
     private static readonly FrozenDictionary<string, Rule> Rules = new Dictionary<string, Rule>(StringComparer.Ordinal)
     {

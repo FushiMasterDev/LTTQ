@@ -3,6 +3,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Infrastructure;
 
+/// <summary>Kiểm tra quyền theo chức vụ của người đang đăng nhập: được làm gì và ở mức nào (tất cả/của mình/không).</summary>
 public sealed class Authorizer(ICurrentSession currentSession)
 {
     // Dịch vụ phải kiểm tra thêm: không tự khóa/hạ chức/nghỉ việc; còn >= 1 QL;

@@ -2,6 +2,7 @@ using Homestay.DAL.Infrastructure;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn bảng phiên bản schema CSDL đã chạy.</summary>
 public sealed class SchemaVersionRepository
 {
     public async Task<IReadOnlyList<int>> ListVersionsAsync(DbSession db, CancellationToken ct)

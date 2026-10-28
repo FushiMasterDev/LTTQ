@@ -10,6 +10,7 @@ using Homestay.DTO.Payments;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử M6: các thao tác kế toán ghi đúng nhật ký và dữ liệu trong CSDL.</summary>
 [Collection("M23 SQL")]
 public sealed class M6AccountingContractSqlTests
 {

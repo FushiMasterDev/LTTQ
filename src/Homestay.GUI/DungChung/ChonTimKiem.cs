@@ -3,6 +3,7 @@ using System.ComponentModel;
 
 namespace Homestay.GUI.Common;
 
+/// <summary>Ô chọn có tìm kiếm (gõ để lọc danh sách rồi chọn một mục).</summary>
 [DefaultEvent(nameof(SelectionChanged))]
 public sealed class SearchPicker : UserControl
 {

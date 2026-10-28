@@ -2,6 +2,7 @@ using Homestay.DAL.Infrastructure;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn tìm các đơn giữ phòng đã quá hạn để tác vụ nền xử lý.</summary>
 public sealed class HoldExpiryRepository
 {
     public async Task<IReadOnlyList<int>> FindRoomTypesAsync(UnitOfWork db, DateTime now, CancellationToken ct)

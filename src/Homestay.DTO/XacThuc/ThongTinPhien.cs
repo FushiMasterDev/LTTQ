@@ -2,6 +2,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.DTO.Auth;
 
+/// <summary>Thông tin phiên đăng nhập: người dùng, chức vụ, khu vực phụ trách, thời điểm đăng nhập.</summary>
 public sealed record SessionInfo
 {
     public long SessionId { get; init; }

@@ -6,6 +6,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Security;
 
+/// <summary>Kiểm tra phiên đăng nhập còn hiệu lực ngay trong giao dịch trước mỗi thao tác ghi dữ liệu.</summary>
 public sealed class WriteSessionValidator(AuthRepository repository) : IWriteSessionValidator
 {
     public async Task ValidateAsync(SessionInfo session, UnitOfWork unitOfWork, CancellationToken cancellationToken)

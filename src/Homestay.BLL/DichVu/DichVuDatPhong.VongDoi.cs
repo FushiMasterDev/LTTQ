@@ -8,6 +8,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Phần vòng đời của dịch vụ đặt phòng: xác nhận, nhận phòng, trả phòng, không đến, hủy… theo máy trạng thái đơn.</summary>
 public sealed partial class BookingService
 {
     // Reuse the already composed read dependencies without changing the M2.4 PaymentService constructor.

@@ -8,8 +8,10 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Kết quả đọc một đơn: chi tiết đơn và đơn có nằm trong phạm vi người dùng hay không.</summary>
 public sealed record BookingReadResult(BookingDetail Detail, bool InScope);
 
+/// <summary>Truy vấn đọc đơn đặt phòng: danh sách theo hàng đợi, tìm nhanh theo mã, chi tiết đơn.</summary>
 public sealed partial class BookingRepository
 {
     private const string From = """

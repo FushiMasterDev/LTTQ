@@ -6,6 +6,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn yêu cầu thay đổi đơn: kiểm tra yêu cầu đang mở, thêm yêu cầu hủy, duyệt/từ chối, danh sách, chi tiết.</summary>
 public sealed class ChangeRequestRepository
 {
     // Callers lock the scoped booking first, shared with all booking/payment writers.

@@ -8,6 +8,7 @@ using Homestay.DTO.Payments;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Phần xét duyệt thanh toán của kế toán: hàng chờ phiếu thu/hoàn tiền, xác nhận hoặc từ chối phiếu thu, ghi đã chi hoàn.</summary>
 public sealed partial class PaymentService
 {
     public Task<PagedResult<PaymentQueueItem>> ListPendingReceiptsAsync(PaymentQueueRequest request, CancellationToken cancellationToken = default)

@@ -6,6 +6,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn bảng công việc: danh sách, đếm việc quá hạn, chi tiết, tạo, sửa, đổi trạng thái.</summary>
 public sealed class TaskRepository
 {
     private const string From = """

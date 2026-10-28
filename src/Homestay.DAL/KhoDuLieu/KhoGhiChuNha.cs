@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn ghi bảng chủ nhà: đọc để khóa trước khi sửa, thêm mới, cập nhật.</summary>
 public sealed partial class OwnerRepository
 {
     public async Task<OwnerItem?> GetForUpdateAsync(UnitOfWork db, int id, string scope, Action<SqlCommand> addScope, CancellationToken ct)

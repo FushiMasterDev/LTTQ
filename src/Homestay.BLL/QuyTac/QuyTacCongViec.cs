@@ -4,8 +4,10 @@ using Homestay.DTO.Tasks;
 
 namespace Homestay.BLL.Rules;
 
+/// <summary>Các thao tác có thể làm trên một công việc: bắt đầu, sửa, hoàn thành, hủy.</summary>
 public enum WorkTaskOperation { Start, Edit, Complete, Cancel }
 
+/// <summary>Quy tắc công việc: thao tác nào được phép ở trạng thái nào, trạng thái kế tiếp, chuẩn hóa dữ liệu nhập và hạn chót.</summary>
 public static class WorkTaskRules
 {
     // Schema/spec 7.5 deliberately keep a started task Open. Start is an audited event.

@@ -8,6 +8,7 @@ using Homestay.DTO.Finance;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ đối soát với chủ nhà theo kỳ: lập/lập lại bảng nháp, gửi, mở lại, đánh dấu đã chi và ghi phản hồi của chủ.</summary>
 public sealed class SettlementService(Authorizer authorizer,ICurrentSession current,ConnectionFactory factory,
     WriteOperationRunner writes,SettlementRepository repository,DbClock clock,SettingsProvider settings,AuditWriter audit,string machineName)
 {

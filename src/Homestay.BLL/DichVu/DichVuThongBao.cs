@@ -7,6 +7,7 @@ using Homestay.DTO.Notifications;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ thông báo: đếm thông báo chưa đọc, xem danh sách, đánh dấu đã đọc.</summary>
 public sealed class NotificationService(ICurrentSession currentSession, ConnectionFactory factory, WriteOperationRunner writes,
     NotificationRepository repository, DbClock clock)
 {

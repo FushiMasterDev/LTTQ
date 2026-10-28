@@ -2,6 +2,7 @@ using Homestay.BLL.Rules;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử tách mã đơn từ nội dung chuyển khoản.</summary>
 public sealed class BankStatementRulesTests
 {
     [Theory]

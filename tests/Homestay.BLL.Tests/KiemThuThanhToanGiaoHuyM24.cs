@@ -12,6 +12,7 @@ using Homestay.DTO.Payments;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử M2.4: ghi phiếu thu, giao đơn và hủy đơn chưa cọc.</summary>
 [Collection("M23 SQL")]
 public sealed class M24PaymentAssignCancelTests
 {

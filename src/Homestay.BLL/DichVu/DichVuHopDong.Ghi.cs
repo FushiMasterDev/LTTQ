@@ -7,6 +7,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Phần ghi của dịch vụ hợp đồng chủ nhà: tạo, kích hoạt, gia hạn và chấm dứt hợp đồng.</summary>
 public sealed partial class ContractService
 {
     private ListingChildWriter Writer => new(authorizer, dataScope, factory, new DbClock(factory));

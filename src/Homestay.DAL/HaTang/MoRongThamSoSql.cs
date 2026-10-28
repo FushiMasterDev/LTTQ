@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Infrastructure;
 
+/// <summary>Hàm tiện ích thêm tham số SQL đúng kiểu dữ liệu (chuỗi, số, tiền, ngày, RowVer…) để tránh SQL injection và sai kiểu.</summary>
 public static class SqlParameterExtensions
 {
     private static SqlParameter Add(SqlParameterCollection parameters, string name, SqlDbType type, object? value, int size = 0, byte precision = 0, byte scale = 0)

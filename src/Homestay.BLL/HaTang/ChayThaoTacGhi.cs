@@ -4,11 +4,13 @@ using Homestay.DTO.Auth;
 namespace Homestay.BLL.Infrastructure;
 
 // M1.4 kiểm tra Users/Employees/UserSessions bằng chính transaction của thao tác ghi.
+/// <summary>Hợp đồng kiểm tra phiên đăng nhập còn hợp lệ trước khi cho ghi dữ liệu.</summary>
 public interface IWriteSessionValidator
 {
     Task ValidateAsync(SessionInfo session, UnitOfWork unitOfWork, CancellationToken cancellationToken);
 }
 
+/// <summary>Chạy một thao tác ghi trong giao dịch: kiểm phiên, mở/commit/rollback, thử lại khi deadlock và dịch lỗi CSDL sang lỗi nghiệp vụ.</summary>
 public sealed class WriteOperationRunner(ConnectionFactory factory, ICurrentSession currentSession, IWriteSessionValidator sessionValidator)
 {
     public Task<T> ExecuteAsync<T>(Func<UnitOfWork, CancellationToken, Task<T>> operation, CancellationToken cancellationToken)

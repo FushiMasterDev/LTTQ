@@ -4,8 +4,10 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Người đang phụ trách đơn, dùng khi kiểm tra quyền thao tác vòng đời.</summary>
 public sealed record BookingAssignmentContext(int? AssignedEmployeeId);
 
+/// <summary>Truy vấn vòng đời đơn: người phụ trách, danh sách người có thể giao, đổi phòng cho các đêm, phòng dùng khi xác nhận.</summary>
 public sealed partial class BookingRepository
 {
     private const string AssignableEmployee = "e.EmploymentStatus='Active' AND u.Status='Active' AND e.Position IN ('Staff','Manager')";

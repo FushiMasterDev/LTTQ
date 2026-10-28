@@ -4,6 +4,7 @@ using Homestay.DAL.Infrastructure;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử dịch lỗi SQL và cấu hình: đọc thông báo lỗi không cần SQL Server, lỗi lạ được xử lý an toàn.</summary>
 public sealed class ErrorAndSettingsTests
 {
     [Theory]

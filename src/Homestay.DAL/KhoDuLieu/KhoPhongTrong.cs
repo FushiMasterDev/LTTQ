@@ -5,13 +5,18 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Một homestay/loại phòng ứng viên khi tìm phòng trống.</summary>
 public sealed record AvailabilityCandidate(int HomestayId, string HomestayName, int AreaId, string AreaName,
     int RoomTypeId, string RoomTypeName, int CategoryId, string CategoryName, int MaxGuests, decimal CommissionRate);
+/// <summary>Một phòng cụ thể của loại phòng ứng viên và còn trống hay không.</summary>
 public sealed record CandidateRoom(int RoomTypeId, int RoomId, string RoomCode, bool IsAvailable);
+/// <summary>Bảng giá áp dụng cho một loại phòng ứng viên.</summary>
 public sealed record CandidatePrice(int RoomTypeId, RoomPriceVersion Version);
+/// <summary>Toàn bộ dữ liệu thô cho việc tìm phòng trống: ứng viên, phòng, giá, ngày lễ.</summary>
 public sealed record AvailabilityData(IReadOnlyList<AvailabilityCandidate> Candidates, IReadOnlyList<CandidateRoom> Rooms,
     IReadOnlyList<CandidatePrice> Prices, IReadOnlySet<DateOnly> Holidays, IReadOnlyList<ApplicableCancellationPolicy> Policies);
 
+/// <summary>Truy vấn tìm phòng trống và lịch phòng theo khoảng ngày.</summary>
 public sealed class AvailabilityRepository
 {
     public async Task<AvailabilityData> LoadAsync(DbSession db, AvailabilitySearchRequest request, int? roomTypeId, DateTime now, CancellationToken ct)

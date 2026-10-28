@@ -9,6 +9,7 @@ using Microsoft.Data.SqlClient;
 namespace Homestay.BLL.Tests;
 
 // Phiên thật qua AuthService/WriteSessionValidator, cùng cách M14TestClient; không validator giả.
+/// <summary>Bộ khởi tạo các dịch vụ đặt phòng/thanh toán cho kiểm thử, dựa trên M14TestClient.</summary>
 internal sealed class M21TestClient
 {
     public M14TestClient Login { get; } = new();
@@ -70,6 +71,7 @@ internal sealed class M21TestClient
     }, CancellationToken.None);
 }
 
+/// <summary>Dữ liệu homestay/phòng/khách đã tạo sẵn để kiểm thử đặt phòng.</summary>
 internal sealed record M21Data(int AreaId, int HomestayId, int RoomTypeId, int CategoryId, int AmenityId, int[] Rooms, int CustomerId)
 {
     public static DateOnly CheckIn => new(2099, 1, 1);

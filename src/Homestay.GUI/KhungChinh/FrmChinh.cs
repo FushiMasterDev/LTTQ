@@ -10,6 +10,7 @@ using Homestay.GUI.Workflow;
 
 namespace Homestay.GUI.Shell;
 
+/// <summary>Màn hình chính sau khi đăng nhập: menu theo chức vụ, vùng chứa các màn hình con, thông báo, đăng xuất.</summary>
 public partial class FrmMain : ScreenForm
 {
     private readonly Dictionary<string, TabPage> tabs = [];

@@ -5,6 +5,7 @@ using Homestay.DTO.Owners;
 using Microsoft.Data.SqlClient;
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn đọc bảng chủ nhà: danh sách, chi tiết, tra cứu.</summary>
 public sealed partial class OwnerRepository
 {
     // Hash the unmasked complete row; no bank/identity values are embedded in the token.

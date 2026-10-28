@@ -5,6 +5,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn tạo đơn: số khách tối đa, phòng còn hoạt động, số đơn đang chờ của khách, cấp số thứ tự, thêm đơn và các đêm phòng.</summary>
 public sealed partial class BookingRepository
 {
     public async Task<int?> GetMaxGuestsAsync(DbSession db, int roomTypeId, CancellationToken ct)

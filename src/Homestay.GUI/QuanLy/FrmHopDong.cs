@@ -5,6 +5,7 @@ using Homestay.DTO.Contracts;
 using Homestay.GUI.Common;
 using Homestay.GUI.Staff;
 namespace Homestay.GUI.Manager;
+/// <summary>Màn hình hợp đồng chủ nhà: tạo, kích hoạt, gia hạn, chấm dứt.</summary>
 public partial class FrmContracts:ScreenForm
 {
     private readonly Button validateButton=new(){Text="Kiểm tra lại hiệu lực",AutoSize=true,Enabled=false};private AppServices? services;private LiveGrid<ContractItem>? live;

@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn số liệu bảng điều khiển của nhân viên (đếm đơn theo hàng đợi, việc gấp).</summary>
 public sealed partial class BookingRepository
 {
     public async Task<EmployeeDashboard> DashboardAsync(DbSession db, string scopeCondition, Action<SqlCommand> addScope,

@@ -2,11 +2,14 @@ using Homestay.BLL.Infrastructure;
 using Homestay.DTO.Enums;
 namespace Homestay.BLL.Rules;
 
+/// <summary>Ai được thực hiện một bước chuyển trạng thái homestay.</summary>
 public enum HomestayTransitionActor { Staff, Manager, Accountant, System }
+/// <summary>Một bước chuyển trạng thái homestay hợp lệ: từ trạng thái nào sang trạng thái nào, ai được làm.</summary>
 public sealed record HomestayTransition(HomestayStatus? From, HomestayStatus To,
     IReadOnlyList<HomestayTransitionActor> Actors, bool RequiresReason = false, bool DifferentCreator = false);
 
 // Business prerequisites (approval checklist, active contract/bookings, area) are checked by services.
+/// <summary>Máy trạng thái homestay: liệt kê các bước chuyển hợp lệ (nháp → chờ duyệt → hoạt động → tạm ngưng/kết thúc…) và chặn bước sai.</summary>
 public static class HomestayStateMachine
 {
     private static IReadOnlyList<HomestayTransitionActor> Actors(params HomestayTransitionActor[] actors) => Array.AsReadOnly(actors);

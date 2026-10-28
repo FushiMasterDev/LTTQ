@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử tiện ích DAL: tham số SQL đúng kiểu, đọc dữ liệu theo tên cột và giờ UTC.</summary>
 public sealed class DalHelperTests
 {
     [Fact]

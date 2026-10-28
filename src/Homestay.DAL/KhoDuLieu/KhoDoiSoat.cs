@@ -4,14 +4,17 @@ using Homestay.DTO.Finance;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Một đơn đặt phòng thuộc kỳ đối soát, dùng để tính tiền phải trả chủ nhà.</summary>
 public sealed record SettlementBookingRow(int Id,string Code,BookingStatus Status,DateOnly CheckOut,bool Replaced,
     decimal TotalAmount,decimal AmountDue,decimal DepositAmount,decimal? RefundAmount,decimal ChangeFeeAmount,
     decimal DiscountAmount,decimal CommissionRate,bool HasVerifiedDeposit);
+/// <summary>Thông tin đầu bảng đối soát: homestay, chủ nhà, kỳ, trạng thái và các tổng tiền.</summary>
 public sealed record SettlementHead(int Id,int HomestayId,string HomestayName,string OwnerName,int Year,int Month,int PeriodNo,
     SettlementStatus Status,decimal TotalRoomAmount,decimal TotalRetained,decimal TotalCommission,decimal TotalDiscount,
     decimal PayoutAmount,DateTime? SentAt,DateTime? PaidAt,string? PaidBankRef,string? OwnerFeedback,string? OwnerBankName,
     string? OwnerBankAccountNo,string? OwnerBankAccountName,byte[] RowVer);
 
+/// <summary>Truy vấn bảng đối soát: đơn trong kỳ, đọc/lập/sửa bảng nháp, các dòng chi tiết, lịch sử và trạng thái.</summary>
 public sealed class SettlementRepository
 {
     private const string HeadSelect = """

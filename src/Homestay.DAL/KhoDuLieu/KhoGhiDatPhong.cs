@@ -4,10 +4,12 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Ảnh chụp đơn tại thời điểm khóa để ghi: trạng thái, người phụ trách, RowVer… dùng để kiểm tra trước khi đổi.</summary>
 public sealed record BookingWriteSnapshot(int Id, string Code, BookingStatus Status, int? AssignedEmployeeId,
     DateTime HoldExpiresAtUtc, decimal AmountDue, byte[] RowVer);
 
 // Metadata applied atomically with the conditional status update, never in a second status path.
+/// <summary>Các giá trị đi kèm khi đổi trạng thái đơn (hạn xác nhận, hạn giữ phòng, tiền hoàn, phòng…).</summary>
 public sealed record BookingStatusMetadata
 {
     public DateTime? ConfirmDeadlineAtUtc { get; init; }
@@ -17,6 +19,7 @@ public sealed record BookingStatusMetadata
     public int? RoomId { get; init; }
 }
 
+/// <summary>Truy vấn ghi đơn: khóa đơn, giao người phụ trách, đổi trạng thái, xóa đêm phòng, ghi lịch sử trạng thái.</summary>
 public sealed partial class BookingRepository
 {
     // PaymentRecord deliberately passes the financial BookingFilter, which includes Accountants at All access.

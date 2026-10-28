@@ -3,6 +3,7 @@ using Homestay.DTO.Catalog;
 
 namespace Homestay.BLL.Rules;
 
+/// <summary>Kiểm tra chính sách hủy hợp lệ (các mốc ngày và tỷ lệ hoàn tiền phải hợp lý).</summary>
 public static class CancellationPolicyRules
 {
     public static void Validate(IReadOnlyList<CancellationRuleItem>? rules)

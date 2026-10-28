@@ -5,6 +5,7 @@ using Homestay.GUI.Common;
 using Homestay.GUI.Infrastructure;
 
 namespace Homestay.GUI.Staff;
+/// <summary>Màn hình ghi phiếu thu cọc kèm ảnh chứng từ chuyển khoản.</summary>
 public partial class FrmReceipt : ScreenForm
 {
     private AppServices? services;

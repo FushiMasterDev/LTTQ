@@ -4,7 +4,9 @@ using Homestay.DTO.Common;
 using Homestay.GUI.Common;
 using Homestay.GUI.Infrastructure;
 namespace Homestay.GUI.Staff;
+/// <summary>Lựa chọn mở danh sách đơn ngoại lệ theo loại.</summary>
 public sealed record BookingExceptionsSelection(BookingExceptionKind? Kind = null);
+/// <summary>Phần dành cho quản lý của màn hình đơn: danh sách đơn ngoại lệ và giao nhiều đơn.</summary>
 public partial class FrmBookings
 {
     private readonly TabPage exceptionsTab = new("Ngoại lệ") { Padding = new Padding(8) };

@@ -6,6 +6,7 @@ using Homestay.DTO.Tasks;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử M5.1: công việc, phiên đăng nhập và quản lý nhân viên với CSDL thật.</summary>
 [Collection("M23 SQL")]
 public sealed class M51TaskSessionStaffTests
 {

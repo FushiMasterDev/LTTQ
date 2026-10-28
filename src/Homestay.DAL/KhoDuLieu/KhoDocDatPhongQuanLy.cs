@@ -6,8 +6,10 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Các ngưỡng để xếp đơn vào danh sách ngoại lệ: phút giữ phòng cảnh báo, giờ làm việc, hạn xét duyệt.</summary>
 public sealed record ManagerExceptionThresholds(int HoldAlertMinutes, int ReviewWorkingHours, TimeOnly WorkingStart, TimeOnly WorkingEnd);
 
+/// <summary>Truy vấn đơn cho quản lý: danh sách đơn ngoại lệ và số liệu tổng quan.</summary>
 public sealed partial class BookingRepository
 {
     // Reused unchanged by exception list/counts. Workday arithmetic is independent of SET DATEFIRST/language.

@@ -3,6 +3,7 @@ using System.Globalization;
 namespace Homestay.GUI.Infrastructure;
 
 // Deliberately records exception type and stack frames, never Message/ToString or input values.
+/// <summary>Ghi log lỗi ra tập tin theo ngày và dọn log cũ.</summary>
 public sealed class FileLogger
 {
     private readonly object gate = new();

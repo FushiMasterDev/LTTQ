@@ -3,6 +3,7 @@ using Homestay.DTO.Common;
 using Microsoft.Data.SqlClient;
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn dữ liệu cho bộ lọc đơn: homestay, khu vực, người phụ trách.</summary>
 public sealed partial class BookingRepository
 {
     public Task<IReadOnlyList<Lookup>> FilterHomestaysAsync(DbSession db, int? areaId, string homes, Action<SqlCommand> addScope, CancellationToken ct) =>

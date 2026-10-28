@@ -2,6 +2,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Infrastructure;
 
+/// <summary>Tạo và mở kết nối SQL Server từ chuỗi kết nối, kèm thời gian chờ lệnh mặc định.</summary>
 public sealed class ConnectionFactory
 {
     private readonly string _connectionString;

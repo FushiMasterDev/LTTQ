@@ -2,6 +2,7 @@ using Homestay.GUI.Common;
 
 namespace Homestay.GUI.Manager;
 
+/// <summary>Màn hình giao việc của quản lý (dùng bảng công việc chung).</summary>
 public partial class FrmTasks : ScreenForm
 {
     public FrmTasks()

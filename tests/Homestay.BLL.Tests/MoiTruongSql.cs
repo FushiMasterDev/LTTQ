@@ -2,6 +2,7 @@ using Homestay.DAL.Infrastructure;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kết nối tới CSDL kiểm thử (biến môi trường HOMESTAY_TEST_CONNECTION) và tạo nhanh dữ liệu đơn mẫu.</summary>
 internal static class SqlFixture
 {
     public static ConnectionFactory Factory() => new(Environment.GetEnvironmentVariable("HOMESTAY_TEST_CONNECTION")!, 30);

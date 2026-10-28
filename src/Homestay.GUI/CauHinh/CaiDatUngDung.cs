@@ -2,6 +2,7 @@ using System.Text.Json;
 
 namespace Homestay.GUI.Configuration;
 
+/// <summary>Cấu hình ứng dụng đọc từ appsettings.json: kết nối CSDL và ghi log.</summary>
 public sealed class AppSettings
 {
     public DatabaseSettings Database { get; set; } = new();
@@ -19,6 +20,7 @@ public sealed class AppSettings
         return settings;
     }
 }
+/// <summary>Phần cấu hình CSDL: máy chủ, tên database, mã hóa, thời gian chờ lệnh.</summary>
 public sealed class DatabaseSettings
 {
     public string Server { get; set; } = @".\SQLEXPRESS";
@@ -27,6 +29,7 @@ public sealed class DatabaseSettings
     public bool TrustServerCertificate { get; set; }
     public int CommandTimeoutSeconds { get; set; } = 30;
 }
+/// <summary>Phần cấu hình ghi log: thư mục và số ngày giữ log.</summary>
 public sealed class LoggingSettings
 {
     public string Folder { get; set; } = @"%LOCALAPPDATA%\HomestayDesktop\logs";

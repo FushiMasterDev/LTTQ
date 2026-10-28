@@ -6,6 +6,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn đọc thanh toán: hàng chờ phiếu thu/hoàn tiền, chi tiết phiếu, số lần bị từ chối.</summary>
 public sealed partial class PaymentRepository
 {
     internal const string PendingReceiptCondition = "p.Status='Pending' AND p.Type='Deposit' AND p.Direction='In'";

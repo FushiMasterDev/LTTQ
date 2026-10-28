@@ -12,6 +12,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử M4.2A: ghi chủ nhà và homestay qua các hàm ghi thật.</summary>
 [Collection("M23 SQL")]
 public sealed class M42AListingWriteTests
 {
@@ -23,6 +24,7 @@ public sealed class M42AListingWriteTests
     private static CreateOwnerRequest Values(OwnerItem o) => new() { FullName = o.FullName, Phone = o.Phone, Email = o.Email, Address = o.Address };
     private static CreateCancellationPolicyRequest Policy(int percent = 0, bool active = true, CancellationScope scope = CancellationScope.All) =>
         new() { Name = "Chính sách M42A", Scope = scope, Activate = active, Rules = [new(7, 100), new(0, percent)] };
+    /// <summary>Dữ liệu chuẩn bị sẵn cho các ca kiểm thử M4.2A.</summary>
     private sealed record Fixture(M41TestClient Manager, M41TestClient Staff, M21Data Source, OwnerItem Owner, HomestayDetail Detail);
     private static async Task<Fixture> DraftAsync(bool managerCreator = false)
     {

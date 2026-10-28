@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Các đoạn SQL dùng chung khi đọc nhân viên: tìm kiếm LIKE, chuẩn hóa mã, phân trang.</summary>
 internal static class StaffReadSql
 {
     internal static string Like(string? value) => string.IsNullOrWhiteSpace(value) ? "" : "%" + value.Trim().Replace("~", "~~").Replace("%", "~%").Replace("_", "~_").Replace("[", "~[") + "%";

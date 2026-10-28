@@ -6,6 +6,7 @@ using Homestay.GUI.Staff;
 
 namespace Homestay.GUI.Accountant;
 
+/// <summary>Màn hình chi tiết một bảng đối soát: xem các dòng, gửi chủ nhà, mở lại, ghi đã chi, ghi phản hồi và in.</summary>
 public partial class FrmSettlementDetail : ScreenForm
 {
     private readonly AsyncLoader loader=new(); private AppServices? services;private int id;private SettlementDraftResult? current;

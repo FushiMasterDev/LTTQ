@@ -3,6 +3,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.GUI.Common;
 
+/// <summary>Hộp thoại nhập chính sách hủy và các mốc hoàn tiền.</summary>
 public partial class CancellationPolicyDialog : ScreenForm
 {
     [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]

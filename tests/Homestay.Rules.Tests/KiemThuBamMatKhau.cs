@@ -4,6 +4,7 @@ using Homestay.BLL.Security;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử băm mật khẩu: định dạng, muối ngẫu nhiên, khớp với dữ liệu mẫu T-SQL.</summary>
 public sealed class PasswordHasherTests
 {
     private readonly PasswordHasher _hasher = new();

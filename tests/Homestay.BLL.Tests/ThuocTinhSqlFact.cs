@@ -1,5 +1,6 @@
 namespace Homestay.BLL.Tests;
 
+/// <summary>Đánh dấu kiểm thử cần SQL Server; tự bỏ qua khi chưa cấu hình CSDL kiểm thử.</summary>
 public sealed class SqlFactAttribute : FactAttribute
 {
     public SqlFactAttribute()

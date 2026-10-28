@@ -4,6 +4,7 @@ using Homestay.GUI.Common;
 using Homestay.GUI.Infrastructure;
 
 namespace Homestay.GUI.Staff;
+/// <summary>Màn hình hủy đơn/gửi yêu cầu hủy: xem trước tiền hoàn và nhập lý do.</summary>
 public partial class FrmCancellation : ScreenForm
 {
     private AppServices? services;

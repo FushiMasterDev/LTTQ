@@ -2,6 +2,7 @@ using Homestay.GUI.Shell;
 
 namespace Homestay.GUI.Workflow;
 
+/// <summary>Điều khiển vòng đời ứng dụng: cấu hình kết nối → đăng nhập → màn hình chính → đăng xuất/khóa màn hình.</summary>
 internal sealed class DesktopContext : ApplicationContext
 {
     private readonly AppServices services;

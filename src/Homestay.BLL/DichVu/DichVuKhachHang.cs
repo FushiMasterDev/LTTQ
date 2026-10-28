@@ -9,6 +9,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ khách hàng: tìm kiếm, tra theo số điện thoại, xem, tạo, sửa và đổi số điện thoại khách.</summary>
 public sealed class CustomerService(Authorizer authorizer, ICurrentSession currentSession, ConnectionFactory factory, WriteOperationRunner writes,
     CustomerRepository repository, DbClock clock, AuditWriter audit, string machineName)
 {

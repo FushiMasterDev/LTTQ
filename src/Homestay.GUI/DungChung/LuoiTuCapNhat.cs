@@ -4,6 +4,7 @@ using Homestay.GUI.Infrastructure;
 using Homestay.GUI.Staff;
 namespace Homestay.GUI.Common;
 
+/// <summary>Lưới dữ liệu tự tải lại và giữ dòng đang chọn khi dữ liệu thay đổi.</summary>
 internal sealed class LiveGrid<T>:IDisposable where T:class
 {
     private readonly PagedGrid grid;private readonly AsyncLoader loader=new();
@@ -30,6 +31,7 @@ internal sealed class LiveGrid<T>:IDisposable where T:class
     }
     public void Dispose()=>loader.Dispose();
 }
+/// <summary>Hàm tiện ích nhỏ cho các màn hình dùng LiveGrid: hiển thị trạng thái, điền dữ liệu, đọc ghi chú.</summary>
 internal static class LiveUi
 {
     public static string Status(object value)=>value.ToString() switch{

@@ -3,6 +3,7 @@ using System.Data.Common;
 
 namespace Homestay.DAL.Infrastructure;
 
+/// <summary>Hàm tiện ích đọc cột từ SqlDataReader theo tên, xử lý giá trị NULL, ngày giờ UTC và RowVer.</summary>
 public static class DataReaderExtensions
 {
     public static string GetString(this IDataRecord reader, string column) => reader.GetString(reader.GetOrdinal(column));

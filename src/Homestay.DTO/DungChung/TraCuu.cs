@@ -1,5 +1,6 @@
 namespace Homestay.DTO.Common;
 
+/// <summary>Một mục tra cứu ngắn (id, tên, mã) dùng cho ô chọn/combobox.</summary>
 public sealed record Lookup
 {
     public int Id { get; init; }

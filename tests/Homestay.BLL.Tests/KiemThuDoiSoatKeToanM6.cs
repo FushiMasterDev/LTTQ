@@ -11,6 +11,7 @@ using Homestay.DTO.Finance;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử M6: sao kê, khớp giao dịch và đối soát với CSDL thật.</summary>
 [Collection("M23 SQL")]
 public sealed class M6AccountingSettlementTests
 {

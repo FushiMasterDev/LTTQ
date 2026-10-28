@@ -8,6 +8,7 @@ using Homestay.GUI.Infrastructure;
 
 namespace Homestay.GUI.Manager;
 
+/// <summary>Màn hình nhân viên: danh sách, tạo tài khoản, khóa/mở khóa, đặt lại mật khẩu.</summary>
 public partial class FrmStaff : ScreenForm
 {
     private AppServices? services;

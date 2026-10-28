@@ -7,6 +7,7 @@ using Homestay.GUI.Infrastructure;
 using Homestay.GUI.Staff;
 
 namespace Homestay.GUI.Manager;
+/// <summary>Màn hình quản lý duyệt hoặc từ chối yêu cầu hủy đơn.</summary>
 public partial class FrmCancellationApproval : ScreenForm
 {
     private AppServices? services;

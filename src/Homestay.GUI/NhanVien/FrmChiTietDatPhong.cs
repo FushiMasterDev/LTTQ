@@ -4,6 +4,7 @@ using Homestay.GUI.Common;
 using Homestay.GUI.Infrastructure;
 
 namespace Homestay.GUI.Staff;
+/// <summary>Màn hình chi tiết đơn: thông tin, thanh toán, lịch sử và các nút thao tác vòng đời đơn.</summary>
 public partial class FrmBookingDetail : ScreenForm
 {
     private AppServices? services;

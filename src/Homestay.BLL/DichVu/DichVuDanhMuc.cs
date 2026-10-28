@@ -9,6 +9,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ danh mục dùng chung: khu vực, tiện nghi, loại phòng, ngày lễ, chính sách hủy và tham số cấu hình hệ thống.</summary>
 public sealed class CatalogService(Authorizer authorizer, ICurrentSession currentSession, ConnectionFactory factory, WriteOperationRunner writes,
     CatalogRepository repository, DbClock clock, SettingsProvider settings, AuditWriter audit, string machineName)
 {

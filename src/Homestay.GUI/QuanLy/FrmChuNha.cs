@@ -6,7 +6,10 @@ using Homestay.DTO.Homestays;
 using Homestay.GUI.Common;
 using Homestay.GUI.Staff;
 namespace Homestay.GUI.Manager;
-public sealed record ListingOwnerSelection(int OwnerId,string OwnerName);public partial class FrmOwners:ScreenForm
+/// <summary>Chủ nhà được chọn để chuyển sang màn hình tạo homestay.</summary>
+public sealed record ListingOwnerSelection(int OwnerId,string OwnerName);
+/// <summary>Màn hình chủ nhà: danh sách, thêm, sửa, đổi tài khoản ngân hàng, duyệt/tạm ngưng.</summary>
+public partial class FrmOwners:ScreenForm
 {
     private AppServices? services;private LiveGrid<OwnerItem>? live;private LiveGrid<HomestayItem>? homes;
     private ListingOwnerSelection? newlyCreatedOwner;private readonly Button createHomeButton=new(){Text="Tạo homestay cho chủ đang chọn",AutoSize=true,Enabled=false},createdHomeButton=new(){Text="Tạo homestay cho chủ vừa tạo",AutoSize=true,Enabled=false};private readonly Button bankButton=new(){Text="Đổi ngân hàng",AutoSize=true};

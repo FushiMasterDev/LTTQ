@@ -2,6 +2,7 @@ using System.Collections.Frozen;
 
 namespace Homestay.BLL.Infrastructure;
 
+/// <summary>Bảng tra tên ràng buộc CSDL sang câu báo lỗi tiếng Việt tương ứng.</summary>
 public static class ConstraintMessages
 {
     public const string DefaultMessage = "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.";

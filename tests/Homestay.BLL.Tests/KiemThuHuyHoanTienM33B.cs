@@ -9,6 +9,7 @@ using Homestay.DTO.Payments;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử M3.3B: luồng hủy đơn giữ đúng báo giá, trả phòng và chi đúng một khoản hoàn.</summary>
 [Collection("M23 SQL")]
 public sealed class M33BCancelRefundTests
 {

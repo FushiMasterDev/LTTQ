@@ -6,8 +6,10 @@ using Homestay.DTO.Payments;
 
 namespace Homestay.BLL.Rules;
 
+/// <summary>Ảnh chứng từ đã qua kiểm tra: tên, loại, nội dung và mã băm SHA-256 để phát hiện trùng.</summary>
 public sealed record ValidatedEvidence(string FileName, string ContentType, byte[] Content, byte[] Sha256);
 
+/// <summary>Quy tắc phiếu thu: kiểm tra ảnh chứng từ, thời điểm chuyển khoản, số tiền đủ cọc, che số tài khoản và sinh số phiếu.</summary>
 public static class ReceiptRules
 {
     public const int MaxEvidenceBytes = 5 * 1024 * 1024;

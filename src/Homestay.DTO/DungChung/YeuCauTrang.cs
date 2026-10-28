@@ -1,5 +1,6 @@
 namespace Homestay.DTO.Common;
 
+/// <summary>Yêu cầu phân trang: trang số mấy, cỡ trang, từ khóa tìm và cột sắp xếp.</summary>
 public sealed record PageRequest
 {
     public const int PageSize10 = 10;

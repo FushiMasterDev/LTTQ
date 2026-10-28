@@ -3,6 +3,7 @@ using Homestay.DTO.Common;
 
 namespace Homestay.BLL.Rules;
 
+/// <summary>Kiểm tra dữ liệu nhập của nhân viên và phân trang; che bớt số giấy tờ tùy thân khi hiển thị.</summary>
 internal static class StaffInputRules
 {
     internal static void Page(PageRequest page, params string[] sortColumns)

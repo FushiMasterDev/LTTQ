@@ -8,6 +8,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Phần dành cho quản lý của dịch vụ đặt phòng: giao nhiều đơn cùng lúc, danh sách đơn ngoại lệ và số liệu tổng quan.</summary>
 public sealed partial class BookingService
 {
     public Task<IReadOnlyList<BookingDetail>> AssignManyAsync(AssignManyBookingsRequest request, CancellationToken cancellationToken = default)

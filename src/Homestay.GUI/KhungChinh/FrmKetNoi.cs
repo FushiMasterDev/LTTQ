@@ -4,6 +4,7 @@ using Homestay.GUI.Infrastructure;
 
 namespace Homestay.GUI.Shell;
 
+/// <summary>Màn hình cấu hình kết nối SQL Server và thử kết nối.</summary>
 public partial class FrmConnection : ScreenForm
 {
     private AppServices? services;

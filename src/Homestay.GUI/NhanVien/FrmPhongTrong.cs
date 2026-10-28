@@ -6,6 +6,7 @@ using Homestay.DTO.Catalog;
 using Homestay.DTO.Common;
 
 namespace Homestay.GUI.Staff;
+/// <summary>Màn hình tìm phòng trống và lịch phòng, chọn phòng để tạo đơn.</summary>
 public partial class FrmAvailability : ScreenForm
 {
     private AppServices? services;

@@ -6,6 +6,7 @@ using Homestay.GUI.Common;
 using Homestay.GUI.Infrastructure;
 
 namespace Homestay.GUI.Staff;
+/// <summary>Màn hình danh sách đơn đặt phòng theo hàng đợi, có lọc, tìm và mở chi tiết.</summary>
 public partial class FrmBookings : ScreenForm
 {
     private AppServices? services;

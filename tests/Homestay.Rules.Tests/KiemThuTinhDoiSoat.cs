@@ -4,6 +4,7 @@ using Homestay.DTO.Finance;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử bộ tính đối soát với ví dụ trong đặc tả.</summary>
 public sealed class SettlementCalculatorTests
 {
     private static SettlementCalculationInput Booking(BookingStatus status=BookingStatus.Completed,bool hasVerifiedDeposit=true)=>new(1,"FJ261026-001",status,new(2026,10,20),false,2_000_000,600_000,600_000,0,0,0,.12m,hasVerifiedDeposit);

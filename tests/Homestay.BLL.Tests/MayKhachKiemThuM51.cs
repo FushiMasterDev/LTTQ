@@ -8,6 +8,7 @@ using Homestay.DTO.Tasks;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Bộ khởi tạo các dịch vụ quản lý (nhân viên, phiên, đơn, công việc) cho kiểm thử.</summary>
 internal sealed class M51TestClient
 {
     public M21TestClient Base { get; } = new();

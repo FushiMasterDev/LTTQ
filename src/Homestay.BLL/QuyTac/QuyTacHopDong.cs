@@ -1,6 +1,7 @@
 using Homestay.BLL.Infrastructure;
 namespace Homestay.BLL.Rules;
 
+/// <summary>Quy tắc hợp đồng chủ nhà: kiểm tra ngày hiệu lực, tỷ lệ hoa hồng và ngày hiện tại hợp lệ.</summary>
 public static class ContractRules
 {
     // Decimal rate (.1250), never percent (12.5). Bounds come from SettingsProvider at write time.

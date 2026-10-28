@@ -3,6 +3,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.DTO.Payments;
 
+/// <summary>Dữ liệu nhập phiếu thu cọc: số tiền, thời điểm chuyển, người chuyển, nội dung, ảnh chứng từ.</summary>
 public sealed record RecordReceiptRequest
 {
     public int BookingId { get; init; }
@@ -17,6 +18,7 @@ public sealed record RecordReceiptRequest
     public string? EvidenceFileName { get; init; }
     public byte[] RowVer { get; init; } = [];
 }
+/// <summary>Kết quả ghi phiếu thu: đơn sau khi cập nhật, phiếu vừa tạo và cảnh báo nếu thiếu tiền.</summary>
 public sealed record RecordReceiptResult(BookingDetail Booking, BookingPaymentItem Receipt)
 {
     public string VoucherNo => Receipt.VoucherNo;

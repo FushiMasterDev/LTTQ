@@ -5,6 +5,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử M5.1: đổi khu vực phụ trách có hiệu lực ngay và giao nhiều đơn.</summary>
 [Collection("M23 SQL")]
 public sealed class M51ScopeAssignmentTests
 {

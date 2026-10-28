@@ -9,6 +9,7 @@ using Homestay.DTO.Rooms;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Phần ghi của dịch vụ phòng: thêm/sửa/bật/tắt loại phòng và phòng, thêm/sửa bảng giá, khóa phòng.</summary>
 public sealed partial class RoomService
 {
     private ListingChildWriter Writer => new(authorizer, dataScope, factory, clock);

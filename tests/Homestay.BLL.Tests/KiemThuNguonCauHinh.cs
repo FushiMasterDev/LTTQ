@@ -3,6 +3,7 @@ using Homestay.DAL.Infrastructure;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử đọc mọi tham số cấu hình mẫu qua các hàm đọc có kiểu.</summary>
 public sealed class SettingsProviderTests
 {
     [SqlFact]

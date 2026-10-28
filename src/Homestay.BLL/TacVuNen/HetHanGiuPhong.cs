@@ -8,6 +8,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Jobs;
 
+/// <summary>Xử lý hết hạn giữ phòng: chuyển đơn quá hạn sang hết hạn, trả lại phòng, ghi lịch sử và nhật ký.</summary>
 public sealed class HoldExpiry(HoldExpiryRepository repository, AuditWriter audit, string machineName)
 {
     // Caller acquires RoomType:{id} in the same transaction, including the job path.

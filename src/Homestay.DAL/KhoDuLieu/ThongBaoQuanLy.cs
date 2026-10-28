@@ -2,6 +2,7 @@ using Homestay.DAL.Infrastructure;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn gửi thông báo về công việc cho người được giao và quản lý.</summary>
 public sealed partial class NotificationRepository
 {
     public async Task NotifyTaskAsync(UnitOfWork db, int userId, string message, int taskId, DateTime now, CancellationToken ct)

@@ -3,6 +3,7 @@ using Homestay.DTO.Common;
 using Microsoft.Data.SqlClient;
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn dùng chung cho tin đăng: lấy một trang dữ liệu (đếm tổng + lấy trang) và danh sách tra cứu id/tên.</summary>
 internal static class ListingReadSql
 {
     internal static async Task<PagedResult<T>> PageAsync<T>(DbSession db, PageRequest page, string columns, string from,

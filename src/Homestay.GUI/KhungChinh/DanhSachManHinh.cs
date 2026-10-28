@@ -3,12 +3,14 @@ using Homestay.GUI.Workflow;
 
 namespace Homestay.GUI.Shell;
 
+/// <summary>Một màn hình trong menu: mã, tiêu đề, dành cho chức vụ nào và cách tạo form.</summary>
 internal sealed record ScreenEntry(string Id, string Title, string Audience, Func<Form> Create)
 {
     public override string ToString() => Id + "  " + Title;
 }
 
 // Layout inventory stays separate from the integrated allowlist; production always checks BLL authorization.
+/// <summary>Danh sách tất cả màn hình của ứng dụng theo chức vụ, dùng để dựng menu và chế độ xem bố cục.</summary>
 internal static class ScreenRegistry
 {
     public static readonly IReadOnlySet<string> EnabledProductionForms = new HashSet<string> { "F14", "F15", "F16", "F19", "F22", "F23", "F02", "F05", "F06", "F07", "F08", "F09", "F10", "F11", "F13", "F18", "F20", "F24", "F27", "F28", "F29", "F30", "F31", "F32" };

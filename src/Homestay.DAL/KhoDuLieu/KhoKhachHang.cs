@@ -6,6 +6,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn bảng khách hàng: tìm kiếm, tra theo số điện thoại, đơn gần đây, thêm, sửa, đổi số điện thoại.</summary>
 public sealed class CustomerRepository
 {
     internal const string Columns = """

@@ -8,6 +8,7 @@ using Homestay.DTO.Payments;
 
 namespace Homestay.BLL.Services;
 
+/// <summary>Dịch vụ thanh toán: nhân viên ghi phiếu thu tiền cọc kèm ảnh chứng từ chuyển khoản.</summary>
 public sealed partial class PaymentService(Authorizer authorizer, ICurrentSession currentSession, DataScope dataScope,
     WriteOperationRunner writes, BookingRepository bookings, PaymentRepository payments, EvidenceRepository files,
     NotificationRepository notifications, DbClock clock, BookingService bookingService, AuditWriter audit, string machineName)

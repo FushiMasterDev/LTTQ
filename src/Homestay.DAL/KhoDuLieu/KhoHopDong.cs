@@ -5,6 +5,7 @@ using Homestay.DTO.Enums;
 using Microsoft.Data.SqlClient;
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn đọc hợp đồng chủ nhà: danh sách, chi tiết, hợp đồng của một homestay.</summary>
 public sealed partial class ContractRepository
 {
     private const string Columns = "c.*,h.Name AS HomestayName,h.RowVer";

@@ -5,6 +5,7 @@ using Homestay.GUI.Workflow;
 
 namespace Homestay.GUI;
 
+/// <summary>Điểm khởi chạy ứng dụng: cấu hình WinForms, bắt lỗi toàn cục và mở luồng chính.</summary>
 internal static class Program
 {
     [STAThread]

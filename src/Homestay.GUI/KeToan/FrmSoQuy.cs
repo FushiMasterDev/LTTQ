@@ -5,6 +5,7 @@ using Homestay.GUI.Staff;
 
 namespace Homestay.GUI.Accountant;
 
+/// <summary>Màn hình sổ quỹ: xem các khoản thu/chi và khoản phải chi theo khoảng ngày, xuất CSV.</summary>
 public partial class FrmCashBook : ScreenForm
 {
     private readonly AsyncLoader loader=new();private AppServices? services;private IReadOnlyList<CashBookItem> cash=[];private IReadOnlyList<PayableItem> payables=[];

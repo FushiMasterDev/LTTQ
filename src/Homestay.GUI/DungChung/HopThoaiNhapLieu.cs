@@ -4,11 +4,14 @@ using Homestay.DTO.Common;
 
 namespace Homestay.GUI.Common;
 
+/// <summary>Kiểu ô nhập trong hộp thoại nhập liệu: chữ, nhiều dòng, số, ngày, lựa chọn, tiền, giờ…</summary>
 public enum FieldKind { Text, Multiline, Integer, Date, Choice, Confirmation, Money, Decimal, Time, Lookup }
+/// <summary>Mô tả một ô nhập: khóa, nhãn, kiểu, bắt buộc, giá trị mặc định, lựa chọn.</summary>
 public sealed record FieldSpec(string Key, string Label, FieldKind Kind = FieldKind.Text,
     object? Initial = null, bool Required = true, Choice[]? Choices = null, int MaxLength = 500,
     decimal? Minimum = null, decimal? Maximum = null);
 
+/// <summary>Hộp thoại nhập liệu dựng tự động từ danh sách ô nhập, có kiểm tra dữ liệu trước khi đóng.</summary>
 public partial class FieldsDialog : ScreenForm
 {
     private readonly Dictionary<string, Control> inputs = [];

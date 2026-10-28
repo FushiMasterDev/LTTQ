@@ -4,6 +4,7 @@ using Homestay.DTO.Enums;
 
 namespace Homestay.BLL.Rules;
 
+/// <summary>Lỗi thiếu giá phòng cho một đêm (ngày thường/cuối tuần/lễ) khi tính tiền.</summary>
 public sealed class MissingRoomPriceException(DateOnly night, DayType dayType)
     : BusinessException($"Không bán: thiếu giá {dayType} hiệu lực cho đêm {night:dd/MM/yyyy}. Vui lòng bổ sung giá.")
 {

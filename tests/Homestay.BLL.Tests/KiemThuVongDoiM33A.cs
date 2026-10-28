@@ -9,6 +9,7 @@ using Homestay.DTO.Payments;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử M3.3A: toàn bộ vòng đời đơn từ ghi cọc, xác nhận, nhận phòng đến hoàn tất.</summary>
 [Collection("M23 SQL")]
 public sealed class M33ALifecycleTests
 {

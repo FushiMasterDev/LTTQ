@@ -1,6 +1,7 @@
 namespace Homestay.GUI.Common;
 
 // For display only. BLL remains responsible for expiry and permitted writes.
+/// <summary>Hiển thị hạn chót dạng dễ đọc (còn bao lâu/đã quá bao lâu).</summary>
 public static class DeadlineDisplay
 {
     public static string Format(DateTime? deadlineUtc,DateTime serverNowUtc)

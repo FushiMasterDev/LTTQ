@@ -3,6 +3,7 @@ using Homestay.DTO.Payments;
 
 namespace Homestay.DAL.Repositories;
 
+/// <summary>Truy vấn ghi thanh toán: thêm phiếu thu, xét duyệt phiếu thu, thêm khoản hoàn chờ chi, ghi đã chi hoàn.</summary>
 public sealed partial class PaymentRepository
 {
     public async Task<int> RecordRefundPaidAsync(UnitOfWork db, int paymentId, byte[] rowVer, string bankRef,

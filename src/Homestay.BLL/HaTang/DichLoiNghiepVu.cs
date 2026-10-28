@@ -2,6 +2,7 @@ using Homestay.DAL.Infrastructure;
 
 namespace Homestay.BLL.Infrastructure;
 
+/// <summary>Đổi lỗi kỹ thuật từ CSDL (vi phạm ràng buộc, deadlock, mất kết nối…) thành câu báo lỗi tiếng Việt dễ hiểu.</summary>
 public static class BusinessErrorTranslator
 {
     public static Exception Translate(Exception exception) => exception switch

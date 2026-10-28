@@ -2,6 +2,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Homestay.DAL.Infrastructure;
 
+/// <summary>Phiên làm việc với CSDL trên một kết nối (có thể kèm giao dịch): tạo lệnh, chạy lệnh, lấy giá trị đơn.</summary>
 public class DbSession
 {
     protected SqlConnection Connection { get; }

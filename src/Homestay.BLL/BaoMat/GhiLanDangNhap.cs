@@ -5,6 +5,7 @@ using Homestay.DAL.Repositories;
 namespace Homestay.BLL.Security;
 
 // Kết quả sai phải được commit trước khi service ném lỗi cho GUI.
+/// <summary>Ghi lại từng lần đăng nhập thành công/thất bại để theo dõi và khóa tài khoản khi nhập sai quá nhiều lần.</summary>
 internal static class LoginAttemptRecorder
 {
     internal static async Task<bool> RecordAsync(AuthRepository repository, SettingsProvider settings, UnitOfWork db, AuthAccount account, DateTime now, CancellationToken ct)

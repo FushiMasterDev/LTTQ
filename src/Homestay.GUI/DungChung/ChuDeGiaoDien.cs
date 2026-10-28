@@ -1,4 +1,5 @@
 namespace Homestay.GUI.Common;
+/// <summary>Bảng màu và kiểu chữ dùng chung để các màn hình đồng bộ giao diện.</summary>
 public static class UiTheme
 {
     public static readonly Color Ink = Color.FromArgb(30, 52, 61);

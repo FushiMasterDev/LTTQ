@@ -2,6 +2,7 @@ namespace Homestay.GUI.Common;
 
 // Called on the UI thread. A superseded request may ignore cancellation;
 // the version check still prevents it from applying its old result.
+/// <summary>Chạy việc tải dữ liệu bất đồng bộ, hủy lần tải cũ khi có lần tải mới để không hiển thị kết quả lỗi thời.</summary>
 public sealed class AsyncLoader : IDisposable
 {
     private long version;

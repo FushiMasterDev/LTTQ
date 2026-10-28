@@ -4,6 +4,7 @@ using Homestay.DTO.Finance;
 
 namespace Homestay.Rules.Tests;
 
+/// <summary>Kiểm thử công thức đối soát M6 với các trường hợp hoàn tất, không đến, có voucher.</summary>
 public sealed class M6SettlementFormulaTests
 {
     private static SettlementCalculationInput Booking(BookingStatus status = BookingStatus.Completed) =>

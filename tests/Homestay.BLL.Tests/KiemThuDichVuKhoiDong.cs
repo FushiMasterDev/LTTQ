@@ -2,6 +2,7 @@ using Homestay.BLL.Services;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử đọc phiên bản schema CSDL lúc khởi động.</summary>
 public sealed class StartupServiceTests
 {
     [SqlFact]

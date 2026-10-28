@@ -4,8 +4,10 @@ using Homestay.DTO.Auth;
 
 namespace Homestay.BLL.Tests;
 
+/// <summary>Kiểm thử bộ chạy thao tác ghi với CSDL thật: thử lại toàn bộ giao dịch khi lỗi và rollback mỗi lần thất bại.</summary>
 public sealed class WriteOperationRunnerTests
 {
+    /// <summary>Bộ kiểm phiên giả, đếm số lần được gọi.</summary>
     private sealed class Validator : IWriteSessionValidator
     {
         public int Calls { get; private set; }

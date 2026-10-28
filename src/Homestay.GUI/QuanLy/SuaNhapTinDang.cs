@@ -6,6 +6,7 @@ namespace Homestay.GUI.Manager;
 
 // Input forms only. No database access, status transitions or business calculations.
 // MAC contracts will supply lookups and map validated presentation values into requests.
+/// <summary>Tạo các hộp thoại nhập liệu cho tin đăng: chủ nhà, homestay, hợp đồng, loại phòng, phòng, giá, khóa phòng.</summary>
 public static class ListingDraftEditors
 {
     private static Choice[] Choices(IEnumerable<Lookup> values)=>values.Select(v=>new Choice(v.Id,v.Name)).ToArray();
@@ -65,6 +66,7 @@ public static class ListingDraftEditors
     }
 }
 
+/// <summary>Dữ liệu mẫu để xem trước bố cục các hộp thoại tin đăng khi chạy chế độ xem bố cục.</summary>
 internal static class ListingDraftPreview
 {
     public static void Add(FlowLayoutPanel toolbar,params (string Text,Func<FieldsDialog> Create)[] editors){
