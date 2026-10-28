@@ -6,15 +6,15 @@ Giữ code M6 hiện hữu, chữ ký hàm đang được GUI gọi và toàn b�
 
 File sửa:
 
-- `src/Homestay.BLL/Services/AccountingService.cs`: kiểm null yêu cầu hoàn; audit số tiền phiếu Pending trước/sau khi khớp sao kê.
-- `src/Homestay.DAL/Repositories/FinanceRepository.cs`: thêm truy vấn `GetPendingDepositAmountForUpdateAsync` đọc Amount với UPDLOCK trong transaction hiện hữu. Không đổi chữ ký hàm cũ.
+- `src/Homestay.BLL/DichVu/DichVuKeToan.cs`: kiểm null yêu cầu hoàn; audit số tiền phiếu Pending trước/sau khi khớp sao kê.
+- `src/Homestay.DAL/KhoDuLieu/KhoTaiChinh.cs`: thêm truy vấn `GetPendingDepositAmountForUpdateAsync` đọc Amount với UPDLOCK trong transaction hiện hữu. Không đổi chữ ký hàm cũ.
 
 File thêm:
 
-- `tests/Homestay.Rules.Tests/M6SettlementFormulaTests.cs`: 32 ca công thức, số tính tay trong comment; giữ nguyên ví dụ Completed không hoàn của `SettlementCalculatorTests`.
-- `tests/Homestay.Rules.Tests/M6AmountWordsAndBankCodeTests.cs`: 22 ca đọc tiền và trích mã sao kê.
-- `tests/Homestay.BLL.Tests/M6AccountingInputTests.cs`: 3 ca không cần SQL, gồm null và ưu tiên kiểm quyền.
-- `tests/Homestay.BLL.Tests/M6AccountingContractSqlTests.cs`: 3 SqlFact (audit khớp tay, audit tự khớp, kỳ mẫu trọn luồng).
+- `tests/Homestay.Rules.Tests/KiemThuCongThucDoiSoatM6.cs`: 32 ca công thức, số tính tay trong comment; giữ nguyên ví dụ Completed không hoàn của `SettlementCalculatorTests`.
+- `tests/Homestay.Rules.Tests/KiemThuSoTienBangChuMaNganHangM6.cs`: 22 ca đọc tiền và trích mã sao kê.
+- `tests/Homestay.BLL.Tests/KiemThuNhapLieuKeToanM6.cs`: 3 ca không cần SQL, gồm null và ưu tiên kiểm quyền.
+- `tests/Homestay.BLL.Tests/KiemThuHopDongSqlKeToanM6.cs`: 3 SqlFact (audit khớp tay, audit tự khớp, kỳ mẫu trọn luồng).
 - `docs/M6_ACCOUNTING_NOTES.md`: hợp đồng và tư liệu chương 3.
 
 Không cần sửa `SettlementService`, các Rules hay `SettlementRepository`. Các ca bổ sung không chỉ ra sai khác công thức 7.6.6/chuẩn hóa mã 7.6.7 cần sửa code; kết quả thực thi test phải xem mục kiểm chứng cuối tài liệu, không suy từ việc build thành công.

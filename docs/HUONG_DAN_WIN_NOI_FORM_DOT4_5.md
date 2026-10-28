@@ -28,9 +28,9 @@ File này chỉ là lộ trình và các điểm dễ sai. Khi cần tên trư�
 
 ---
 
-## Bước 1 — Lắp service vào `AppServices.cs`
+## Bước 1 — Lắp service vào `DichVuUngDung.cs`
 
-`AppServices.cs` là chỗ **duy nhất** của GUI được dùng DAL (spec 3.5). Thêm vào `CreateRuntime`, dùng lại các biến đã có (`factory`, `current`, `authorizer`, `scope`, `writes`, `clock`, `audit`, `availability`, `notifications`, `evidence`):
+`DichVuUngDung.cs` là chỗ **duy nhất** của GUI được dùng DAL (spec 3.5). Thêm vào `CreateRuntime`, dùng lại các biến đã có (`factory`, `current`, `authorizer`, `scope`, `writes`, `clock`, `audit`, `availability`, `notifications`, `evidence`):
 
 ```csharp
 var owners    = new OwnerService(authorizer, scope, factory, new OwnerRepository());
